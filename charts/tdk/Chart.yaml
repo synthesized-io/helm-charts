@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: v1.28.0
+description: TDK is a DevOps' best friend for database masking, subsetting and generation.
+home: https://www.synthesized.io/
+icon: https://avatars.githubusercontent.com/u/42060457
+keywords:
+- synthesized
+- tdk
+kubeVersion: ^1.21.0-0
+name: synthesized-tdk
+type: application
+version: 0.1.5
