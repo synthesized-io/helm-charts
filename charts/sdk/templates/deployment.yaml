@@ -17,4 +17,4 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         envFrom:
         - secretRef:
-            name: synth
+            name: {{ .Values.synthesized.name }}-secret
