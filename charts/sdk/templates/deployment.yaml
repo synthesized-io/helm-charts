@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.synthesized.name }}-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tag: synth
+  template:
+    metadata:
+      labels:
+        tag: synth
+    spec:
+      containers:
+      - name: synthesized
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        envFrom:
+        - secretRef:
+            name: synth
