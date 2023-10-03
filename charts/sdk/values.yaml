@@ -1,0 +1,14 @@
+synthesized:
+  name: sdk
+  storageSize: 8Gi
+  secret:
+    synthesizedKey: <Synthesized Licence Key>
+
+image:
+  repository: synthesizedio/sdk-jupyter-server
+  tag: ""
+
+service:
+  port: 8888
+  targetPort: 8888
+  nodePort: 30001
