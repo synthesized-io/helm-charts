@@ -1,0 +1,3 @@
+default_config:
+  mode: MASKING
+safety_mode: RELAXED
