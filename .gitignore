@@ -1,0 +1,34 @@
+.env
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+nocommit
+*.tgz
+/config/application-secret.properties
+
+### Mac OS X ###
+*.DS_Store
+
+logical-plan.dot
+
+*.db
+
+### FE e2e misc
+frontend/reports-e2e
+frontend/reports-html-e2e
