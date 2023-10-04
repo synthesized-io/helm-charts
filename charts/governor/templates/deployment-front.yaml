@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.front.name }}
+  labels:
+    app: {{ .Values.front.name }}
+    group: {{ .Values.front.group }}
+spec:
+  replicas: {{ .Values.front.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.front.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.front.name }}
+        group: {{ .Values.front.group }}
+    spec:
+      {{- with .Values.front.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.front.name }}
+          image: "{{ .Values.front.image.repository }}:{{ .Values.front.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.front.image.pullPolicy }}
+          {{- if .Values.front.container.command }}
+          command:
+{{ toYaml .Values.front.container.command | indent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.front.container.port }}
+          {{- if .Values.front.container.config }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.front.name }}-configmap
+          {{- end}}
+          env:
+            {{- range .Values.front.container.secretenv }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .valueFrom.secretKeyRef.name }}
+                  key: {{ .valueFrom.secretKeyRef.key }}
+            {{- end}}
+          {{- if .Values.front.container.healthchecks }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            failureThreshold: 10
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          {{- end }}

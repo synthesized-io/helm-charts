@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.jupyter.name }}
+  labels:
+    app: {{ .Values.jupyter.name }}
+    group: {{ .Values.jupyter.group }}
+spec:
+  replicas: {{ .Values.jupyter.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.jupyter.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.jupyter.name }}
+        group: {{ .Values.jupyter.group }}
+    spec:
+      {{- with .Values.jupyter.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.jupyter.name }}
+          image: "{{ .Values.jupyter.image.repository }}:{{ .Values.jupyter.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.jupyter.image.pullPolicy }}
+          {{- if .Values.jupyter.container.command }}
+          command:
+{{ toYaml .Values.jupyter.container.command | indent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.jupyter.container.port }}
+          {{- if .Values.jupyter.container.config }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.jupyter.name }}-configmap
+          {{- end}}
+          env:
+            {{- range .Values.jupyter.container.secretenv }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .valueFrom.secretKeyRef.name }}
+                  key: {{ .valueFrom.secretKeyRef.key }}
+            {{- end}}
+          {{- if .Values.jupyter.container.healthchecks }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            failureThreshold: 10
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          {{- end }}

@@ -1,0 +1,53 @@
+api:
+  name: governor-api
+  group: governor-api
+  image:
+    repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-api
+    pullPolicy: Always
+    tag: 'latest'
+  container:
+    port: 8081
+    config:
+      SPRING_PROFILES_ACTIVE: staging
+      VERSION: 'not-specified'
+      SPRING_DATASOURCE_URL: jdbc:postgresql://10.110.58.105:5432/governor
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 6LyfVGoEe5
+    healthchecks:
+  service:
+    type: ClusterIP
+    port: 80
+
+front:
+  name: governor-front
+  group: governor-front
+  image:
+    repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-front
+    pullPolicy: Always
+    tag: 'latest'
+  container:
+    port: 80
+    config:
+      # public hosts
+      API_PUBLIC_HOST: 'localhost'
+      JUPYTER_NOTEBOOK_PUBLIC_HOST: 'jupyter.localhost'
+      # private hosts
+      API_INTERNAL_HOST: 'governor-api:80'
+      JUPYTER_NOTEBOOK_INTERNAL_HOST: 'governor-jupyter'
+      JUPYTER_NOTEBOOK_INTERNAL_PORT: '8888'
+  service:
+    type: ClusterIP
+    port: 80
+
+jupyter:
+  name: governor-jupyter
+  group: governor-jupyter
+  image:
+    repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-jupyter
+    pullPolicy: Always
+    tag: 'latest'
+  container:
+    port: 8888
+  service:
+    type: ClusterIP
+    port: 8888

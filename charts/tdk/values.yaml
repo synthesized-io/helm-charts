@@ -26,7 +26,8 @@ serviceAccount:
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # If not set and create is true, a name is generated using
+  # the fullname template
   name: ""
 
 securityContext: {}
@@ -57,16 +58,19 @@ affinity: {}
 restartPolicy: Never
 
 # -- Environment variables.
-# List of supported variables: https://docs.synthesized.io/tdk/latest/user_guide/reference/docker_environment_variables
+# List of supported variables:
+# https://docs.synthesized.io/tdk/latest/user_guide/reference/docker_environment_variables
 env: {}
-# Synthesized config https://docs.synthesized.io/tdk/latest/user_guide/reference/configuration_reference
+# Synthesized config
+# https://docs.synthesized.io/tdk/latest/user_guide/reference/configuration_reference
 #  SYNTHESIZED_USERCONFIG: |
 #    default_config:
 #      mode: "KEEP"
 #  SYNTHESIZED_INPUT_URL:
 #  SYNTHESIZED_OUTPUT_URL:
 
-# -- Sensitive environment variables that will be rendered as a new secret object
+# -- Sensitive environment variables that will be rendered as a new secret
+#    object
 envRenderSecret: {}
 #  SYNTHESIZED_INPUT_USERNAME:
 #  SYNTHESIZED_INPUT_PASSWORD:
@@ -74,13 +78,16 @@ envRenderSecret: {}
 #  SYNTHESIZED_OUTPUT_PASSWORD:
 #  SYNTHESIZED_KEY:
 
-# -- Pass the configuration directives and envRenderSecret through Helm's templating engine.
+# -- Pass the configuration directives and envRenderSecret through Helm's
+# templating engine.
 ## ref: https://helm.sh/docs/developing_charts/#using-the-tpl-function
 tplConfig: false
 
-# -- Reference to an external secret that contains sensitive environment variables
-# This option is useful to avoid store sensitive values in Git. You need to create the secret manually and reference it.
-# If secretRef is used, the envRenderSecret parameter will be omitted (in case that it has content).
+# -- Reference to an external secret that contains sensitive environment
+# variables. This option is useful to avoid store sensitive values in Git.
+# You need to create the secret manually and reference it.
+# If secretRef is used, the envRenderSecret parameter will be omitted (in case
+# that it has content).
 secretRef:
 
 # Optional. Additional volumes to mount in the pod.
@@ -95,7 +102,8 @@ cronJobPodAnnotations: { }
 # Optional. CronJob Pod labels.
 cronJobPodLabels: { }
 
-# Seconds after which Completed and Failed jobs will be removed by the TTL mechanism provided by the TTL controller.
+# Seconds after which Completed and Failed jobs will be removed by the TTL
+# mechanism provided by the TTL controller.
 # https://kubernetes.io/docs/concepts/workloads/controllers/job/#clean-up-finished-jobs-automatically
 # Note: AWS marketplace hourly-billing depends on the Pod lifetime.
 ttlSecondsAfterFinished: 6000

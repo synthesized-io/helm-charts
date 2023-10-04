@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.jupyter.name }}
+  labels:
+    group: {{ .Values.jupyter.group }}
+spec:
+  type: {{ .Values.jupyter.service.type }}
+  selector:
+    app: {{ .Values.jupyter.name }}
+  ports:
+    - port: {{ .Values.jupyter.service.port }}
+      targetPort: {{ .Values.jupyter.container.port }}
+      name: defaultport

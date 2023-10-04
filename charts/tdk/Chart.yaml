@@ -1,6 +1,7 @@
 apiVersion: v2
 appVersion: v1.28.0
-description: TDK is a DevOps' best friend for database masking, subsetting and generation.
+description: >
+  TDK is a DevOps' best friend for database masking, subsetting and generation.
 home: https://www.synthesized.io/
 icon: https://avatars.githubusercontent.com/u/42060457
 keywords:

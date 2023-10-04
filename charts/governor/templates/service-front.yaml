@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.front.name }}
+  labels:
+    group: {{ .Values.front.group }}
+spec:
+  type: {{ .Values.front.service.type }}
+  selector:
+    app: {{ .Values.front.name }}
+  ports:
+    - port: {{ .Values.front.service.port }}
+      targetPort: {{ .Values.front.container.port }}
+      name: defaultport
