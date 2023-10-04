@@ -12,9 +12,32 @@ spec:
       labels:
         tag: synth
     spec:
+      initContainers:
+      - name: pre-populate-pvc
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "cp -r /home/synthesized/* /mnt/synthesized/"]
+        volumeMounts:
+        - name: {{ .Values.synthesized.name }}-storage
+          mountPath: /mnt/synthesized
       containers:
       - name: synthesized
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: {{ .Values.synthesized.name }}-storage
+          mountPath: /home/synthesized
         envFrom:
         - secretRef:
             name: {{ .Values.synthesized.name }}-secret
+        resources:
+          requests:
+            memory: {{ .Values.resources.requests.memory }}
+            cpu: {{ .Values.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+            cpu: {{ .Values.resources.limits.cpu }}
+      volumes:
+      - name: {{ .Values.synthesized.name }}-storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.synthesized.name }}-pvc
