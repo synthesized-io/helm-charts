@@ -1,4 +1,4 @@
-name: Static verification
+name: check
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  static-check:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
