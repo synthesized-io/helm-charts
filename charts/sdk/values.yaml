@@ -12,3 +12,11 @@ service:
   port: 8888
   targetPort: 8888
   nodePort: 30001
+
+resources:
+  requests:
+    memory: "8Gi"
+    cpu: "4"
+  limits:
+    memory: "8Gi"
+    cpu: "4"
