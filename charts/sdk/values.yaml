@@ -1,7 +1,7 @@
 synthesized:
   name: sdk
   storageSize: 10Gi
-  storageNode: minikube
+  storageNode: ""
   storagePath: /tmp
   secret:
     synthesizedKey: <Synthesized Licence Key>
