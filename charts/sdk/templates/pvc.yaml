@@ -3,8 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ .Values.synthesized.name }}-pvc
 spec:
+  storageClassName:  local-storage
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: {{ .Values.synthesized.storageSize }}

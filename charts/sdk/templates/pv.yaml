@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.synthesized.name }}-pv
+spec:
+  capacity:
+    storage: {{ .Values.synthesized.storageSize }}
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: {{ .Values.synthesized.storagePath }}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ .Values.synthesized.storageNode }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.synthesized.name }}-pvc
