@@ -1,6 +1,8 @@
 synthesized:
   name: sdk
-  storageSize: 8Gi
+  storageSize: 10Gi
+  storageNode: ""
+  storagePath: /tmp
   secret:
     synthesizedKey: <Synthesized Licence Key>
 
