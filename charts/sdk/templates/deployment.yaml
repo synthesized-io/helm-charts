@@ -16,7 +16,7 @@ spec:
       - name: pre-populate-pvc
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: IfNotPresent
-        command: ["sh", "-c", "cp -r /home/synthesized/* /mnt/synthesized/"]
+        command: ["sh", "-c", "cp -r /synthesized/jupyter/* /mnt/synthesized/"]
         volumeMounts:
         - name: {{ .Values.synthesized.name }}-storage
           mountPath: /mnt/synthesized
@@ -26,7 +26,7 @@ spec:
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: {{ .Values.synthesized.name }}-storage
-          mountPath: /home/synthesized
+          mountPath: /synthesized/jupyter
         envFrom:
         - secretRef:
             name: {{ .Values.synthesized.name }}-secret

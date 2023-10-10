@@ -1,8 +1,7 @@
 synthesized:
   name: sdk
   storageSize: 10Gi
-  storageNode: ""
-  storagePath: /tmp
+  storageClassName: ""
   secret:
     synthesizedKey: <Synthesized Licence Key>
 
@@ -18,7 +17,7 @@ service:
 resources:
   requests:
     memory: "8Gi"
-    cpu: "4"
+    cpu: "2"
   limits:
     memory: "8Gi"
-    cpu: "4"
+    cpu: "2"
