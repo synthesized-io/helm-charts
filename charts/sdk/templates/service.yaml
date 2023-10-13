@@ -2,10 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.synthesized.name }}-service
+  labels:
+    app: {{ .Values.synthesized.name }}
 spec:
   type: NodePort
   selector:
-    tag: synth
+    app: {{ .Values.synthesized.name }}
   ports:
   - port: {{ .Values.service.port }}
     targetPort: {{ .Values.service.targetPort }}
