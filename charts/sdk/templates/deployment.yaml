@@ -29,6 +29,9 @@ spec:
         volumeMounts:
         - name: {{ .Values.synthesized.name }}-storage
           mountPath: /synthesized/jupyter
+        {{- with .Values.volumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         envFrom:
         - secretRef:
             name: {{ .Values.synthesized.name }}-secret
@@ -43,3 +46,6 @@ spec:
       - name: {{ .Values.synthesized.name }}-storage
         persistentVolumeClaim:
           claimName: {{ .Values.synthesized.name }}-pvc
+      {{- with .Values.volumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}

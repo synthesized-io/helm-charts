@@ -21,3 +21,16 @@ resources:
   limits:
     memory: "8Gi"
     cpu: "2"
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# volumes:
+# - name: data-storage
+#   persistentVolumeClaim:
+#     claimName: data-pvc
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# volumeMounts:
+# - name: data-storage
+#   mountPath: /synthesized/data
