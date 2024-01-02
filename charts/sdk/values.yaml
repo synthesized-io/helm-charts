@@ -34,3 +34,9 @@ volumeMounts: []
 # volumeMounts:
 # - name: data-storage
 #   mountPath: /synthesized/data
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

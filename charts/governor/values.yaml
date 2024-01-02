@@ -51,3 +51,9 @@ jupyter:
   service:
     type: ClusterIP
     port: 8888
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
