@@ -4,7 +4,6 @@ api:
   image:
     repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-api
     pullPolicy: Always
-    tag: 'latest'
   container:
     port: 8081
     config:
@@ -24,7 +23,6 @@ front:
   image:
     repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-front
     pullPolicy: Always
-    tag: 'latest'
   container:
     port: 80
     config:
