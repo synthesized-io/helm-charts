@@ -7,11 +7,11 @@ api:
   container:
     port: 8081
     config:
-      SPRING_PROFILES_ACTIVE: staging
+      SPRING_PROFILES_ACTIVE: production
       VERSION: 'not-specified'
-      SPRING_DATASOURCE_URL: jdbc:postgresql://10.110.58.105:5432/governor
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 6LyfVGoEe5
+    # Sensitive configuration variables that will be rendered as a new secret
+    secretConfig:
+
     healthchecks:
   service:
     type: ClusterIP

@@ -19,6 +19,8 @@ The following configuration values should be updated:
 * `SPRING_DATASOURCE_URL` - JDBC URL to Governor PostgreSQL database
 * `SPRING_DATASOURCE_USERNAME` - database username
 * `SPRING_DATASOURCE_PASSWORD` - database password
+* `JWT_SECRET` - JWT secret for authentication
+* `SYNTHESIZED_KEY` - licence key
 * `API_PUBLIC_HOST` - hostname on which Governor will be used, e. g. localhost or example.com
 * `JUPYTER_NOTEBOOK_PUBLIC_HOST` - hostname for Jupyter. Typically, it's `jupyter` subdomain of `API_PUBLIC_HOST`
 

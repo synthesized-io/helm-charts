@@ -30,11 +30,11 @@ spec:
           {{- end }}
           ports:
             - containerPort: {{ .Values.api.container.port }}
-          {{- if .Values.api.container.config }}
           envFrom:
             - configMapRef:
                 name: {{ .Values.api.name }}-configmap
-          {{- end}}
+            - secretRef:
+                name: {{ .Values.api.name }}-secret
           env:
             {{- range .Values.api.container.secretenv }}
             - name: {{ .name }}
