@@ -24,6 +24,8 @@ The following configuration values should be updated:
 * `API_PUBLIC_HOST` - hostname on which Governor will be used, e. g. localhost or example.com
 * `JUPYTER_NOTEBOOK_PUBLIC_HOST` - hostname for Jupyter. Typically, it's `jupyter` subdomain of `API_PUBLIC_HOST`
 
+More details about installation can be found [here](https://docs.synthesized.io/governor/latest/deployment/helm)
+
 In order to install Governor on Kubernetes, run:
 
 ```shell
