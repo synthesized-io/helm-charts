@@ -31,7 +31,7 @@ front:
     port: 80
     config:
       # public hosts
-      API_PUBLIC_HOST: 'localhost'
+      API_PUBLIC_HOST: '/'
       JUPYTER_NOTEBOOK_PUBLIC_HOST: 'jupyter.localhost'
       # private hosts
       API_INTERNAL_HOST: 'governor-api:80'
