@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.director.name }}-configmap
+data:
+{{- if .Values.director.container.config }}
+{{ toYaml .Values.director.container.config | indent 2}}
+{{- end }}
