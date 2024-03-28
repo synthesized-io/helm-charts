@@ -10,7 +10,7 @@ api:
       SPRING_PROFILES_ACTIVE: production
       VERSION: 'not-specified'
       DIRECTOR_SERVERHOST: governor-director
-      DIRECTOR_SERVERPORT: 50051
+      DIRECTOR_SERVERPORT: '50051'
     # Sensitive configuration variables that will be rendered as a new secret
     secretConfig:
       SPRING_DATASOURCE_URL: ""
@@ -47,7 +47,7 @@ director:
   name: governor-director
   group: governor-director
   image:
-    repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-director
+    repository: eu.gcr.io/synthesized-cloud-275014/director
     pullPolicy: Always
   container:
     port: 50051
