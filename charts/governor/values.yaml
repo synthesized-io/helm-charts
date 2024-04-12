@@ -9,6 +9,8 @@ api:
     config:
       SPRING_PROFILES_ACTIVE: production
       VERSION: 'not-specified'
+      DIRECTOR_SERVERHOST: governor-director
+      DIRECTOR_SERVERPORT: '50051'
     # Sensitive configuration variables that will be rendered as a new secret
     secretConfig:
       SPRING_DATASOURCE_URL: ""
@@ -40,6 +42,26 @@ front:
   service:
     type: ClusterIP
     port: 80
+
+director:
+  name: governor-director
+  group: governor-director
+  image:
+    repository: eu.gcr.io/synthesized-cloud-275014/director
+    pullPolicy: Always
+  container:
+    port: 50051
+    config:
+      OPENAI_API_VERSION: "2023-03-15-preview"
+      AZURE_DEPLOYMENT: "gpt-35-turbo"
+      AZURE_OPENAI_ENDPOINT: "https://director-openai.openai.azure.com/"
+    secretConfig:
+      AZURE_OPENAI_API_KEY: ""
+      DATABASE_URL_POSTGRES: ""
+    healthchecks:
+  service:
+    type: ClusterIP
+    port: 50051
 
 jupyter:
   name: governor-jupyter
