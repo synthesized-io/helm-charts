@@ -35,7 +35,7 @@ spec:
             - configMapRef:
                 name: {{ .Values.front.name }}-configmap
             - secretRef:
-                name: { { .Values.front.name } }-secret
+                name: {{ .Values.front.name }}-secret
           {{- end}}
           env:
             {{- range .Values.front.container.secretenv }}
