@@ -12,3 +12,6 @@ spec:
     - port: {{ .Values.api.service.port }}
       targetPort: {{ .Values.api.container.port }}
       name: defaultport
+    - port: {{ .Values.api.service.grpcPort }}
+      targetPort: {{ .Values.api.container.grpcPort}}
+      name: grpcport
