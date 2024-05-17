@@ -30,6 +30,7 @@ spec:
           {{- end }}
           ports:
             - containerPort: {{ .Values.api.container.port }}
+            - containerPort: {{ .Values.api.container.grpcPort }}
           envFrom:
             - configMapRef:
                 name: {{ .Values.api.name }}-configmap

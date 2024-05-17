@@ -6,6 +6,7 @@ api:
     pullPolicy: Always
   container:
     port: 8081
+    grpcPort: 50055
     config:
       SPRING_PROFILES_ACTIVE: production
       VERSION: 'not-specified'
@@ -22,6 +23,7 @@ api:
   service:
     type: ClusterIP
     port: 80
+    grpcPort: 50055
 
 front:
   name: governor-front
@@ -37,9 +39,10 @@ front:
       JUPYTER_NOTEBOOK_PUBLIC_HOST: 'jupyter.localhost'
       POSTHOG_ANALYTICS_API_HOST: 'https://eu.posthog.com'
       # private hosts
-      API_INTERNAL_HOST: 'governor-api:80'
-      JUPYTER_NOTEBOOK_INTERNAL_HOST: 'governor-jupyter'
-      JUPYTER_NOTEBOOK_INTERNAL_PORT: '8888'
+      API_INTERNAL_HOST: 'governor-api'
+      API_GRPC_INTERNAL_PORT: '50055'
+      API_HTTP_INTERNAL_PORT: '80'
+
     secretConfig:
       POSTHOG_ANALYTICS_API_KEY: ""
   service:
