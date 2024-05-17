@@ -1,0 +1,25 @@
+image:
+  repository: "otel/opentelemetry-collector-contrib"
+mode: deployment
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1024Mi
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc: {}
+  exporters:
+    prometheus:
+      endpoint: ${env:MY_POD_IP}:8889
+    debug: {}
+  service:
+    pipelines:
+      metrics:
+        receivers: [otlp]
+        processors: []
+        exporters: [prometheus, debug]
+

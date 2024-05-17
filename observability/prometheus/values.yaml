@@ -1,0 +1,28 @@
+grafana:
+  enabled: false
+alertmanager:
+  enabled: false
+kubeStateMetrics:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 10d
+    walCompression: true
+    enableAdminAPI: true
+    storageSpec:
+      volumeClaimTemplate:
+        metadata:
+          name: prometheus-metrics
+        spec:
+          storageClassName: default
+          accessModes: [ "ReadWriteOnce" ]
+          resources:
+            requests:
+              storage: 5Gi
+    additionalScrapeConfigs:
+      - job_name: aggregated-metrics
+        scrape_interval: 15s
+        static_configs:
+          - targets: [ 'otel-collector-opentelemetry-collector.{{ .Release.Namespace }}.svc.cluster.local:8889' ]
+
