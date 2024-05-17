@@ -25,4 +25,3 @@ prometheus:
         scrape_interval: 15s
         static_configs:
           - targets: [ 'otel-collector-opentelemetry-collector.{{ .Release.Namespace }}.svc.cluster.local:8889' ]
-
