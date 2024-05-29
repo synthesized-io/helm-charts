@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.jupyter.name }}-configmap
-data:
-{{- if .Values.jupyter.container.config }}
-{{ toYaml .Values.jupyter.container.config | indent 2}}
-{{- end }}
