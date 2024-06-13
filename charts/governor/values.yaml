@@ -41,6 +41,8 @@ front:
       API_INTERNAL_HOST: 'governor-api'
       API_GRPC_INTERNAL_PORT: '50055'
       API_HTTP_INTERNAL_PORT: '80'
+      UI_ENVIRONMENT: "on-premise-classic"
+      UI_TDK_AGENTS: false
 
     secretConfig:
       POSTHOG_ANALYTICS_API_KEY: ""
