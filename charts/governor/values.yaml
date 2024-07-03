@@ -18,8 +18,6 @@ api:
       SPRING_DATASOURCE_USERNAME: ""
       SPRING_DATASOURCE_PASSWORD: ""
       JWT_SECRET: ""
-
-    healthchecks:
   service:
     type: ClusterIP
     port: 80
