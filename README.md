@@ -30,6 +30,23 @@ In order to install Governor on Kubernetes, run:
 helm install governor ./governor
 ```
 
+### Self-hosted vs SaaS mode
+
+This Helm chart provides options for both saas and self-hosted installation, defaulting to self-hosted. 
+The mode is controlled by `mode` value.
+
+#### SaaS mode
+* Director service, configmap, secrets and deployment are being installed.
+* API is configured to use the director.
+* Frontend is configured to use "cloud" mode via `UI_ENVIRONMENT` variable.
+* Posthog is configured via `UI_POSTHOG_ANALYTICS_API_HOST` variable.
+* `GOVERNOR_SECURITY_OWNERACCESSONLY` variable is enabled for backend.
+
+#### Self-hosted mode
+
+* Director service, configmap, secrets, deployment are not installed
+* Frontend is configured to use "on-premise" mode via `UI_ENVIRONMENT` variable
+
 ### How to release Governor Helm
 
 Update the version of the chart in `Chart.yaml` file!
