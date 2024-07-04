@@ -9,5 +9,5 @@ data:
 {{- if eq .Values.mode "saas" }}
   DIRECTOR_SERVERHOST: "{{ .Values.director.name }}"
   DIRECTOR_SERVERPORT: "{{ .Values.director.service.port }}"
-  GOVERNOR_SECURITY_OWNERACCESSONLY: yes
+  GOVERNOR_SECURITY_OWNERACCESSONLY: "yes"
 {{- end }}
