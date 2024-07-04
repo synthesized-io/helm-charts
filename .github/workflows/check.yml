@@ -20,7 +20,7 @@ jobs:
         uses: azure/setup-helm@v3
 
       - name: Set up kubeconform
-        run: go install github.com/yannh/kubeconform/cmd/kubeconform@0.6.6
+        run: go install github.com/yannh/kubeconform/cmd/kubeconform@latest
 
       - name: Set up Python 3.7
         uses: actions/setup-python@v4
