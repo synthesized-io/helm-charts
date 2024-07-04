@@ -43,27 +43,11 @@ spec:
                   name: {{ .valueFrom.secretKeyRef.name }}
                   key: {{ .valueFrom.secretKeyRef.key }}
             {{- end}}
-          {{- if .Values.director.container.healthchecks }}
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8081
-            initialDelaySeconds: 10
-            periodSeconds: 10
           readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8081
+            tcpSocket:
+              port: {{ .Values.director.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
-          startupProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8081
-            failureThreshold: 10
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
