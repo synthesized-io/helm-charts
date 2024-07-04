@@ -13,8 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+
       - name: Set up Helm
         uses: azure/setup-helm@v3
+
+      - name: Set up kubeconform
+        run: go install github.com/yannh/kubeconform/cmd/kubeconform@0.6.6
 
       - name: Set up Python 3.7
         uses: actions/setup-python@v4
@@ -30,8 +36,15 @@ jobs:
         run: |
           yamllint -s .
 
-      - name: Verify Helm charts
+      - name: Lint Helm charts
         run: |
           helm lint charts/tdk
           helm lint charts/sdk
           helm lint charts/governor
+
+      - name: Verify Helm chart outputs
+        run: |
+          helm template --set mode=cloud        charts/governor | kubeconform -strict
+          helm template --set mode=self-hosted  charts/governor | kubeconform -strict
+          helm template charts/tdk | kubeconform -strict
+          helm template charts/sdk | kubeconform -strict
