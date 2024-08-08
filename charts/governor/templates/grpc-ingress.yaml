@@ -1,0 +1,37 @@
+{{- if .Values.grpcIngress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-grpc-ingress
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+{{- range $key, $value := .Values.grpcIngress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
+spec:
+  rules:
+  {{- range .Values.grpcIngress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .service }}
+                port:
+                  number: {{ .servicePort }}
+        {{- end }}
+  {{- end }}
+  tls:
+  {{- range .Values.grpcIngress.tls }}
+    - secretName: {{ .secretName }}
+      hosts:
+      {{- range .hosts }}
+        - {{ . }}
+      {{- end }}
+  {{- end }}
+---
+{{- end }}

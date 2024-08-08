@@ -71,13 +71,13 @@ tolerations: []
 affinity: {}
 
 ingress:
-  enabled: false
+  enabled: true
   annotations:
     kubernetes.io/ingress.class: webapprouting.kubernetes.azure.com
     cert-manager.io/cluster-issuer: "letsencrypt-staging"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: example.synthesized.io
+    - host: azure-web.staging.synthesized.io
       paths:
         - path: /
           service: governor-front
@@ -88,17 +88,17 @@ ingress:
   tls:
     - secretName: tls-secret
       hosts:
-        - example.synthesized.io
+        - azure-web.staging.synthesized.io
 
 grpcIngress:
-  enabled: false
+  enabled: true
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
     kubernetes.io/ingress.class: webapprouting.kubernetes.azure.com
     cert-manager.io/cluster-issuer: "letsencrypt-staging"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: grpc.example.synthesized.io
+    - host: grpc.azure-web.staging.synthesized.io
       paths:
         - path: /api
           service: governor-api
@@ -106,4 +106,4 @@ grpcIngress:
   tls:
     - secretName: grpc-tls-secret
       hosts:
-        - grpc.example.synthesized.io
+        - grpc.azure-web.staging.synthesized.io
