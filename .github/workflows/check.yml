@@ -44,7 +44,13 @@ jobs:
 
       - name: Verify Helm chart outputs
         run: |
-          helm template --set mode=cloud        charts/governor | kubeconform -strict
-          helm template --set mode=self-hosted  charts/governor | kubeconform -strict
+          helm template --set mode=cloud \
+                        --set ingress.enabled=true \
+                        --set grpcIngress.enabled=true \
+                        charts/governor | kubeconform -strict
+          helm template --set mode=self-hosted \
+                        --set ingress.enabled=true \
+                        --set grpcIngress.enabled=true \
+                        charts/governor | kubeconform -strict
           helm template charts/tdk | kubeconform -strict
           helm template charts/sdk | kubeconform -strict
