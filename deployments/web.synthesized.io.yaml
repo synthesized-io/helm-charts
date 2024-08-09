@@ -10,7 +10,7 @@ api:
     port: 8081
     grpcPort: 50055
     config:
-      SPRING_PROFILES_ACTIVE: staging
+      SPRING_PROFILES_ACTIVE: production
       VERSION: 'not-specified'
     # Sensitive configuration variables that will be rendered as a new secret
     secretConfig:
@@ -77,7 +77,7 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: azure-web.staging.synthesized.io
+    - host: azure-web.synthesized.io
       paths:
         - path: /
           service: governor-front
@@ -88,7 +88,7 @@ ingress:
   tls:
     - secretName: tls-secret
       hosts:
-        - azure-web.staging.synthesized.io
+        - azure-web.synthesized.io
 
 grpcIngress:
   enabled: true
@@ -98,7 +98,7 @@ grpcIngress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: grpc.azure-web.staging.synthesized.io
+    - host: grpc.azure-web.synthesized.io
       paths:
         - path: /api
           service: governor-api
@@ -106,4 +106,4 @@ grpcIngress:
   tls:
     - secretName: grpc-tls-secret
       hosts:
-        - grpc.azure-web.staging.synthesized.io
+        - grpc.azure-web.synthesized.io
