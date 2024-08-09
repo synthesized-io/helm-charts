@@ -100,7 +100,7 @@ grpcIngress:
   hosts:
     - host: grpc.azure-web.staging.synthesized.io
       paths:
-        - path: /api
+        - path: /
           service: governor-api
           servicePort: 50055
   tls:
