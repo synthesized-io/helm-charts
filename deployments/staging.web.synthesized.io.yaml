@@ -77,7 +77,7 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: azure-web.staging.synthesized.io
+    - host: web.staging.synthesized.io
       paths:
         - path: /
           service: governor-front
@@ -88,7 +88,7 @@ ingress:
   tls:
     - secretName: tls-secret
       hosts:
-        - azure-web.staging.synthesized.io
+        - web.staging.synthesized.io
 
 grpcIngress:
   enabled: true
@@ -98,7 +98,7 @@ grpcIngress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: grpc.azure-web.staging.synthesized.io
+    - host: grpc.web.staging.synthesized.io
       paths:
         - path: /
           service: governor-api
@@ -106,4 +106,4 @@ grpcIngress:
   tls:
     - secretName: grpc-tls-secret
       hosts:
-        - grpc.azure-web.staging.synthesized.io
+        - grpc.web.staging.synthesized.io
