@@ -98,7 +98,7 @@ grpcIngress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: grpc.staging.web.synthesized.io
+    - host: staging.grpc.web.synthesized.io
       paths:
         - path: /
           service: governor-api
@@ -106,4 +106,4 @@ grpcIngress:
   tls:
     - secretName: grpc-tls-secret
       hosts:
-        - grpc.staging.web.synthesized.io
+        - staging.grpc.web.synthesized.io
