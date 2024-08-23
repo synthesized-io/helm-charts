@@ -30,10 +30,8 @@ spec:
           {{- end }}
           ports:
             - containerPort: {{ .Values.front.container.port }}
-          {{- with .Values.front.resources }}
           resources:
-            {{- toYaml .Values.front.resources | nindent 12 }}
-          {{- end }}
+            {{- toYaml .Values.api.resources | default "{}" | nindent 12 }}
           {{- if .Values.front.container.config }}
           envFrom:
             - configMapRef:

@@ -31,10 +31,8 @@ spec:
           {{- end }}
           ports:
             - containerPort: {{ .Values.director.container.port }}
-          {{- with .Values.director.resources }}
           resources:
-            {{- toYaml .Values.director.resources | nindent 12 }}
-          {{- end }}
+            {{- toYaml .Values.api.resources | default "{}" | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: {{ .Values.director.name }}-configmap
