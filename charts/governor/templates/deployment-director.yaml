@@ -32,7 +32,7 @@ spec:
           ports:
             - containerPort: {{ .Values.director.container.port }}
           resources:
-            {{- toYaml .Values.api.resources | default "{}" | nindent 12 }}
+            {{- toYaml .Values.director.resources | default "{}" | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: {{ .Values.director.name }}-configmap
