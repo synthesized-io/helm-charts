@@ -33,11 +33,14 @@ jobs:
         run: |
           helm package ${{ env.CHART_NAME }} --version ${{ env.CHART_VERSION }} --app-version ${{ env.IMAGE_TAG }}
 
+      - name: Install JFrog cli
+        uses: jfrog/setup-jfrog-cli@v4.0.2
+        env:
+          JF_URL: ${{ env.ARTIFACTORY_URL }}
+          JF_ACCESS_TOKEN: ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+
       - name: Push Helm Chart to Artifactory
         run: |
-          curl -X PUT "${{ env.ARTIFACTORY_URL }}/helm/${{ env.CHART_NAME }}/${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz" \
-            -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" \
-            -T "${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz"
-        env:
-          ARTIFACTORY_URL: ${{ vars.ARTIFACTORY_URL }}  # Using environment variable here
-          ARTIFACTORY_ACCESS_TOKEN: ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}
+          jf rt u ${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz helm/${{ env.CHART_NAME }}/${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz
