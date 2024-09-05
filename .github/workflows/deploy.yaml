@@ -35,11 +35,9 @@ jobs:
 
       - name: Push Helm Chart to Artifactory
         run: |
-          CHART_PACKAGE=$(ls ./${{ env.CHART_NAME }}-*.tgz | head -n1)
-          ARTIFACTORY_REPO="${{ env.ARTIFACTORY_URL }}/helm/${{ env.CHART_NAME }}"
-          curl -X PUT "$ARTIFACTORY_REPO" \
+          curl -X PUT "${{ env.ARTIFACTORY_URL }}/helm/${{ env.CHART_NAME }}-${{ env.IMAGE_TAG}}.tgz" \
             -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" \
-            -T "$CHART_PACKAGE"
+            -T "${{ env.CHART_NAME }}-${{ env.IMAGE_TAG}}.tgz"
         env:
           ARTIFACTORY_URL: ${{ vars.ARTIFACTORY_URL }}  # Using environment variable here
           ARTIFACTORY_ACCESS_TOKEN: ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}
