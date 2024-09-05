@@ -35,7 +35,7 @@ jobs:
 
       - name: Push Helm Chart to Artifactory
         run: |
-          curl -X PUT "${{ env.ARTIFACTORY_URL }}/helm/${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz" \
+          curl -X PUT "${{ env.ARTIFACTORY_URL }}/helm/${{ env.CHART_NAME }}/${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz" \
             -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" \
             -T "${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz"
         env:
