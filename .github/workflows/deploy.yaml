@@ -32,12 +32,11 @@ jobs:
       - name: Package Helm chart with Image Tag
         run: |
           helm package ${{ env.CHART_NAME }} --version ${{ env.CHART_VERSION }} --app-version ${{ env.IMAGE_TAG }}
-        
 
       - name: Push Helm Chart to Artifactory
         run: |
           CHART_PACKAGE=$(ls ./${{ env.CHART_NAME }}-*.tgz | head -n1)
-          ARTIFACTORY_REPO="${{ env.ARTIFACTORY_URL }}/helm-repo/$(basename $CHART_PACKAGE)"
+          ARTIFACTORY_REPO="${{ env.ARTIFACTORY_URL }}/helm/${{ env.CHART_NAME }}"
           curl -X PUT "$ARTIFACTORY_REPO" \
             -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" \
             -T "$CHART_PACKAGE"
