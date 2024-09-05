@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "IMAGE_TAG=${{ github.event.client_payload.image_tag }}" >> $GITHUB_ENV
           echo "CHART_VERSION=${{ github.event.client_payload.chart_version }}" >> $GITHUB_ENV
-          echp "CHART_NAME=${{ github.event.client_payload.chart_name }}" >> $GITHUB_ENV
+          echo "CHART_NAME=${{ github.event.client_payload.chart_name }}" >> $GITHUB_ENV
 
       - name: Package Helm chart with Image Tag
         run: |
