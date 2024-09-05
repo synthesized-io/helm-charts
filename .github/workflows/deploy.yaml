@@ -37,13 +37,13 @@ jobs:
       # - name: Install JFrog cli
       #   uses: jfrog/setup-jfrog-cli@v4.0.2
       #   env:
-      #     JF_URL: ${{ vars.ARTIFACTORY_URL }}
+      #     JF_URL: https://${{ vars.ARTIFACTORY_DOMAIN }}
       #     JF_ACCESS_TOKEN: ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
 
       - name: Helm login && push to oci jfrog artifactory registry
         run: |
-          helm registry login ${{ vars.ARTIFACTORY_URL }} -p ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
-          helm push ${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz ${{ vars.ARTIFACTORY_URL }}/helm
+          helm registry login https://${{ vars.ARTIFACTORY_DOMAIN }} -p ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
+          helm push ${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz oci://${{ vars.ARTIFACTORY_DOMAIN }}/helm
 
       # - name: Push Helm Chart to Artifactory
       #   run: |
