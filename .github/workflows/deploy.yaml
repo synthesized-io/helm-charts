@@ -36,10 +36,8 @@ jobs:
       - name: Install JFrog cli
         uses: jfrog/setup-jfrog-cli@v4.0.2
         env:
-          JF_URL: ${{ env.ARTIFACTORY_URL }}
+          JF_URL: ${{ vars.ARTIFACTORY_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}
-          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
 
       - name: Push Helm Chart to Artifactory
         run: |
