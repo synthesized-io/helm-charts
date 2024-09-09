@@ -4,6 +4,20 @@ on:
   repository_dispatch:
     types:
       - helm-chart-push
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker Image Tag'
+        required: true
+        default: '1.65.0'
+      chart_version:
+        description: 'Helm Chart Version'
+        required: true
+        default: '1.65.0'
+      chart_name:
+        description: 'Helm Chart Name'
+        required: true
+        default: 'governor'
 
 jobs:
   helm:
@@ -23,12 +37,18 @@ jobs:
           version: v3.11.0
         id: install
 
-      - name: Extract Image Tag and Chart Version from Dispatch Event
+      - name: Extract Image Tag and Chart Version
         id: extract_tags
         run: |
-          echo "IMAGE_TAG=${{ github.event.client_payload.image_tag }}" >> $GITHUB_ENV
-          echo "CHART_VERSION=${{ github.event.client_payload.chart_version }}" >> $GITHUB_ENV
-          echo "CHART_NAME=${{ github.event.client_payload.chart_name }}" >> $GITHUB_ENV
+          if [ -z "${{ github.event.client_payload.image_tag }}" ]; then
+            echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
+            echo "CHART_VERSION=${{ github.event.inputs.chart_version }}" >> $GITHUB_ENV
+            echo "CHART_NAME=${{ github.event.inputs.chart_name }}" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=${{ github.event.client_payload.image_tag }}" >> $GITHUB_ENV
+            echo "CHART_VERSION=${{ github.event.client_payload.chart_version }}" >> $GITHUB_ENV
+            echo "CHART_NAME=${{ github.event.client_payload.chart_name }}" >> $GITHUB_ENV
+          fi
 
       - name: Package Helm chart with Image Tag
         run: |
@@ -36,6 +56,5 @@ jobs:
 
       - name: Helm login && push to oci jfrog artifactory registry
         run: |
-          helm registry login https://${{ vars.ARTIFACTORY_DOMAIN }} \
-          -u ${{ secrets.ARTIFACTORY_LOGIN }} -p ${{ secrets.ARTIFACTORY_PWD }}
-          helm push ${{ env.CHART_NAME }}-${{ env.CHART_VERSION}}.tgz oci://${{ vars.ARTIFACTORY_DOMAIN }}/helm
+          helm registry login https://${{ vars.ARTIFACTORY_DOMAIN }} -u ${{ secrets.ARTIFACTORY_LOGIN }} -p ${{ secrets.ARTIFACTORY_PWD }}
+          helm push ${{ env.CHART_NAME }}-${{ env.CHART_VERSION }}.tgz oci://${{ vars.ARTIFACTORY_DOMAIN }}/helm
