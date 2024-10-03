@@ -36,13 +36,27 @@ front:
       API_INTERNAL_HOST: 'governor-api'
       API_GRPC_INTERNAL_PORT: '50055'
       API_HTTP_INTERNAL_PORT: '80'
-      UI_TDK_AGENTS: "false"
+      UI_TDK_AGENTS: "true"
 
     secretConfig:
       POSTHOG_ANALYTICS_API_KEY: ""
   service:
     type: ClusterIP
     port: 80
+
+agent:
+  name: governor-agent
+  group: governor-director
+  image:
+    repository: eu.gcr.io/synthesized-cloud-275014/agent
+    pullPolicy: Always
+  container:
+    config:
+      AGENT_SERVERHOST: 'governor-api'
+      AGENT_SERVERPORT: '50055'
+      AGENT_TAGS: 'default'
+      AGENT_DATASOURCES: '*'
+      AGENT_USEPLAINTEXT: "true"
 
 director:
   name: governor-director

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.agent.name }}
+  labels:
+    app: {{ .Values.agent.name }}
+    group: {{ .Values.agent.group }}
+spec:
+  replicas: {{ .Values.agent.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.agent.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.agent.name }}
+        group: {{ .Values.agent.group }}
+    spec:
+      {{- with .Values.agent.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.agent.name }}
+          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.agent.image.pullPolicy }}
+          {{- if .Values.agent.container.command }}
+          command:
+{{ toYaml .Values.agent.container.command | indent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.agent.resources | default "{}" | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.agent.name }}-configmap
+            - secretRef:
+                name: {{ .Values.agent.name }}-secret
+          env:
+            {{- range .Values.agent.container.secretenv }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .valueFrom.secretKeyRef.name }}
+                  key: {{ .valueFrom.secretKeyRef.key }}
+            {{- end}}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8083
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
