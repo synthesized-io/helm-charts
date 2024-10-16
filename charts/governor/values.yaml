@@ -48,7 +48,7 @@ agent:
   name: governor-agent
   group: governor-director
   image:
-    repository: eu.gcr.io/synthesized-cloud-275014/agent
+    repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-agent
     pullPolicy: Always
   container:
     config:
