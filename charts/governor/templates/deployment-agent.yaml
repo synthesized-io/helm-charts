@@ -44,9 +44,8 @@ spec:
                   key: {{ .valueFrom.secretKeyRef.key }}
             {{- end}}
           readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8083
+            exec:
+              command: curl -f http://localhost:8083/actuator/health || exit 1
             initialDelaySeconds: 10
             periodSeconds: 10
       {{- with .Values.nodeSelector }}
