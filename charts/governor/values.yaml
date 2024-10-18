@@ -18,6 +18,8 @@ api:
       SPRING_DATASOURCE_USERNAME: ""
       SPRING_DATASOURCE_PASSWORD: ""
       JWT_SECRET: ""
+      ADMIN_EMAIL: ""
+      ADMIN_DEFAULT_PASSWORD: ""
   service:
     type: ClusterIP
     port: 80
