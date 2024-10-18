@@ -45,7 +45,10 @@ spec:
             {{- end}}
           readinessProbe:
             exec:
-              command: curl -f http://localhost:8083/actuator/health || exit 1
+              command:
+                - /bin/sh
+                - -c
+                - curl -f http://localhost:8083/actuator/health || exit 1
             initialDelaySeconds: 10
             periodSeconds: 10
       {{- with .Values.nodeSelector }}
