@@ -20,6 +20,8 @@ The following configuration values should be updated:
 * `SPRING_DATASOURCE_USERNAME` - database username
 * `SPRING_DATASOURCE_PASSWORD` - database password
 * `JWT_SECRET` - JWT secret for authentication
+* `ADMIN_EMAIL` - email for seed admin used
+* `ADMIN_DEFAULT_PASSWORD` - admin password (needs to be changed later)
 * `SYNTHESIZED_KEY` - licence key
 
 More details about installation can be found [here](https://docs.synthesized.io/governor/latest/deployment/helm)
