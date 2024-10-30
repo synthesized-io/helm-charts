@@ -43,14 +43,6 @@ spec:
                   name: {{ .valueFrom.secretKeyRef.name }}
                   key: {{ .valueFrom.secretKeyRef.key }}
             {{- end}}
-          readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - curl -f http://localhost:8083/actuator/health || exit 1
-            initialDelaySeconds: 10
-            periodSeconds: 10
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

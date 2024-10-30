@@ -4,7 +4,7 @@ api:
   name: governor-api
   group: governor-api
   image:
-    repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-api
+    repository: synthesizedio/synthesized-api
     pullPolicy: Always
   container:
     port: 8081
@@ -29,7 +29,7 @@ front:
   name: governor-front
   group: governor-front
   image:
-    repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-front
+    repository: synthesizedio/synthesized-front
     pullPolicy: Always
   container:
     port: 80
@@ -50,7 +50,7 @@ agent:
   name: governor-agent
   group: governor-director
   image:
-    repository: eu.gcr.io/synthesized-cloud-275014/testing-suite-agent
+    repository: synthesizedio/synthesized-agent
     pullPolicy: Always
   container:
     config:
@@ -64,7 +64,7 @@ director:
   name: governor-director
   group: governor-director
   image:
-    repository: eu.gcr.io/synthesized-cloud-275014/director
+    repository: synthesziedio/synthesized-director
     pullPolicy: Always
   container:
     port: 50051
