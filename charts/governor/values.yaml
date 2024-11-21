@@ -1,4 +1,5 @@
 mode: self-hosted
+sandbox: false
 
 api:
   name: governor-api
