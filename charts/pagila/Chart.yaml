@@ -1,5 +1,5 @@
 apiVersion: v2
-name: pagila-chart
+name: pagila
 description: A Helm chart for running synthesizedio/pagila:1.8
 type: application
 version: 0.1.0
