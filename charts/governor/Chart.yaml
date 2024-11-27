@@ -10,6 +10,6 @@ appVersion: 1.75.5
 
 dependencies:
   - name: pagila
-    version: 1.75.5
+    version: 1.74.0
     repository: oci://synthesizedio.jfrog.io/helm
     condition: sandbox
