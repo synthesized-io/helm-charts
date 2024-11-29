@@ -20,6 +20,8 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      securityContext:
+        {{- toYaml .Values.api.securityContext | nindent 8 }}
       containers:
         - name: {{ .Values.api.name }}
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag | default .Chart.AppVersion }}"
@@ -62,8 +64,6 @@ spec:
         - name: {{ .Values.api.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ .Values.api.persistence.claimName }}
-          securityContext:
-            {{- toYaml .Values.api.persistence.securityContext | nindent 12 }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

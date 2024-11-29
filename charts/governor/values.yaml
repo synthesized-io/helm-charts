@@ -7,6 +7,9 @@ api:
   image:
     repository: synthesizedio/synthesized-api
     pullPolicy: Always
+  securityContext:
+    runAsUser: 100
+    fsGroup: 65533
   container:
     port: 8081
     grpcPort: 50055
@@ -27,9 +30,6 @@ api:
     mountPath: /data
     claimName: api-pvc
     size: 10Gi
-    securityContext:
-      runAsUser: 100
-      fsGroup: 65533
   service:
     type: ClusterIP
     port: 80
