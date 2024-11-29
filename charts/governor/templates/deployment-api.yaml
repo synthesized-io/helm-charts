@@ -62,6 +62,8 @@ spec:
         - name: {{ .Values.api.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ .Values.api.persistence.claimName }}
+          securityContext:
+            {{- toYaml .Values.api.persistence.securityContext | nindent 12 }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
