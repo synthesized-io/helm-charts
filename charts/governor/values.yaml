@@ -21,6 +21,12 @@ api:
       JWT_SECRET: ""
       ADMIN_EMAIL: ""
       ADMIN_DEFAULT_PASSWORD: ""
+  persistence:
+    enabled: false
+    name: api-pv
+    mountPath: /data
+    claimName: api-pvc
+    size: 10Gi
   service:
     type: ClusterIP
     port: 80

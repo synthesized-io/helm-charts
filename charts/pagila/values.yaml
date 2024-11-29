@@ -28,6 +28,7 @@ configMap:
       CREATE DATABASE input_source WITH TEMPLATE postgres OWNER input_source;
       GRANT ALL PRIVILEGES ON DATABASE input_source TO input_source;
       GRANT ALL PRIVILEGES ON DATABASE input_source TO apiuser;
+      GRANT SELECT ON ALL TABLES IN SCHEMA public TO input_source;
     5_create_output_db.sql: |
       CREATE USER output_source;
       CREATE DATABASE output_source;
