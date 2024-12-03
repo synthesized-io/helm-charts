@@ -34,6 +34,8 @@ configMap:
       CREATE DATABASE output_source;
       GRANT ALL PRIVILEGES ON DATABASE output_source TO output_source;
       GRANT ALL PRIVILEGES ON DATABASE output_source TO apiuser;
+      GRANT ALL ON ALL TABLES IN SCHEMA public TO output_source;
+      ALTER SCHEMA public OWNER TO output_source;
   env:
     PGDATA: /mnt/data/pgdata
 

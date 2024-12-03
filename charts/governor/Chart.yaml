@@ -7,9 +7,3 @@ type: application
 version: 1.76.0
 
 appVersion: 1.76.0
-
-dependencies:
-  - name: pagila
-    version: 1.74.0
-    repository: oci://synthesizedio.jfrog.io/helm
-    condition: sandbox
