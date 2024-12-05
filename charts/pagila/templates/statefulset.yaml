@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-pagila
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  serviceName: {{ .Release.Name }}-pagila
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: pagila
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgres-secret
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgres-secret
+              key: POSTGRES_PASSWORD
+        volumeMounts:
+        {{- $index := 0 }}
+        {{- range $filename, $content := .Values.configMap.customScripts }}
+        - name: custom-script-{{ $index }}
+          mountPath: /docker-entrypoint-initdb.d/{{ $filename }}
+          subPath: {{ $filename }}
+        {{- $index = (add $index 1) }}
+        {{- end }}
+      volumes:
+      {{- $index := 0 }}
+      {{- range $filename, $content := .Values.configMap.customScripts }}
+      - name: custom-script-{{ $index }}
+        configMap:
+          name: {{ $.Release.Name }}-custom-scripts
+          items:
+          - key: {{ $filename }}
+            path: {{ $filename }}
+      {{- $index = (add $index 1) }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      accessModes:
+      - {{ .Values.persistence.accessMode }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size }}

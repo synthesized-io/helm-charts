@@ -20,6 +20,8 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      securityContext:
+        {{- toYaml .Values.api.securityContext | nindent 8 }}
       containers:
         - name: {{ .Values.api.name }}
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag | default .Chart.AppVersion }}"
@@ -52,6 +54,17 @@ spec:
               port: {{ .Values.api.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
+          {{- if .Values.api.persistence.enabled }}
+          volumeMounts:
+            - name: {{ .Values.api.persistence.name }}
+              mountPath: {{ .Values.api.persistence.mountPath }}
+          {{- end }}
+      {{- if .Values.api.persistence.enabled }}
+      volumes:
+        - name: {{ .Values.api.persistence.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.api.persistence.claimName }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -1,4 +1,5 @@
 mode: self-hosted
+sandbox: false
 
 api:
   name: governor-api
@@ -6,6 +7,9 @@ api:
   image:
     repository: synthesizedio/synthesized-api
     pullPolicy: Always
+  securityContext:
+    runAsUser: 100
+    fsGroup: 65533
   container:
     port: 8081
     grpcPort: 50055
@@ -20,6 +24,12 @@ api:
       JWT_SECRET: ""
       ADMIN_EMAIL: ""
       ADMIN_DEFAULT_PASSWORD: ""
+  persistence:
+    enabled: false
+    name: api-pv
+    mountPath: /data
+    claimName: api-pvc
+    size: 10Gi
   service:
     type: ClusterIP
     port: 80

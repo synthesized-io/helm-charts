@@ -60,7 +60,9 @@ helm registry login synthesizedio.jfrog.io
 Provide your username and password.
 
 ```
-helm package  charts/governor
+cd charts/governor
+helm dependency update
+helm package .
 ```
 
 This will create a packaged tgz file.

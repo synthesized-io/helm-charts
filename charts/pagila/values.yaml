@@ -1,0 +1,44 @@
+replicaCount: 1
+
+image:
+  repository: synthesizedio/pagila
+  tag: "1.8"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+configMap:
+  customScripts:
+    3_create_apiuser.sql: |
+      CREATE ROLE apiuser WITH LOGIN SUPERUSER PASSWORD 'apipassword';
+    4_create_input_db.sql: |
+      CREATE USER input_source;
+      CREATE DATABASE input_source WITH TEMPLATE postgres OWNER input_source;
+      GRANT ALL PRIVILEGES ON DATABASE input_source TO input_source;
+      GRANT ALL PRIVILEGES ON DATABASE input_source TO apiuser;
+      GRANT SELECT ON ALL TABLES IN SCHEMA public TO input_source;
+    5_create_output_db.sql: |
+      CREATE USER output_source;
+      CREATE DATABASE output_source;
+      GRANT ALL PRIVILEGES ON DATABASE output_source TO output_source;
+      GRANT ALL PRIVILEGES ON DATABASE output_source TO apiuser;
+      GRANT ALL ON ALL TABLES IN SCHEMA public TO output_source;
+      ALTER SCHEMA public OWNER TO output_source;
+  env:
+    PGDATA: /mnt/data/pgdata
+
+secret:
+  postgresUser: "postgres"
+  postgresPasswordLength: 16
