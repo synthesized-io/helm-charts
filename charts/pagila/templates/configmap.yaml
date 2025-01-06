@@ -1,12 +1,13 @@
+{{- range .Values.databases }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-custom-scripts
+  name: {{ .name }}-custom-scripts
   labels:
-    app: {{ .Chart.Name }}
+    app: {{ $.Chart.Name }}
 data:
-{{- if .Values.configMap.customScripts }}
-{{- range $filename, $content := .Values.configMap.customScripts }}
+{{- if and .configMap .configMap.customScripts }}
+{{- range $filename, $content := .configMap.customScripts }}
   {{ $filename }}: |
 {{ $content | indent 4 }}
 {{- end }}
@@ -14,11 +15,5 @@ data:
   dummy.sql: |
     -- No custom scripts provided
 {{- end }}
-
-  {{- if .Values.configMap.env }}
-  {{- range $key, $value := .Values.configMap.env }}
-  {{ $key }}: "{{ $value }}"
-  {{- end }}
-  {{- else }}
-  debug-env: "No environment variables defined"
-  {{- end }}
+---
+{{- end }}

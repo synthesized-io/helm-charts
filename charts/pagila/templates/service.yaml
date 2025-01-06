@@ -1,14 +1,16 @@
+{{- range .Values.databases }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-pagila
+  name: {{ .name }}
   labels:
-    app: {{ .Chart.Name }}
+    app: {{ $.Chart.Name }}
 spec:
-  clusterIP: None
-  type: {{ .Values.service.type }}
+  type: {{ .service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .service.port }}
       targetPort: 5432
   selector:
-    app: {{ .Chart.Name }}
+    app: {{ $.Chart.Name }}-{{ .name }}
+---
+{{- end }}

@@ -1,0 +1,19 @@
+rootDir:
+  pvc:
+    existingClaim: api-pvc
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: filebrowser-investcloud.synthesized.io  
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: filebrowser-tls-secret
+      hosts:
+        - filebrowser-investcloud.synthesized.io

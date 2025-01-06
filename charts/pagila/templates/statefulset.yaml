@@ -1,64 +1,61 @@
+{{- range .Values.databases }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Release.Name }}-pagila
+  name: {{ .name }}
   labels:
-    app: {{ .Chart.Name }}
+    app: {{ $.Chart.Name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
-  serviceName: {{ .Release.Name }}-pagila
+      app: {{ $.Chart.Name }}-{{ .name }}
+  serviceName: {{ .name }}
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
+        app: {{ $.Chart.Name }}-{{ .name }}
     spec:
       containers:
-      - name: pagila
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+      - name: {{ .name }}
+        image: "{{ .image.repository }}:{{ .image.tag }}"
+        imagePullPolicy: {{ .image.pullPolicy }}
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-postgres-secret
+              name: {{ .name }}-postgres-secret
               key: POSTGRES_USER
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-postgres-secret
+              name: {{ .name }}-postgres-secret
               key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
         volumeMounts:
-        {{- $index := 0 }}
-        {{- range $filename, $content := .Values.configMap.customScripts }}
-        - name: custom-script-{{ $index }}
-          mountPath: /docker-entrypoint-initdb.d/{{ $filename }}
-          subPath: {{ $filename }}
-        {{- $index = (add $index 1) }}
+        {{- if and .configMap .configMap.customScripts }}
+        - name: custom-scripts
+          mountPath: /docker-entrypoint-initdb.d
         {{- end }}
+        - name: data
+          mountPath: /var/lib/postgresql/data
       volumes:
-      {{- $index := 0 }}
-      {{- range $filename, $content := .Values.configMap.customScripts }}
-      - name: custom-script-{{ $index }}
+      {{- if and .configMap .configMap.customScripts }}
+      - name: custom-scripts
         configMap:
-          name: {{ $.Release.Name }}-custom-scripts
-          items:
-          - key: {{ $filename }}
-            path: {{ $filename }}
-      {{- $index = (add $index 1) }}
+          name: {{ .name }}-custom-scripts
       {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: data
-      labels:
-        app: {{ .Chart.Name }}
     spec:
       accessModes:
-      - {{ .Values.persistence.accessMode }}
+      - {{ .persistence.accessMode }}
       resources:
         requests:
-          storage: {{ .Values.persistence.size }}
+          storage: {{ .persistence.size }}
+---
+{{- end }}
