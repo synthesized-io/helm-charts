@@ -32,6 +32,7 @@ databases:
     persistence:
       accessMode: ReadWriteOnce
       size: 10Gi
+    ephemeral: true
   - name: custom-source
     image:
       repository: postgres
