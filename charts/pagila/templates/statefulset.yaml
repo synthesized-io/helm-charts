@@ -49,9 +49,9 @@ spec:
           name: {{ .name }}-custom-scripts
       {{- end }}
   {{- if .ephemeral }}
-  volumes:
-  - name: data
-    emptyDir: {}
+      volumes:
+      - name: data
+        emptyDir: {}
   {{- else }}
   volumeClaimTemplates:
   - metadata:
