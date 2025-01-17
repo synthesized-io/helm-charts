@@ -48,7 +48,11 @@ spec:
         configMap:
           name: {{ .name }}-custom-scripts
       {{- end }}
-  {{- if not .ephemeral }}
+  {{- if .ephemeral }}
+  volumes:
+  - name: data
+    emptyDir: {}
+  {{- else }}
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -58,10 +62,6 @@ spec:
       resources:
         requests:
           storage: {{ .persistence.size }}
-  {{- else }}
-  volumes:
-  - name: data
-    emptyDir: {}
   {{- end }}
 ---
 {{- end }}
