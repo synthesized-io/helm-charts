@@ -86,7 +86,8 @@ director:
       AZURE_OPENAI_API_KEY: ""
       DATABASE_URL_POSTGRES: ""
     command: 
-      - 'python3.9 director/server.py'
+      - python3.9
+      - director/server.py
     healthchecks:
   service:
     type: ClusterIP
