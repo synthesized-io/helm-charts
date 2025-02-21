@@ -87,7 +87,7 @@ director:
     secretConfig:
       AZURE_OPENAI_API_KEY: ""
       DATABASE_URL_POSTGRES: ""
-    command: 
+    command:
       - python3.9
       - director/server.py
     healthchecks:
