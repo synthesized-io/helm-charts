@@ -49,7 +49,9 @@ front:
       API_GRPC_INTERNAL_PORT: '50055'
       API_HTTP_INTERNAL_PORT: '80'
       UI_TDK_AGENTS: "true"
-
+      UI_TDK_AGENTS_BY_DEFAULT: "true"
+      UI_PII_SCAN: "true"
+      UI_WORKFLOW_WIZARD: "true"
     secretConfig:
       POSTHOG_ANALYTICS_API_KEY: ""
   service:
