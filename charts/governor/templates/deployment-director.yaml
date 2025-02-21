@@ -26,8 +26,7 @@ spec:
           image: "{{ .Values.director.image.repository }}:{{ .Values.director.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.director.image.pullPolicy }}
           {{- if .Values.director.container.command }}
-          command:
-{{ toYaml .Values.director.container.command | indent 12 }}
+          command: {{ toYaml .Values.director.container.command }}
           {{- end }}
           ports:
             - containerPort: {{ .Values.director.container.port }}
