@@ -22,7 +22,7 @@ spec:
       {{- end }}
       {{- with .Values.front.securityContext }}
       securityContext:
-        {{- toYaml .Values.front.securityContext | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ .Values.front.name }}
