@@ -20,6 +20,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.front.securityContext }}
+      securityContext:
+        {{- toYaml .Values.front.securityContext | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Values.front.name }}
           image: "{{ .Values.front.image.repository }}:{{ .Values.front.image.tag | default .Chart.AppVersion }}"
@@ -38,7 +42,7 @@ spec:
                 name: {{ .Values.front.name }}-configmap
             - secretRef:
                 name: {{ .Values.front.name }}-secret
-          {{- end}}
+          {{- end }}
           env:
             {{- range .Values.front.container.secretenv }}
             - name: {{ .name }}
@@ -46,13 +50,31 @@ spec:
                 secretKeyRef:
                   name: {{ .valueFrom.secretKeyRef.name }}
                   key: {{ .valueFrom.secretKeyRef.key }}
-            {{- end}}
+            {{- end }}
           readinessProbe:
             httpGet:
               path: /
               port: {{ .Values.front.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
+          {{- if .Values.openShiftEnabled }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+            - name: app-data
+              mountPath: /apps/governor
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+          {{- end }}
+      volumes:
+        {{- if .Values.openShiftEnabled }}
+        - name: nginx-config
+          emptyDir: {}
+        - name: app-data
+          emptyDir: {}
+        - name: nginx-cache
+          emptyDir: {}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

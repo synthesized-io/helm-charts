@@ -1,5 +1,6 @@
 mode: self-hosted
 sandbox: false
+openshiftEnabled: false
 
 api:
   name: governor-api
