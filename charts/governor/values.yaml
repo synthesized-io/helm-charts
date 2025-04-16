@@ -43,7 +43,7 @@ front:
     repository: synthesizedio/synthesized-front
     pullPolicy: Always
   container:
-    port: 80
+    port: 8080
     config:
       # private hosts
       API_INTERNAL_HOST: 'governor-api'
