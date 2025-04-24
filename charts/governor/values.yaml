@@ -72,7 +72,7 @@ agent:
       AGENT_TAGS: 'default'
       AGENT_DATASOURCES: '*'
       AGENT_USEPLAINTEXT: "true"
-      AGENT_CONNECTIONS_POOL_SIZE: 20
+      AGENT_CONNECTIONS_POOL_SIZE: '20'
 
 director:
   name: governor-director
