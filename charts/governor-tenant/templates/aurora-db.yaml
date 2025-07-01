@@ -1,4 +1,13 @@
 {{- if .Values.aurora.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.aurora.secretName }}
+  namespace: {{ .Values.aurora.secretNamespace }}
+type: Opaque
+stringData:
+  {{ .Values.aurora.secretKey }}: {{ randAlphaNum 20 | quote }}
+---
 apiVersion: rds.services.k8s.aws/v1alpha1
 kind: DBCluster
 metadata:
