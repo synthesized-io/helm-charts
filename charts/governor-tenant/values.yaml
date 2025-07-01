@@ -4,7 +4,7 @@ openshiftEnabled: false
 
 aurora:
   enabled: true
-  masterUsername: admin
+  masterUsername: governor-admin
   secretNamespace: default
   secretName: db-secret
   secretKey: password
