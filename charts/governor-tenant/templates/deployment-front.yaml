@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.front.name }}
+  labels:
+    app: {{ .Values.front.name }}
+    group: {{ .Values.front.group }}
+spec:
+  replicas: {{ .Values.front.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.front.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.front.name }}
+        group: {{ .Values.front.group }}
+    spec:
+      {{- with .Values.front.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.front.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.front.name }}
+          image: "{{ .Values.front.image.repository }}:{{ .Values.front.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.front.image.pullPolicy }}
+          {{- if .Values.front.container.command }}
+          command:
+{{ toYaml .Values.front.container.command | indent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.front.container.port }}
+          resources:
+            {{- toYaml .Values.front.resources | default "{}" | nindent 12 }}
+          {{- if .Values.front.container.config }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.front.name }}-configmap
+            - secretRef:
+                name: {{ .Values.front.name }}-secret
+          {{- end }}
+          env:
+            {{- range .Values.front.container.secretenv }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .valueFrom.secretKeyRef.name }}
+                  key: {{ .valueFrom.secretKeyRef.key }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.front.container.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          {{- if .Values.openShiftEnabled }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+            - name: app-data
+              mountPath: /apps/governor
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+          {{- end }}
+      volumes:
+        {{- if .Values.openShiftEnabled }}
+        - name: nginx-config
+          emptyDir: {}
+        - name: app-data
+          emptyDir: {}
+        - name: nginx-cache
+          emptyDir: {}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

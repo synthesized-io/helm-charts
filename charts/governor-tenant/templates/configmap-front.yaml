@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.front.name }}-configmap
+data:
+{{- if .Values.front.container.config }}
+{{ toYaml .Values.front.container.config | indent 2}}
+{{- end }}
+{{- if eq .Values.mode "saas" }}
+  UI_POSTHOG_ANALYTICS_API_HOST: 'https://eu.posthog.com'
+  UI_ENVIRONMENT: "cloud"
+{{- else}}
+  UI_ENVIRONMENT: "on-premise"
+{{- end }}
