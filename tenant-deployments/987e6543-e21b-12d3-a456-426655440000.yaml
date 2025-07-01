@@ -1,7 +1,7 @@
 aws:
   cognito:
-    appClientId: 5h6i7j8k9l0m1n2o3p4q
-    userPoolId: eu-west-2_X1yZ2aB3C
+    appClientId: 1h2j3k4l5m6n7o8p9q0r
+    userPoolId: us-west-2_abCdEfGhI
   db_crd: true
   enabled: true
   operationId: 123e4567-e89b-12d3-a456-426614174000
