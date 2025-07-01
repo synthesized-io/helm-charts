@@ -1,0 +1,30 @@
+{{- if .Values.aurora.enabled }}
+apiVersion: rds.services.k8s.aws/v1alpha1
+kind: DBCluster
+metadata:
+  name: {{ .Release.Name }}-aurora-cluster
+spec:
+  dbClusterIdentifier: {{ .Release.Name }}-aurora-cluster
+  engine: aurora-postgresql
+  engineVersion: "13.6"
+  masterUsername: {{ .Values.aurora.masterUsername | quote }}
+  masterUserPassword:
+    namespace: {{ .Values.aurora.secretNamespace | quote }}
+    name: {{ .Values.aurora.secretName | quote }}
+    key: {{ .Values.aurora.secretKey | quote }}
+  dbSubnetGroupName: {{ .Values.aurora.dbSubnetGroupName | quote }}
+  vpcSecurityGroupIDs:
+  {{- range .Values.aurora.securityGroupIds }}
+    - {{ . | quote }}
+  {{- end }}
+  backupRetentionPeriod: {{ .Values.aurora.backupRetentionPeriod }}
+---
+apiVersion: rds.services.k8s.aws/v1alpha1
+kind: DBInstance
+metadata:
+  name: {{ .Release.Name }}-aurora-instance
+spec:
+  dbInstanceIdentifier: {{ .Release.Name }}-aurora-instance
+  dbInstanceClass: {{ .Values.aurora.instanceClass | quote }}
+  dbClusterIdentifier: {{ .Release.Name }}-aurora-cluster
+{{- end }}

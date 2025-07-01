@@ -2,6 +2,19 @@ mode: self-hosted
 sandbox: false
 openshiftEnabled: false
 
+aurora:
+  enabled: true
+  masterUsername: admin
+  secretNamespace: default
+  secretName: db-secret
+  secretKey: password
+  dbSubnetGroupName: my-subnet-group
+  securityGroupIds:
+    - sg-0defda8d677d85a02
+    - sg-0f3ec8186664db851
+  backupRetentionPeriod: 7
+  instanceClass: db.r6g.large
+
 api:
   name: governor-api
   group: governor-api
