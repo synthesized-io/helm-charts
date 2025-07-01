@@ -14,7 +14,7 @@ metadata:
 spec:
   dbClusterIdentifier: tenant-{{ .Release.Name }}-aurora-cluster
   engine: aurora-postgresql
-  engineVersion: "13.6"
+  engineVersion: "17.5"
   masterUsername: {{ .Values.aurora.masterUsername | quote }}
   masterUserPassword:
     name: {{ .Values.aurora.secretName | quote }}
