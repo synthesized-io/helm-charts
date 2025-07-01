@@ -1,0 +1,8 @@
+aws:
+  cognito:
+    appClientId: oqle9k4a635i6i0g6f15h9mnn
+    userPoolId: eu-west-2_dev6D4DgH
+  db_crd: true
+  enabled: true
+  operationId: d8a5de53-b30f-421d-b8c7-0ed6712a3335
+  tenantName: 9e014c3a-6d2e-4403-8f90-f77ac1e1be99
