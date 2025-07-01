@@ -27,4 +27,5 @@ spec:
   dbInstanceIdentifier: {{ .Release.Name }}-aurora-instance
   dbInstanceClass: {{ .Values.aurora.instanceClass | quote }}
   dbClusterIdentifier: {{ .Release.Name }}-aurora-cluster
+  engine: aurora-postgresql
 {{- end }}
