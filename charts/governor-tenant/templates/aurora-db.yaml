@@ -4,7 +4,7 @@ kind: DBCluster
 metadata:
   name: {{ .Release.Name }}-aurora-cluster
 spec:
-  dbClusterIdentifier: {{ .Release.Name }}-aurora-cluster
+  dbClusterIdentifier: tenant-{{ .Release.Name }}-aurora-cluster
   engine: aurora-postgresql
   engineVersion: "13.6"
   masterUsername: {{ .Values.aurora.masterUsername | quote }}
@@ -24,8 +24,8 @@ kind: DBInstance
 metadata:
   name: {{ .Release.Name }}-aurora-instance
 spec:
-  dbInstanceIdentifier: {{ .Release.Name }}-aurora-instance
+  dbInstanceIdentifier: tenant-{{ .Release.Name }}-aurora-instance
   dbInstanceClass: {{ .Values.aurora.instanceClass | quote }}
-  dbClusterIdentifier: {{ .Release.Name }}-aurora-cluster
+  dbClusterIdentifier: tenant-{{ .Release.Name }}-aurora-cluster
   engine: aurora-postgresql
 {{- end }}
