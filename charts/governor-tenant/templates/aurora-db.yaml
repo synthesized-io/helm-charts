@@ -61,7 +61,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-aurora-endpoints
+  name: aurora-endpoints
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
 data: {}
@@ -69,7 +69,7 @@ data: {}
 apiVersion: services.k8s.aws/v1alpha1
 kind: FieldExport
 metadata:
-  name: {{ .Release.Name }}-aurora-writer-export
+  name: aurora-writer-export
 spec:
   from:
     resource:
@@ -79,13 +79,13 @@ spec:
     path: ".status.endpoint"
   to:
     kind: configmap
-    name: {{ .Release.Name }}-aurora-endpoints
+    name: aurora-endpoints
     key: writerEndpoint
 ---
 apiVersion: services.k8s.aws/v1alpha1
 kind: FieldExport
 metadata:
-  name: {{ .Release.Name }}-aurora-reader-export
+  name: aurora-reader-export
 spec:
   from:
     resource:
@@ -95,6 +95,6 @@ spec:
     path: ".status.readerEndpoint"
   to:
     kind: configmap
-    name: {{ .Release.Name }}-aurora-endpoints
+    name: aurora-endpoints
     key: readerEndpoint
 {{- end }}
