@@ -1,4 +1,4 @@
-{{- if .Values.aurora.enabled | default true }}
+{{- if .Values.aurora.enabled | default false }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -38,9 +38,9 @@ spec:
 apiVersion: rds.services.k8s.aws/v1alpha1
 kind: DBInstance
 metadata:
-  name: {{ .Values.aurora.writerName | default (printf "%s-writer" .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name)) }}
+  name: {{ .Values.aurora.writerName | default (printf "aurora-%s-cluster" .Release.Name) }}
 spec:
-  dbInstanceIdentifier: {{ .Values.aurora.writerName | default (printf "%s-writer" .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name)) }}
+  dbInstanceIdentifier: {{ .Values.aurora.writerName | default (printf "aurora-%s-cluster" .Release.Name) }}
   dbClusterIdentifier: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
   dbInstanceClass: db.serverless
   engine: {{ .Values.aurora.engine | default "aurora-postgresql" | quote }}
