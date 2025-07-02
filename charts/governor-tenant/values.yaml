@@ -14,7 +14,7 @@ aurora:
   backupRetentionPeriod: 7
   instanceClass: db.r6g.large
   serverless:
-    minCapacity: 0.5
+    minCapacity: 0
     maxCapacity: 4
     autoPauseSeconds: 300
 
