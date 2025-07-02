@@ -49,6 +49,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-aurora-endpoints
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
 data: {}
 ---
 apiVersion: services.k8s.aws/v1alpha1
