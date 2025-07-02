@@ -13,6 +13,10 @@ aurora:
     - sg-fcc8e897
   backupRetentionPeriod: 7
   instanceClass: db.r6g.large
+  serverless:
+    minCapacity: 0.5
+    maxCapacity: 4
+    autoPauseSeconds: 300
 
 api:
   name: governor-api
