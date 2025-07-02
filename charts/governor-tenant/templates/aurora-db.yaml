@@ -32,4 +32,4 @@ spec:
     maxCapacity: {{ .Values.aurora.serverless.maxCapacity | default 4 }}
     {{- if .Values.aurora.serverless.autoPauseSeconds }}secondsUntilAutoPause: {{ .Values.aurora.serverless.autoPauseSeconds }}{{ end }}
   {{- end }}
-  
+{{- end }}
