@@ -1,38 +1,35 @@
-{{- if .Values.aurora.enabled }}
+{{- if .Values.aurora.enabled | default true }}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Values.aurora.secretName }}
+  name: {{ .Values.aurora.secretName | default "db-secret" }}
+  namespace: {{ .Values.aurora.secretNamespace | default .Release.Namespace }}
 type: Opaque
 stringData:
-  {{ .Values.aurora.secretKey }}: {{ randAlphaNum 20 | quote }}
+  {{ .Values.aurora.secretKey | default "password" }}: {{ randAlphaNum 20 | quote }}
 ---
 apiVersion: rds.services.k8s.aws/v1alpha1
 kind: DBCluster
 metadata:
-  name: {{ .Release.Name }}-aurora-cluster
+  name: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
 spec:
-  dbClusterIdentifier: tenant-{{ .Release.Name }}-aurora-cluster
-  engine: aurora-postgresql
-  engineVersion: "17.5"
-  masterUsername: {{ .Values.aurora.masterUsername | quote }}
+  dbClusterIdentifier: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
+  engine: {{ .Values.aurora.engine | default "aurora-postgresql" | quote }}
+  engineVersion: {{ .Values.aurora.engineVersion | default "17.5" | quote }}
+  masterUsername: {{ .Values.aurora.masterUsername | default "admin" | quote }}
   masterUserPassword:
-    name: {{ .Values.aurora.secretName | quote }}
-    key: {{ .Values.aurora.secretKey | quote }}
-  dbSubnetGroupName: {{ .Values.aurora.dbSubnetGroupName | quote }}
+    name: {{ .Values.aurora.secretName | default "db-secret" | quote }}
+    key: {{ .Values.aurora.secretKey | default "password" | quote }}
+  dbSubnetGroupName: {{ .Values.aurora.dbSubnetGroupName | default "aurora-subnet-group" | quote }}
   vpcSecurityGroupIDs:
-  {{- range .Values.aurora.securityGroupIds }}
+  {{- range .Values.aurora.securityGroupIds | default (list "sg-1234567890abcdef0") }}
     - {{ . | quote }}
   {{- end }}
-  backupRetentionPeriod: {{ .Values.aurora.backupRetentionPeriod }}
----
-apiVersion: rds.services.k8s.aws/v1alpha1
-kind: DBInstance
-metadata:
-  name: {{ .Release.Name }}-aurora-instance
-spec:
-  dbInstanceIdentifier: tenant-{{ .Release.Name }}-aurora-instance
-  dbInstanceClass: {{ .Values.aurora.instanceClass | quote }}
-  dbClusterIdentifier: tenant-{{ .Release.Name }}-aurora-cluster
-  engine: aurora-postgresql
-{{- end }}
+  backupRetentionPeriod: {{ .Values.aurora.backupRetentionPeriod | default 7 }}
+  {{- if .Values.aurora.serverless }}
+  serverlessV2ScalingConfiguration:
+    minCapacity: {{ .Values.aurora.serverless.minCapacity | default 0.5 }}
+    maxCapacity: {{ .Values.aurora.serverless.maxCapacity | default 4 }}
+    {{- if .Values.aurora.serverless.autoPauseSeconds }}secondsUntilAutoPause: {{ .Values.aurora.serverless.autoPauseSeconds }}{{ end }}
+  {{- end }}
+  
