@@ -28,7 +28,7 @@ spec:
   backupRetentionPeriod: {{ .Values.aurora.backupRetentionPeriod | default 7 }}
   {{- if .Values.aurora.serverless }}
   serverlessV2ScalingConfiguration:
-    minCapacity: {{ .Values.aurora.serverless.minCapacity | default 0.5 }}
+    minCapacity: {{ .Values.aurora.serverless.minCapacity | default 0 }}
     maxCapacity: {{ .Values.aurora.serverless.maxCapacity | default 4 }}
     {{- if .Values.aurora.serverless.autoPauseSeconds }}
     secondsUntilAutoPause: {{ .Values.aurora.serverless.autoPauseSeconds }}
