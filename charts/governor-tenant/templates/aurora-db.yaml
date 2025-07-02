@@ -1,4 +1,4 @@
-{{- if .Values.aurora.enabled | default false }}
+{{- if .Values.aurora.enabled | default true }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -44,4 +44,42 @@ spec:
   dbClusterIdentifier: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
   dbInstanceClass: db.serverless
   engine: {{ .Values.aurora.engine | default "aurora-postgresql" | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-aurora-endpoints
+data: {}
+---
+apiVersion: services.k8s.aws/v1alpha1
+kind: FieldExport
+metadata:
+  name: {{ .Release.Name }}-aurora-writer-export
+spec:
+  from:
+    resource:
+      group: rds.services.k8s.aws
+      kind: DBCluster
+      name: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
+    path: ".status.endpoint"
+  to:
+    kind: ConfigMap
+    name: {{ .Release.Name }}-aurora-endpoints
+    key: writerEndpoint
+---
+apiVersion: services.k8s.aws/v1alpha1
+kind: FieldExport
+metadata:
+  name: {{ .Release.Name }}-aurora-reader-export
+spec:
+  from:
+    resource:
+      group: rds.services.k8s.aws
+      kind: DBCluster
+      name: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
+    path: ".status.readerEndpoint"
+  to:
+    kind: ConfigMap
+    name: {{ .Release.Name }}-aurora-endpoints
+    key: readerEndpoint
 {{- end }}
