@@ -57,7 +57,7 @@ spec:
                   name: {{ .Release.Name }}-aurora-endpoints
                   key: writerEndpoint
             - name: DB_PORT
-              value: {{ .Values.aurora.port | default "5432" }}
+              value: "{{ .Values.aurora.port | default 5432 }}"
             - name: DB_NAME
               value: {{ .Values.aurora.databaseName | default "postgres" }}
             - name: SPRING_DATASOURCE_USERNAME
