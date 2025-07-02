@@ -35,9 +35,7 @@ api:
       VERSION: 'not-specified'
     # Sensitive configuration variables that will be rendered as a new secret
     secretConfig:
-      JWT_SECRET: ""
       ADMIN_EMAIL: "admin@synthesized.io"
-      ADMIN_DEFAULT_PASSWORD: "admin"
   persistence:
     enabled: false
     name: api-pv
