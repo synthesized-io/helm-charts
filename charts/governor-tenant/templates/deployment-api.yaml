@@ -59,12 +59,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.aurora.secretName }}
-                  key: {{ .Values.aurora.secretKey }}
+                  key: username
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.aurora.secretName }}
-                  key: {{ .Values.aurora.secretKey }}
+                  key: password
             {{- end }}
             {{- range .Values.api.container.secretenv }}
             - name: {{ .name }}

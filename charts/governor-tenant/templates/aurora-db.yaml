@@ -1,11 +1,24 @@
 {{- if .Values.aurora.enabled | default false }}
+
+{{- $secretName := printf "%s-credentials" .Release.Name }}
+{{- $existing := lookup "v1" "Secret" .Release.Namespace $secretName }}
+{{- $pwd := default "" .Values.aurora.masterUserPassword }}
+{{- if not $pwd }}
+  {{- if and $existing $existing.data }}
+    {{- $pwd = index $existing.data "password" | b64dec }}
+  {{- else }}
+    {{- $pwd = randAlphaNum 16 }}
+  {{- end }}
+{{- end }}
+
 apiVersion: v1
 kind: Secret
 metadata:
   name: {{ .Values.aurora.secretName | default "db-secret" }}
 type: Opaque
-stringData:
-  {{ .Values.aurora.secretKey | default "password" }}: {{ randAlphaNum 20 | quote }}
+data:
+  password: {{ $pwd | b64enc | quote }}
+  username: {{ .Values.aurora.masterUsername | b64enc | quote }}
 ---
 apiVersion: rds.services.k8s.aws/v1alpha1
 kind: DBCluster
