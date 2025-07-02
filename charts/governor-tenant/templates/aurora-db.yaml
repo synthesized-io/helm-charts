@@ -14,6 +14,7 @@ metadata:
 spec:
   dbClusterIdentifier: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
   engine: {{ .Values.aurora.engine | default "aurora-postgresql" | quote }}
+  engineMode: provisioned
   engineVersion: {{ .Values.aurora.engineVersion | default "17.5" | quote }}
   masterUsername: {{ .Values.aurora.masterUsername | default "admin" | quote }}
   masterUserPassword:
@@ -29,6 +30,18 @@ spec:
   serverlessV2ScalingConfiguration:
     minCapacity: {{ .Values.aurora.serverless.minCapacity | default 0.5 }}
     maxCapacity: {{ .Values.aurora.serverless.maxCapacity | default 4 }}
-    {{- if .Values.aurora.serverless.autoPauseSeconds }}secondsUntilAutoPause: {{ .Values.aurora.serverless.autoPauseSeconds }}{{ end }}
+    {{- if .Values.aurora.serverless.autoPauseSeconds }}
+    secondsUntilAutoPause: {{ .Values.aurora.serverless.autoPauseSeconds }}
+    {{- end }}
   {{- end }}
+---
+apiVersion: rds.services.k8s.aws/v1alpha1
+kind: DBInstance
+metadata:
+  name: {{ .Values.aurora.writerName | default (printf "%s-writer" .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name)) }}
+spec:
+  dbInstanceIdentifier: {{ .Values.aurora.writerName | default (printf "%s-writer" .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name)) }}
+  dbClusterIdentifier: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
+  dbInstanceClass: db.serverless
+  engine: {{ .Values.aurora.engine | default "aurora-postgresql" | quote }}
 {{- end }}
