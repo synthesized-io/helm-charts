@@ -28,17 +28,12 @@ spec:
         - name: {{ .Values.api.name }}
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.api.image.pullPolicy }}
-          command:
-            - sh
+          command: ["sh"]
           args:
             - -c
             - |
-              echo "SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}"
-              exec java -Dtruffle.UseFallbackRuntime=true org.springframework.boot.loader.JarLauncher
-          {{- if .Values.api.container.command }}
-          command:
-{{ toYaml .Values.api.container.command | indent 12 }}
-          {{- end }}
+              export SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+              exec java -Dtruffle.UseFallbackRuntime=true org.springframework.boot.loader.launch.JarLauncher
           ports:
             - containerPort: {{ .Values.api.container.port }}
             - containerPort: {{ .Values.api.container.grpcPort }}

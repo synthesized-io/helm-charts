@@ -10,7 +10,7 @@ aurora:
   secretKey: password
   dbSubnetGroupName: default
   securityGroupIds:
-    - sg-fcc8e897
+    - sg-0f3ec8186664db851
   backupRetentionPeriod: 7
   instanceClass: db.r6g.large
   serverless:
