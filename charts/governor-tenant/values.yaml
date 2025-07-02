@@ -8,7 +8,7 @@ aurora:
   secretNamespace: default
   secretName: db-secret
   secretKey: password
-  dbSubnetGroupName: default
+  dbSubnetGroupName: tenants-production-aurora-subnet-group
   securityGroupIds:
     - sg-0f3ec8186664db851
   backupRetentionPeriod: 7
