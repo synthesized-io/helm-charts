@@ -35,12 +35,9 @@ api:
       VERSION: 'not-specified'
     # Sensitive configuration variables that will be rendered as a new secret
     secretConfig:
-      SPRING_DATASOURCE_URL: ""
-      SPRING_DATASOURCE_USERNAME: ""
-      SPRING_DATASOURCE_PASSWORD: ""
       JWT_SECRET: ""
-      ADMIN_EMAIL: ""
-      ADMIN_DEFAULT_PASSWORD: ""
+      ADMIN_EMAIL: "admin@synthesized.io"
+      ADMIN_DEFAULT_PASSWORD: "admin"
   persistence:
     enabled: false
     name: api-pv

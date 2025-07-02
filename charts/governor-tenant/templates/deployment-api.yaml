@@ -43,6 +43,26 @@ spec:
             - secretRef:
                 name: {{ .Values.api.name }}-secret
           env:
+          {{- if .Values.aurora.enabled | default false }}
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-aurora-endpoints
+                  key: writerEndpoint
+            - name: SPRING_DATASOURCE_URL
+              value: >-
+                jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.aurora.secretName }}
+                  key: {{ .Values.aurora.secretKey }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.aurora.secretName }}
+                  key: {{ .Values.aurora.secretKey }}
+            {{- end }}
             {{- range .Values.api.container.secretenv }}
             - name: {{ .name }}
               valueFrom:

@@ -1,4 +1,4 @@
-{{- if .Values.aurora.enabled | default true }}
+{{- if .Values.aurora.enabled | default false }}
 apiVersion: v1
 kind: Secret
 metadata:
