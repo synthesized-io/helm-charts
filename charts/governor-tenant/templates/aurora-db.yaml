@@ -63,7 +63,7 @@ spec:
       name: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
     path: ".status.endpoint"
   to:
-    kind: ConfigMap
+    kind: configmap
     name: {{ .Release.Name }}-aurora-endpoints
     key: writerEndpoint
 ---
@@ -79,7 +79,7 @@ spec:
       name: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
     path: ".status.readerEndpoint"
   to:
-    kind: ConfigMap
+    kind: configmap
     name: {{ .Release.Name }}-aurora-endpoints
     key: readerEndpoint
 {{- end }}
