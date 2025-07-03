@@ -22,10 +22,10 @@ ingress:
       paths:
         - path: /
           service: governor-front
-          servicePort: 80
+          servicePort: 8080
         - path: /api
           service: governor-api
-          servicePort: 80
+          servicePort: 8081
   tls:
     - secretName: tls-secret
       hosts:
@@ -41,7 +41,7 @@ grpcIngress:
       paths:
         - path: /
           service: governor-api-grpc
-          servicePort: 80
+          servicePort: 50055
   tls:
     - secretName: grpc-tls-secret
       hosts:
