@@ -18,7 +18,7 @@ spec:
         paths:
         {{- range .paths }}
           - path: {{ .path }}
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .service }}
