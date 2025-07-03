@@ -45,7 +45,7 @@ api:
   service:
     type: ClusterIP
     port: 80
-    grpcPort: 50055
+    grpcPort: 80
 
 front:
   name: governor-front
