@@ -13,8 +13,8 @@ api:
       SPRING_PROFILES_ACTIVE: production
 ingress:
   enabled: true
+  ingressClassName: alb
   annotations:
-    kubernetes.io/ingress.class: alb
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     kubernetes.io/tls-acme: "true"
   hosts:
@@ -32,8 +32,8 @@ ingress:
         - 111222.synthesized.io
 grpcIngress:
   enabled: true
+  ingressClassName: alb
   annotations:
-    kubernetes.io/ingress.class: alb
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     kubernetes.io/tls-acme: "true"
   hosts:

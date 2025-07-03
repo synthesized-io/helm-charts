@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-grpc-ingress
+  name: governor-grpc-ingress
   labels:
     app: {{ .Release.Name }}
   annotations:
@@ -10,6 +10,7 @@ metadata:
     {{ $key }}: {{ $value | quote }}
 {{- end }}
 spec:
+  ingressClassName: {{ .Values.grpcIngress.ingressClassName }}
   rules:
   {{- range .Values.grpcIngress.hosts }}
     - host: {{ .host }}

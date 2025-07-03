@@ -11,4 +11,3 @@ spec:
   ports:
     - port: {{ .Values.api.service.port }}
       targetPort: {{ .Values.api.container.port }}
-      name: defaultport
