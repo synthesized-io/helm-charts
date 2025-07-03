@@ -15,13 +15,11 @@ ingress:
   enabled: true
   ingressClassName: alb
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: 'ip'
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     alb.ingress.kubernetes.io/group.name: governor
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
-    kubernetes.io/tls-acme: "true"
   hosts:
     - host: 111222.synthesized.io
       paths:
@@ -31,28 +29,18 @@ ingress:
         - path: /api
           service: governor-api
           servicePort: 80
-  tls:
-    - secretName: tls-secret
-      hosts:
-        - 111222.synthesized.io
 grpcIngress:
   enabled: true
   ingressClassName: alb
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: 'ip'
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTP": 50055}]'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 50055}]'
     alb.ingress.kubernetes.io/group.name: governor-grpc
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
-    kubernetes.io/tls-acme: "true"
   hosts:
     - host: grpc-111222.synthesized.io
       paths:
         - path: /
           service: governor-api-grpc
           servicePort: 50055
-  tls:
-    - secretName: grpc-tls-secret
-      hosts:
-        - grpc-111222.synthesized.io
