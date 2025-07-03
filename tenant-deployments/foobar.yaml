@@ -1,0 +1,54 @@
+api:
+  container:
+    config:
+      SPRING_PROFILES_ACTIVE: production
+    secretConfig:
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_ISSUERURI: https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_kksc1D7kc
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_USER_NAME_ATTRIBUTE: username
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_AUTHORIZATION_GRANT_TYPE: authorization_code
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTID: 7phb5bq3jfqhmkaiacvelo9nvp
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTSECRET: dlsfm1io0dv609on598c0abnh1cknm1mdu1pim9qlc004mk02i4
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_REDIRECTURI: https://foobar.synthesized.io/oauth2/COGNITO
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_SCOPE: email,openid,phone
+aws:
+  cognito:
+    appClientId: 7phb5bq3jfqhmkaiacvelo9nvp
+    appClientSecret: dlsfm1io0dv609on598c0abnh1cknm1mdu1pim9qlc004mk02i4
+    userPoolId: eu-west-2_kksc1D7kc
+  companyName: foobar
+  db_crd: true
+  enabled: true
+  operationId: 2bd84495-4101-4ea8-af75-ffa9489049da
+  tenantName: 0dbcd207-868a-47cc-9e45-612dc8fd8f95
+grpcIngress:
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor-grpc
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 50055}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: grpc-foobar.synthesized.io
+    paths:
+    - path: /
+      service: governor-api-grpc
+      servicePort: 50055
+  ingressClassName: alb
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: foobar.synthesized.io
+    paths:
+    - path: /
+      service: governor-front
+      servicePort: 80
+    - path: /api
+      service: governor-api
+      servicePort: 80
+  ingressClassName: alb
