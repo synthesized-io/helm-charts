@@ -44,7 +44,7 @@ api:
     size: 10Gi
   service:
     type: ClusterIP
-    port: 8081
+    port: 80
     grpcPort: 50055
 
 front:
@@ -68,7 +68,7 @@ front:
       POSTHOG_ANALYTICS_API_KEY: ""
   service:
     type: ClusterIP
-    port: 8080
+    port: 80
 
 agent:
   name: governor-agent
