@@ -11,12 +11,6 @@ api:
   container:
     config:
       SPRING_PROFILES_ACTIVE: production
-    secretConfig: {}
-  persistence:
-    enabled: ${var.filebrowser_persistence_enabled}
-front:
-  container:
-    secretConfig: {}
 ingress:
   enabled: true
   annotations:
