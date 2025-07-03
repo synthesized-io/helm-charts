@@ -6,3 +6,50 @@ aws:
   enabled: true
   operationId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
   tenantName: 11112222-3333-4444-5555-666677778888
+
+api:
+  container:
+    config:
+      SPRING_PROFILES_ACTIVE: production
+    secretConfig: {}
+  persistence:
+    enabled: ${var.filebrowser_persistence_enabled}
+front:
+  container:
+    secretConfig: {}
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: alb
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: 111222.synthesized.io
+      paths:
+        - path: /
+          service: governor-front
+          servicePort: 80
+        - path: /api
+          service: governor-api
+          servicePort: 8081
+  tls:
+    - secretName: tls-secret
+      hosts:
+        - 111222.synthesized.io
+grpcIngress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    kubernetes.io/ingress.class: alb
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: grpc.111222.synthesized.io
+      paths:
+        - path: /
+          service: governor-api
+          servicePort: 50055
+  tls:
+    - secretName: grpc-tls-secret
+      hosts:
+        - grpc.111222.synthesized.io
