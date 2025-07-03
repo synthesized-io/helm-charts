@@ -25,7 +25,7 @@ ingress:
           servicePort: 80
         - path: /api
           service: governor-api
-          servicePort: 8081
+          servicePort: 80
   tls:
     - secretName: tls-secret
       hosts:
