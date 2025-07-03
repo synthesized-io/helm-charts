@@ -116,36 +116,6 @@ affinity: {}
 
 ingress:
   enabled: false
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
-    kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: example.synthesized.io
-      paths:
-        - path: /
-          service: governor-front
-          servicePort: 80
-        - path: /api
-          service: governor-api
-          servicePort: 80
-  tls:
-    - secretName: tls-secret
-      hosts:
-        - example.synthesized.io
 
 grpcIngress:
   enabled: false
-  annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
-    kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: grpc.example.synthesized.io
-      paths:
-        - path: /api
-          service: governor-api
-          servicePort: 80
-  tls:
-    - secretName: grpc-tls-secret
-      hosts:
-        - grpc.example.synthesized.io
