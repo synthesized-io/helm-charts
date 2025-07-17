@@ -1,4 +1,4 @@
-mode: self-hosted
+mode: hybrid-cloud
 sandbox: false
 openshiftEnabled: false
 
@@ -23,6 +23,7 @@ api:
   group: governor-api
   image:
     repository: synthesizedio/synthesized-api
+    tag: latest
     pullPolicy: Always
   securityContext:
     runAsUser: 100
@@ -52,6 +53,7 @@ front:
   group: governor-front
   image:
     repository: synthesizedio/synthesized-front
+    tag: latest
     pullPolicy: Always
   container:
     port: 8080
@@ -75,6 +77,7 @@ agent:
   group: governor-director
   image:
     repository: synthesizedio/synthesized-agent
+    tag: latest
     pullPolicy: Always
   container:
     config:
@@ -90,6 +93,7 @@ director:
   group: governor-director
   image:
     repository: synthesized.azurecr.io/synthesized-director
+    tag: latest
     pullPolicy: Always
   container:
     port: 50051
