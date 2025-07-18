@@ -1,3 +1,5 @@
+mode: hybrid-cloud
+
 api:
   container:
     config:
