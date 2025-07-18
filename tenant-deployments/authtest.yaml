@@ -1,5 +1,11 @@
 mode: hybrid-cloud
 
+front:
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-front
+    tag: latest
+    pullPolicy: Always
+
 api:
   image:
     repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
