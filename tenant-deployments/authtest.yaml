@@ -1,6 +1,10 @@
 mode: hybrid-cloud
 
 api:
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
+    tag: latest
+    pullPolicy: Always
   container:
     config:
       SPRING_PROFILES_ACTIVE: production
