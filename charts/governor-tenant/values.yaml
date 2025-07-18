@@ -66,6 +66,7 @@ front:
       UI_TDK_AGENTS_BY_DEFAULT: "true"
       UI_PII_SCAN: "true"
       UI_WORKFLOW_WIZARD: "true"
+      UI_ENVIRONMENT: "hybrid-cloud"
     secretConfig:
       POSTHOG_ANALYTICS_API_KEY: ""
   service:
