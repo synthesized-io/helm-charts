@@ -34,6 +34,7 @@ api:
     config:
       SPRING_PROFILES_ACTIVE: production
       VERSION: 'not-specified'
+      UI_ENVIRONMENT: "hybrid-cloud"
     # Sensitive configuration variables that will be rendered as a new secret
     secretConfig:
       ADMIN_EMAIL: "admin@synthesized.io"
