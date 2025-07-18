@@ -42,7 +42,7 @@ ingress:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/auth-type: cognito
-    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN":"arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_r8KhGBf4H","userPoolClientID":"2ls2v4fbiffuv5samn6v1oo2o9","userPoolDomain":"https://eu-west-2r8khgbf4h.auth.eu-west-2.amazoncognito.com"}'
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN":"arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_r8KhGBf4H","userPoolClientID":"2ls2v4fbiffuv5samn6v1oo2o9","userPoolDomain":"eu-west-2r8khgbf4h"}'
     alb.ingress.kubernetes.io/auth-scope: 'email openid'
   enabled: true
   hosts:
