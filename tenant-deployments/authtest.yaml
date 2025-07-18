@@ -22,6 +22,7 @@ api:
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTSECRET: 1deg70f2bpnps0vunvu1mnrsd9hsk8ptlsmpe0qb28cnt7p20scc
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_REDIRECTURI: https://authtest.synthesized.io/oauth2/idpresponse
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_SCOPE: email,openid,phone
+      GOVERNOR_SECURITY_DEFAULT_ROLE: OPERATOR
 aws:
   cognito:
     appClientId: 2ls2v4fbiffuv5samn6v1oo2o9
