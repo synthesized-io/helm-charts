@@ -48,7 +48,7 @@ grpcIngress:
   ingressClassName: alb
 ingress:
   annotations:
-    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:userpool/eu-west-2_wL9amIf0K",
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_wL9amIf0K",
       "userPoolClientID": "4b0ea9c6o3mh9nfecn9ags9f0t", "userPoolDomain": "autotest-auth"}'
     alb.ingress.kubernetes.io/auth-type: cognito
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
