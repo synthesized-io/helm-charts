@@ -1,0 +1,58 @@
+api:
+  container:
+    config:
+      ADMIN_EMAIL: maksim.stepachev@synthesized.io
+      SPRING_PROFILES_ACTIVE: production
+    secretConfig:
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_ISSUERURI: https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_rqYC2j1co
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_USER_NAME_ATTRIBUTE: username
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_AUTHORIZATION_GRANT_TYPE: authorization_code
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTID: 6lb7mcbpu47f55ael1n4u5lja4
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTSECRET: 16oq2qjfhn9gt8dti3hgcc71d5sp58sh0stu6ni0fat86qn08q76
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_REDIRECTURI: https://max2.synthesized.io/oauth2/COGNITO
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_SCOPE: email,openid,phone
+aws:
+  cognito:
+    appClientId: 6lb7mcbpu47f55ael1n4u5lja4
+    appClientSecret: 16oq2qjfhn9gt8dti3hgcc71d5sp58sh0stu6ni0fat86qn08q76
+    userPoolId: eu-west-2_rqYC2j1co
+  companyName: max2
+  db_crd: true
+  enabled: true
+  operationId: c590b12b-b91b-4de8-98a9-ed11bb6889c0
+  tenantName: 20d67247-3e03-4044-9259-2950adb2843a
+grpcIngress:
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor-grpc
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 50055}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: grpc-max2.synthesized.io
+    paths:
+    - path: /
+      service: governor-api-grpc
+      servicePort: 50055
+  ingressClassName: alb
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_rqYC2j1co",
+      "userPoolClientID": "6lb7mcbpu47f55ael1n4u5lja4", "userPoolDomain": "max2-auth"}'
+    alb.ingress.kubernetes.io/auth-type: cognito
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: max2.synthesized.io
+    paths:
+    - path: /
+      service: governor-front
+      servicePort: 80
+    - path: /api
+      service: governor-api
+      servicePort: 80
+  ingressClassName: alb
