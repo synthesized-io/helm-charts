@@ -1,20 +1,15 @@
 {{- if .Values.aurora.enabled | default false }}
 
-{{- $secretName := printf "%s-credentials" .Release.Name }}
-{{- $existing := lookup "v1" "Secret" .Release.Namespace $secretName }}
+{{- $secretName := .Values.aurora.secretName | default (printf "%s-credentials" .Release.Name) }}
 {{- $pwd := default "" .Values.aurora.masterUserPassword }}
 {{- if not $pwd }}
-  {{- if and $existing $existing.data }}
-    {{- $pwd = index $existing.data "password" | b64dec }}
-  {{- else }}
-    {{- $pwd = randAlphaNum 16 }}
-  {{- end }}
+  {{- $pwd = randAlphaNum 16 }}
 {{- end }}
 
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Values.aurora.secretName | default "db-secret" }}
+  name: {{ $secretName }}
 type: Opaque
 data:
   password: {{ $pwd | b64enc | quote }}
@@ -24,6 +19,8 @@ apiVersion: rds.services.k8s.aws/v1alpha1
 kind: DBCluster
 metadata:
   name: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
+  annotations:
+    passwordRotationTimestamp: "{{ now | unixEpoch }}"
 spec:
   dbClusterIdentifier: {{ .Values.aurora.clusterName | default (printf "aurora-%s-cluster" .Release.Name) }}
   engine: {{ .Values.aurora.engine | default "aurora-postgresql" | quote }}
@@ -31,7 +28,7 @@ spec:
   engineVersion: {{ .Values.aurora.engineVersion | default "17.5" | quote }}
   masterUsername: {{ .Values.aurora.masterUsername | default "admin" | quote }}
   masterUserPassword:
-    name: {{ .Values.aurora.secretName | default "db-secret" | quote }}
+    name: {{ $secretName | quote }}
     key: {{ .Values.aurora.secretKey | default "password" | quote }}
   dbSubnetGroupName: {{ .Values.aurora.dbSubnetGroupName | default "aurora-subnet-group" | quote }}
   vpcSecurityGroupIDs:
