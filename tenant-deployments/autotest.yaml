@@ -1,6 +1,7 @@
 api:
   container:
     config:
+      ADMIN_EMAIL: "admin@synthesized.io"
       GOVERNOR_SECURITY_DEFAULT_ROLE: OPERATOR
       SPRING_PROFILES_ACTIVE: production
     secretConfig:
