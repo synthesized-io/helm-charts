@@ -2,6 +2,7 @@ api:
   container:
     config:
       SPRING_PROFILES_ACTIVE: production
+      ADMIN_EMAIL: admin@synthesized.io
     secretConfig:
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_ISSUERURI: https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_Ohz9M7NRR
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_USER_NAME_ATTRIBUTE: username
