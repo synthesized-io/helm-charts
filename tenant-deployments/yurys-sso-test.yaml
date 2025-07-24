@@ -1,0 +1,66 @@
+api:
+  container:
+    config:
+      ADMIN_EMAIL: yuri@synthesized.io
+      SPRING_PROFILES_ACTIVE: production
+    secretConfig:
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_ISSUERURI: https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_B0tEwg0Jt
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_USER_NAME_ATTRIBUTE: username
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_AUTHORIZATION_GRANT_TYPE: authorization_code
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTID: 79obptj8gmpcmghp5ts11gc8ot
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTSECRET: o0aoasrkgkd43hh8gaecm30t82njfa9s1155r2d81cuso7qq6m2
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_REDIRECTURI: https://yurys-sso-test.synthesized.io/oauth2/COGNITO
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_SCOPE: email,openid,phone
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
+    tag: latest
+aws:
+  cognito:
+    appClientId: 79obptj8gmpcmghp5ts11gc8ot
+    appClientSecret: o0aoasrkgkd43hh8gaecm30t82njfa9s1155r2d81cuso7qq6m2
+    userPoolId: eu-west-2_B0tEwg0Jt
+  companyName: yurys-sso-test
+  db_crd: true
+  enabled: true
+  operationId: 20e8ea23-b334-44df-b008-9ae7dd946e28
+  tenantName: 90b75710-9e27-4934-b1bb-ea0426973a1d
+front:
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-front
+    tag: latest
+grpcIngress:
+  annotations:
+    alb.ingress.kubernetes.io/backend-protocol-version: GRPC
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor-grpc
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 50055}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: grpc-yurys-sso-test.synthesized.io
+    paths:
+    - path: /
+      service: governor-api-grpc
+      servicePort: 50055
+  ingressClassName: alb
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_B0tEwg0Jt",
+      "userPoolClientID": "79obptj8gmpcmghp5ts11gc8ot", "userPoolDomain": "yurys-sso-test-auth"}'
+    alb.ingress.kubernetes.io/auth-type: cognito
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: yurys-sso-test.synthesized.io
+    paths:
+    - path: /
+      service: governor-front
+      servicePort: 80
+    - path: /api
+      service: governor-api
+      servicePort: 80
+  ingressClassName: alb
