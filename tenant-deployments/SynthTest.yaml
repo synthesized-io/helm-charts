@@ -9,7 +9,7 @@ api:
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_AUTHORIZATION_GRANT_TYPE: authorization_code
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTID: q3maof8uvq2kg952r0l6c60fo
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENTSECRET: 1ndn60igvockm8o8h382oboothhcgne1ufpga8ercadoit9shjak
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_REDIRECTURI: https://SynthTest.synthesized.io/oauth2/COGNITO
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_REDIRECTURI: https://synthtest.synthesized.io/oauth2/COGNITO
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_SCOPE: email,openid,phone
   image:
     repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
@@ -19,7 +19,7 @@ aws:
     appClientId: q3maof8uvq2kg952r0l6c60fo
     appClientSecret: 1ndn60igvockm8o8h382oboothhcgne1ufpga8ercadoit9shjak
     userPoolId: eu-west-2_qxBu4z8YD
-  companyName: SynthTest
+  companyName: synthtest
   db_crd: true
   enabled: true
   operationId: cae719e6-7920-41b3-b826-e0d5616968f7
@@ -38,7 +38,7 @@ grpcIngress:
     alb.ingress.kubernetes.io/target-type: ip
   enabled: true
   hosts:
-  - host: grpc-SynthTest.synthesized.io
+  - host: grpc-synthtest.synthesized.io
     paths:
     - path: /
       service: governor-api-grpc
@@ -55,7 +55,7 @@ ingress:
     alb.ingress.kubernetes.io/target-type: ip
   enabled: true
   hosts:
-  - host: SynthTest.synthesized.io
+  - host: synthtest.synthesized.io
     paths:
     - path: /
       service: governor-front
