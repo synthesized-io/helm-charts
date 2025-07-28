@@ -3,6 +3,8 @@ api:
     config:
       ADMIN_EMAIL: maksim.stepachev@synthesized.io
       SPRING_PROFILES_ACTIVE: production
+      AWS_COGNITO_AUTH_POOL: https://max4.auth.eu-west-2.amazoncognito.com
+      AWS_LOGOUT_URL: https://max4.synthesized.io/
     secretConfig:
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_ISSUERURI: https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_uV0lTyoPN
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_USER_NAME_ATTRIBUTE: username
