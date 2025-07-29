@@ -3,7 +3,7 @@ api:
     config:
       ADMIN_EMAIL: dmitriy.gubenko@synthesized.io
       AWS_CLIENT_ID: 6uq3bh3gop69j517qlt73te267
-      AWS_COGNITO_AUTH_POOL: https://yayaya2-egqv8la.auth.eu-west-2.amazoncognito.com
+      AWS_COGNITO_AUTH_URL: https://yayaya2-egqv8la.auth.eu-west-2.amazoncognito.com
       AWS_LOGOUT_URL: https://yayaya2-egqv8la.synthesized.io/
       AWS_USER_POOL_ID: eu-west-2_F0OGkUqhG
       SPRING_PROFILES_ACTIVE: production
