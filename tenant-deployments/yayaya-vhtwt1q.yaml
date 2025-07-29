@@ -1,0 +1,57 @@
+api:
+  container:
+    config:
+      ADMIN_EMAIL: dmitriy.gubenko@synthesized.io
+      AWS_CLIENT_ID: 380ki336115ir7bl9dbnp57oia
+      AWS_COGNITO_AUTH_POOL: https://yayaya-vhtwt1q.auth.eu-west-2.amazoncognito.com
+      AWS_LOGOUT_URL: https://yayaya-vhtwt1q.synthesized.io/
+      AWS_USER_POOL_ID: eu-west-2_FYvJeHNKZ
+      SPRING_PROFILES_ACTIVE: production
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
+    tag: latest
+aws:
+  db_crd: true
+  enabled: true
+  operationId: c8881059-63b9-4b56-a900-d528a2df526a
+  tenantName: 2f0228b7-7745-499a-acec-8086ca8c4a22
+front:
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-front
+    tag: latest
+grpcIngress:
+  annotations:
+    alb.ingress.kubernetes.io/backend-protocol-version: GRPC
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor-grpc
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 50055}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: grpc-yayaya-vhtwt1q.synthesized.io
+    paths:
+    - path: /
+      service: governor-api-grpc
+      servicePort: 50055
+  ingressClassName: alb
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_FYvJeHNKZ",
+      "userPoolClientID": "380ki336115ir7bl9dbnp57oia", "userPoolDomain": "yayaya-vhtwt1q"}'
+    alb.ingress.kubernetes.io/auth-type: cognito
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: yayaya-vhtwt1q.synthesized.io
+    paths:
+    - path: /
+      service: governor-front
+      servicePort: 80
+    - path: /api
+      service: governor-api
+      servicePort: 80
+  ingressClassName: alb
