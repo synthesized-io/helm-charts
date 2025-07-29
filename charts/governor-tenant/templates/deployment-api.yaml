@@ -28,12 +28,6 @@ spec:
         - name: {{ .Values.api.name }}
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.api.image.pullPolicy }}
-          command: ["sh"]
-          args:
-            - -c
-            - |
-              export SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-              exec java -Dtruffle.UseFallbackRuntime=true org.springframework.boot.loader.launch.JarLauncher
           ports:
             - containerPort: {{ .Values.api.container.port }}
             - containerPort: {{ .Values.api.container.grpcPort }}
@@ -46,6 +40,8 @@ spec:
                 name: {{ .Values.api.name }}-secret
           env:
           {{- if .Values.aurora.enabled | default false }}
+            - name: SPRING_DATASOURCE_URL
+              value: 'jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}'
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
