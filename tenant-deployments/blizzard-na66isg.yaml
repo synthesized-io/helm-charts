@@ -4,7 +4,7 @@ api:
       ADMIN_EMAIL: maksim.stepachev@synthesized.io
       AWS_CLIENT_ID: 581q347brma58pprgcdoq4o21o
       AWS_COGNITO_AUTH_URL: https://blizzard-na66isg.auth.eu-west-2.amazoncognito.com
-      AWS_LOGOUT_URL: https://blizzard-na66isg.synthesized.io/
+      AWS_LOGOUT_URL: https://blizzard-na66isg.synthesized.io/api/v1/auth/alb-logout
       AWS_USER_POOL_ID: eu-west-2_l5N3DfIJ6
       SPRING_PROFILES_ACTIVE: production
     secretConfig:
