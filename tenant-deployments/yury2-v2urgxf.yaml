@@ -1,0 +1,59 @@
+api:
+  container:
+    config:
+      ADMIN_EMAIL: acme-tenant-admin@synthesized.io
+      AWS_CLIENT_ID: 27borqsb25dfdv82nc9o9p37ho
+      AWS_COGNITO_AUTH_URL: https://yury2-v2urgxf.auth.eu-west-2.amazoncognito.com
+      AWS_LOGOUT_URL: https://yury2-v2urgxf.synthesized.io/
+      AWS_USER_POOL_ID: eu-west-2_cq32xhtyF
+      SPRING_PROFILES_ACTIVE: production
+    secretConfig:
+      HELLO_WORLD: Hello World!
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
+    tag: latest
+aws:
+  db_crd: true
+  enabled: true
+  operationId: 6404f9f4-f765-4b7d-9ea3-73fc538e0b6c
+  tenantName: 04a7c8e1-2d82-4301-92cb-58d647e3587c
+front:
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-front
+    tag: latest
+grpcIngress:
+  annotations:
+    alb.ingress.kubernetes.io/backend-protocol-version: GRPC
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor-grpc
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 50055}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: grpc-yury2-v2urgxf.synthesized.io
+    paths:
+    - path: /
+      service: governor-api-grpc
+      servicePort: 50055
+  ingressClassName: alb
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_cq32xhtyF",
+      "userPoolClientID": "27borqsb25dfdv82nc9o9p37ho", "userPoolDomain": "yury2-v2urgxf"}'
+    alb.ingress.kubernetes.io/auth-type: cognito
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: yury2-v2urgxf.synthesized.io
+    paths:
+    - path: /
+      service: governor-front
+      servicePort: 80
+    - path: /api
+      service: governor-api
+      servicePort: 80
+  ingressClassName: alb
