@@ -1,0 +1,73 @@
+api:
+  container:
+    config:
+      ADMIN_EMAIL: acme-tenant-admin@synthesized.io
+      AWS_CLIENT_ID: 48c8j9ns255kq6puk6ti86nuvc
+      AWS_COGNITO_AUTH_URL: https://sso-demo-gzpjwgw.auth.eu-west-2.amazoncognito.com
+      AWS_LOGOUT_URL: https://sso-demo-gzpjwgw.synthesized.io/api/v1/auth/alb-logout
+      AWS_USER_POOL_ID: eu-west-2_O9C7CMIIS
+      SPRING_PROFILES_ACTIVE: production
+    secretConfig:
+      HELLO_WORLD: Hello World!
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
+    tag: latest
+aws:
+  db_crd: true
+  enabled: true
+  operationId: 99c92d15-3473-488a-bd10-a4932fb010ea
+  tenantName: b5841bd2-740e-4e9c-9bb0-a753e804952d
+front:
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-front
+    tag: latest
+grpcIngress:
+  annotations:
+    alb.ingress.kubernetes.io/backend-protocol-version: GRPC
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor-grpc
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 50055}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: grpc-sso-demo-gzpjwgw.synthesized.io
+    paths:
+    - path: /
+      service: governor-api-grpc
+      servicePort: 50055
+  ingressClassName: alb
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_O9C7CMIIS",
+      "userPoolClientID": "48c8j9ns255kq6puk6ti86nuvc", "userPoolDomain": "sso-demo-gzpjwgw",
+      "authenticationRequestExtraParams": {"prompt": "login"}}'
+    alb.ingress.kubernetes.io/auth-type: cognito
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/group.order: '2'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: sso-demo-gzpjwgw.synthesized.io
+    paths:
+    - path: /
+      service: governor-front
+      servicePort: 80
+    - path: /api
+      service: governor-api
+      servicePort: 80
+  ingressClassName: alb
+  logoutAnnotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/group.order: '1'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  logoutHosts:
+  - host: sso-demo-gzpjwgw.synthesized.io
+    paths:
+    - path: /api/v1/auth/alb-logout
+      service: governor-api
+      servicePort: 80
