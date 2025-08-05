@@ -1,6 +1,7 @@
 extends: relaxed
 
 ignore: /**/templates/*
+ignore: /tenant-deployments/*
 
 rules:
   line-length:
