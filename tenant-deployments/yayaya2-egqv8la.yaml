@@ -1,21 +1,22 @@
 api:
   container:
     config:
-      ADMIN_EMAIL: maksim.stepachev@synthesized.io
-      AWS_COGNITO_AUTH_POOL: https://alchemax-7irljlu.auth.eu-west-2.amazoncognito.com
-      AWS_LOGOUT_URL: https://alchemax-7irljlu.synthesized.io/
+      ADMIN_EMAIL: dmitriy.gubenko@synthesized.io
+      AWS_CLIENT_ID: 6uq3bh3gop69j517qlt73te267
+      AWS_COGNITO_AUTH_URL: https://yayaya2-egqv8la.auth.eu-west-2.amazoncognito.com
+      AWS_LOGOUT_URL: https://yayaya2-egqv8la.synthesized.io/
+      AWS_USER_POOL_ID: eu-west-2_F0OGkUqhG
       SPRING_PROFILES_ACTIVE: production
     secretConfig:
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_ISSUERURI: https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_7JzC247y1
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_USER_NAME_ATTRIBUTE: username
+      HELLO_WORLD: Hello World!
   image:
     repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
     tag: latest
 aws:
   db_crd: true
   enabled: true
-  operationId: c590084b-97d5-46c7-aeb0-11e8e9f66ee5
-  tenantName: 2d123f30-7493-467a-96b1-14f17d600e39
+  operationId: 14e60b0d-f279-4305-b1f1-3a6d8d566c02
+  tenantName: daf43b98-6064-41e9-b88e-4c12efe02716
 front:
   image:
     repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-front
@@ -30,7 +31,7 @@ grpcIngress:
     alb.ingress.kubernetes.io/target-type: ip
   enabled: true
   hosts:
-  - host: grpc-alchemax-7irljlu.synthesized.io
+  - host: grpc-yayaya2-egqv8la.synthesized.io
     paths:
     - path: /
       service: governor-api-grpc
@@ -38,8 +39,8 @@ grpcIngress:
   ingressClassName: alb
 ingress:
   annotations:
-    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_7JzC247y1",
-      "userPoolClientID": "i673vlpcckh5irvdep5uqfdeu", "userPoolDomain": "alchemax-7irljlu"}'
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_F0OGkUqhG",
+      "userPoolClientID": "6uq3bh3gop69j517qlt73te267", "userPoolDomain": "yayaya2-egqv8la"}'
     alb.ingress.kubernetes.io/auth-type: cognito
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
     alb.ingress.kubernetes.io/group.name: governor
@@ -47,7 +48,7 @@ ingress:
     alb.ingress.kubernetes.io/target-type: ip
   enabled: true
   hosts:
-  - host: alchemax-7irljlu.synthesized.io
+  - host: yayaya2-egqv8la.synthesized.io
     paths:
     - path: /
       service: governor-front
