@@ -32,7 +32,7 @@ api:
     port: 8081
     grpcPort: 50055
     config:
-      SPRING_PROFILES_ACTIVE: production
+      SPRING_PROFILES_ACTIVE: platform
       VERSION: 'not-specified'
       UI_ENVIRONMENT: "hybrid-cloud"
       GOVERNOR_SECURITY_DEFAULT_ROLE: "OPERATOR"

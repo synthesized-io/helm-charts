@@ -6,7 +6,7 @@ api:
       AWS_COGNITO_AUTH_URL: https://sso-demo-gzpjwgw.auth.eu-west-2.amazoncognito.com
       AWS_LOGOUT_URL: https://sso-demo-gzpjwgw.synthesized.io/api/v1/auth/alb-logout
       AWS_USER_POOL_ID: eu-west-2_O9C7CMIIS
-      SPRING_PROFILES_ACTIVE: production
+      SPRING_PROFILES_ACTIVE: platform
     secretConfig:
       HELLO_WORLD: Hello World!
   image:

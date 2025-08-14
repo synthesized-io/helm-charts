@@ -6,7 +6,7 @@ api:
       AWS_COGNITO_AUTH_URL: https://yury-wcebupu.auth.eu-west-2.amazoncognito.com
       AWS_LOGOUT_URL: https://yury-wcebupu.synthesized.io/api/v1/auth/alb-logout
       AWS_USER_POOL_ID: eu-west-2_A0CN9KTdP
-      SPRING_PROFILES_ACTIVE: production
+      SPRING_PROFILES_ACTIVE: platform
       SPRING_DATASOURCE_HIKARI_MINIMUMIDLE: '0'
     secretConfig:
       HELLO_WORLD: Hello World!

@@ -6,7 +6,7 @@ api:
       AWS_COGNITO_AUTH_URL: https://yayaya2-egqv8la.auth.eu-west-2.amazoncognito.com
       AWS_LOGOUT_URL: https://yayaya2-egqv8la.synthesized.io/
       AWS_USER_POOL_ID: eu-west-2_F0OGkUqhG
-      SPRING_PROFILES_ACTIVE: production
+      SPRING_PROFILES_ACTIVE: platform
     secretConfig:
       HELLO_WORLD: Hello World!
   image:
