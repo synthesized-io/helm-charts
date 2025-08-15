@@ -67,12 +67,19 @@ agent:
     pullPolicy: Always
   container:
     config:
+      AGENT_WORKING_DIRECTORY_PATH: '/app/rocksdb'
       AGENT_SERVERHOST: 'governor-api'
       AGENT_SERVERPORT: '50055'
       AGENT_TAGS: 'default'
       AGENT_DATASOURCES: '*'
       AGENT_USEPLAINTEXT: "true"
       AGENT_CONNECTIONS_POOL_SIZE: '20'
+  persistence:
+    enabled: false
+    name: agent-pv
+    mountPath: /app/rocksdb
+    claimName: agent-pvc
+    size: 10Gi
 
 director:
   name: governor-director
