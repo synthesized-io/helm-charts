@@ -36,6 +36,7 @@ api:
       VERSION: 'not-specified'
       UI_ENVIRONMENT: "hybrid-cloud"
       GOVERNOR_SECURITY_DEFAULT_ROLE: "OPERATOR"
+      SPIRE_SOCKET_PATH: unix:///spiffe-workload-api/spire-agent.sock
   persistence:
     enabled: false
     name: api-pv
@@ -85,8 +86,9 @@ agent:
       AGENT_SERVERPORT: '50055'
       AGENT_TAGS: 'default'
       AGENT_DATASOURCES: '*'
-      AGENT_USEPLAINTEXT: "true"
+      AGENT_USEPLAINTEXT: "false"
       AGENT_CONNECTIONS_POOL_SIZE: '20'
+      SPIRE_SOCKET_PATH: unix:///spiffe-workload-api/spire-agent.sock
 
 director:
   name: governor-director
