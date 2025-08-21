@@ -35,6 +35,8 @@ api:
       SPRING_PROFILES_ACTIVE: platform
       VERSION: 'not-specified'
       UI_ENVIRONMENT: "hybrid-cloud"
+      UI_TDK_AGENTS: "true"
+      UI_TDK_AGENTS_BY_DEFAULT: "true"
       GOVERNOR_SECURITY_DEFAULT_ROLE: "OPERATOR"
       SPIRE_SOCKET_PATH: unix:///spiffe-workload-api/spire-agent.sock
   persistence:
