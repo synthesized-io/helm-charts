@@ -1,6 +1,8 @@
 extends: relaxed
 
-ignore: /**/templates/*
+ignore:
+  - "**/templates/*"
+  - "tenant-deployments/*"
 
 rules:
   line-length:

@@ -1,25 +1,29 @@
-mode: self-hosted
+mode: hybrid-cloud
 sandbox: false
 openshiftEnabled: false
 
 aurora:
   enabled: true
-  masterUsername: admin
+  masterUsername: governor_admin
   secretNamespace: default
   secretName: db-secret
   secretKey: password
-  dbSubnetGroupName: my-subnet-group
+  dbSubnetGroupName: tenants-production-aurora-subnet-group
   securityGroupIds:
-    - sg-0defda8d677d85a02
     - sg-0f3ec8186664db851
   backupRetentionPeriod: 7
   instanceClass: db.r6g.large
+  serverless:
+    minCapacity: 0
+    maxCapacity: 4
+    autoPauseSeconds: 300
 
 api:
   name: governor-api
   group: governor-api
   image:
     repository: synthesizedio/synthesized-api
+    tag: latest
     pullPolicy: Always
   securityContext:
     runAsUser: 100
@@ -28,16 +32,13 @@ api:
     port: 8081
     grpcPort: 50055
     config:
-      SPRING_PROFILES_ACTIVE: production
+      SPRING_PROFILES_ACTIVE: platform
       VERSION: 'not-specified'
-    # Sensitive configuration variables that will be rendered as a new secret
-    secretConfig:
-      SPRING_DATASOURCE_URL: ""
-      SPRING_DATASOURCE_USERNAME: ""
-      SPRING_DATASOURCE_PASSWORD: ""
-      JWT_SECRET: ""
-      ADMIN_EMAIL: ""
-      ADMIN_DEFAULT_PASSWORD: ""
+      UI_ENVIRONMENT: "hybrid-cloud"
+      UI_TDK_AGENTS: "true"
+      UI_TDK_AGENTS_BY_DEFAULT: "true"
+      GOVERNOR_SECURITY_DEFAULT_ROLE: "OPERATOR"
+      SPIRE_SOCKET_PATH: unix:///spiffe-workload-api/spire-agent.sock
   persistence:
     enabled: false
     name: api-pv
@@ -54,6 +55,7 @@ front:
   group: governor-front
   image:
     repository: synthesizedio/synthesized-front
+    tag: latest
     pullPolicy: Always
   container:
     port: 8080
@@ -66,6 +68,7 @@ front:
       UI_TDK_AGENTS_BY_DEFAULT: "true"
       UI_PII_SCAN: "true"
       UI_WORKFLOW_WIZARD: "true"
+      UI_ENVIRONMENT: "hybrid-cloud"
     secretConfig:
       POSTHOG_ANALYTICS_API_KEY: ""
   service:
@@ -77,6 +80,7 @@ agent:
   group: governor-director
   image:
     repository: synthesizedio/synthesized-agent
+    tag: latest
     pullPolicy: Always
   container:
     config:
@@ -84,14 +88,16 @@ agent:
       AGENT_SERVERPORT: '50055'
       AGENT_TAGS: 'default'
       AGENT_DATASOURCES: '*'
-      AGENT_USEPLAINTEXT: "true"
+      AGENT_USEPLAINTEXT: "false"
       AGENT_CONNECTIONS_POOL_SIZE: '20'
+      SPIRE_SOCKET_PATH: unix:///spiffe-workload-api/spire-agent.sock
 
 director:
   name: governor-director
   group: governor-director
   image:
     repository: synthesized.azurecr.io/synthesized-director
+    tag: latest
     pullPolicy: Always
   container:
     port: 50051
@@ -118,38 +124,6 @@ affinity: {}
 
 ingress:
   enabled: false
-  annotations:
-    kubernetes.io/ingress.class: webapprouting.kubernetes.azure.com
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
-    kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: example.synthesized.io
-      paths:
-        - path: /
-          service: governor-front
-          servicePort: 80
-        - path: /api
-          service: governor-api
-          servicePort: 8081
-  tls:
-    - secretName: tls-secret
-      hosts:
-        - example.synthesized.io
 
 grpcIngress:
   enabled: false
-  annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-    kubernetes.io/ingress.class: webapprouting.kubernetes.azure.com
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
-    kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: grpc.example.synthesized.io
-      paths:
-        - path: /api
-          service: governor-api
-          servicePort: 50055
-  tls:
-    - secretName: grpc-tls-secret
-      hosts:
-        - grpc.example.synthesized.io

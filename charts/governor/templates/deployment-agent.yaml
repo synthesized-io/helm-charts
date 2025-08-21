@@ -43,6 +43,17 @@ spec:
                   name: {{ .valueFrom.secretKeyRef.name }}
                   key: {{ .valueFrom.secretKeyRef.key }}
             {{- end}}
+          {{- if .Values.agent.persistence.enabled }}
+          volumeMounts:
+            - name: {{ .Values.agent.persistence.name }}
+              mountPath: {{ .Values.agent.persistence.mountPath }}
+          {{- end }}
+      {{- if .Values.agent.persistence.enabled }}
+      volumes:
+        - name: {{ .Values.agent.persistence.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.agent.persistence.claimName }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

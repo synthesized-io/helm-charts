@@ -28,10 +28,6 @@ spec:
         - name: {{ .Values.api.name }}
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.api.image.pullPolicy }}
-          {{- if .Values.api.container.command }}
-          command:
-{{ toYaml .Values.api.container.command | indent 12 }}
-          {{- end }}
           ports:
             - containerPort: {{ .Values.api.container.port }}
             - containerPort: {{ .Values.api.container.grpcPort }}
@@ -43,6 +39,29 @@ spec:
             - secretRef:
                 name: {{ .Values.api.name }}-secret
           env:
+          {{- if .Values.aurora.enabled | default false }}
+            - name: SPRING_DATASOURCE_URL
+              value: 'jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}'
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: aurora-endpoints
+                  key: writerEndpoint
+            - name: DB_PORT
+              value: "{{ .Values.aurora.port | default 5432 }}"
+            - name: DB_NAME
+              value: {{ .Values.aurora.databaseName | default "postgres" }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.aurora.secretName }}
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.aurora.secretName }}
+                  key: password
+            {{- end }}
             {{- range .Values.api.container.secretenv }}
             - name: {{ .name }}
               valueFrom:
@@ -56,17 +75,24 @@ spec:
               port: {{ .Values.api.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
-          {{- if .Values.api.persistence.enabled }}
           volumeMounts:
+          {{- if .Values.api.persistence.enabled }}
             - name: {{ .Values.api.persistence.name }}
               mountPath: {{ .Values.api.persistence.mountPath }}
           {{- end }}
-      {{- if .Values.api.persistence.enabled }}
+            - name: spiffe-workload-api
+              mountPath: /spiffe-workload-api
+              readOnly: true
       volumes:
+      {{- if .Values.api.persistence.enabled }}
         - name: {{ .Values.api.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ .Values.api.persistence.claimName }}
       {{- end }}
+        - name: spiffe-workload-api
+          csi:
+            driver: "csi.spiffe.io"
+            readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

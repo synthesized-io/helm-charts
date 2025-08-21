@@ -1,0 +1,75 @@
+api:
+  container:
+    config:
+      ADMIN_EMAIL: maksim.stepachev@synthesized.io
+      AWS_CLIENT_ID: 4vq8t5hqkebnfntmnsfvhf94bm
+      AWS_COGNITO_AUTH_URL: https://xcom-njeil8g.auth.eu-west-2.amazoncognito.com
+      AWS_LOGOUT_URL: https://xcom-njeil8g.synthesized.io/api/v1/auth/alb-logout
+      AWS_USER_POOL_ID: eu-west-2_BiYjaHJi1
+      SPRING_PROFILES_ACTIVE: platform
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+      SPIRE_API_URL: http://spire-rest-api.spire-rest-api.svc.cluster.local
+      SPIRE_TENANT_ID: ec67a21c-304d-47ef-a01d-e3894ef1fcbf
+    secretConfig:
+      HELLO_WORLD: Hello World!
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
+    tag: latest
+aws:
+  db_crd: true
+  enabled: true
+  operationId: 1bd87cfd-fdfe-44ec-b181-3d88e1f2ddb8
+  tenantName: ec67a21c-304d-47ef-a01d-e3894ef1fcbf
+front:
+  image:
+    repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-front
+    tag: latest
+grpcIngress:
+  annotations:
+    alb.ingress.kubernetes.io/backend-protocol-version: GRPC
+    #alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor-grpc-no-ssl
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 50055}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: grpc-xcom-njeil8g.synthesized.io
+    paths:
+    - path: /
+      service: governor-api-grpc
+      servicePort: 50055
+  ingressClassName: alb
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_BiYjaHJi1",
+      "userPoolClientID": "4vq8t5hqkebnfntmnsfvhf94bm", "userPoolDomain": "xcom-njeil8g"}'
+    alb.ingress.kubernetes.io/auth-type: cognito
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/group.order: '2'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  enabled: true
+  hosts:
+  - host: xcom-njeil8g.synthesized.io
+    paths:
+    - path: /
+      service: governor-front
+      servicePort: 80
+    - path: /api
+      service: governor-api
+      servicePort: 80
+  ingressClassName: alb
+  logoutAnnotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
+    alb.ingress.kubernetes.io/group.name: governor
+    alb.ingress.kubernetes.io/group.order: '1'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  logoutHosts:
+  - host: xcom-njeil8g.synthesized.io
+    paths:
+    - path: /api/v1/auth/alb-logout
+      service: governor-api
+      servicePort: 80

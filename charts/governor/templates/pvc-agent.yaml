@@ -1,0 +1,15 @@
+
+{{- if .Values.agent.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.agent.persistence.claimName }}
+  labels:
+    app: {{ .Values.agent.name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.agent.persistence.size }}
+{{- end }}
