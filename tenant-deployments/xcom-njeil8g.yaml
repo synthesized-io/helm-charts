@@ -8,7 +8,7 @@ api:
       AWS_USER_POOL_ID: eu-west-2_BiYjaHJi1
       SPRING_PROFILES_ACTIVE: platform
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
-      SPIRE_API_URL: spire-rest-api.spire-rest-api.svc.cluster.local
+      SPIRE_API_URL: http://spire-rest-api.spire-rest-api.svc.cluster.local
       SPIRE_TENANT_ID: ec67a21c-304d-47ef-a01d-e3894ef1fcbf
     secretConfig:
       HELLO_WORLD: Hello World!
