@@ -15,6 +15,12 @@ api:
   image:
     repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-api
     tag: latest
+  service:
+    grpcAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+      external-dns.alpha.kubernetes.io/hostname: grpc.xcom-njeil8g.synthesized.io
 aws:
   db_crd: true
   enabled: true
@@ -24,22 +30,6 @@ front:
   image:
     repository: 248441125472.dkr.ecr.eu-west-2.amazonaws.com/governor-front
     tag: latest
-grpcIngress:
-  annotations:
-    alb.ingress.kubernetes.io/backend-protocol-version: GRPC
-    #alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:248441125472:certificate/6b2a2484-db96-435e-b866-2711dfa80e9b
-    alb.ingress.kubernetes.io/group.name: governor-grpc-no-ssl
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 50055}]'
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-  enabled: true
-  hosts:
-  - host: grpc-xcom-njeil8g.synthesized.io
-    paths:
-    - path: /
-      service: governor-api-grpc
-      servicePort: 50055
-  ingressClassName: alb
 ingress:
   annotations:
     alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN": "arn:aws:cognito-idp:eu-west-2:248441125472:userpool/eu-west-2_BiYjaHJi1",

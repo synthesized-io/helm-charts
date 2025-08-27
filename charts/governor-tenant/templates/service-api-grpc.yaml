@@ -4,8 +4,13 @@ metadata:
   name: {{ .Values.api.name }}-grpc
   labels:
     group: {{ .Values.api.group }}
+  annotations:
+{{- range $key, $value := .Values.api.service.grpcAnnotations }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
+    
 spec:
-  type: {{ .Values.api.service.type }}
+  type: {{ .Values.api.service.grpcType }}
   selector:
     app: {{ .Values.api.name }}
   ports:

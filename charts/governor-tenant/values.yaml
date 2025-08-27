@@ -48,6 +48,7 @@ api:
   service:
     type: ClusterIP
     port: 80
+    grpcType: LoadBalancer
     grpcPort: 50055
 
 front:
