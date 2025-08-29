@@ -20,6 +20,8 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      securityContext:
+        fsGroup: 1001
       containers:
         - name: {{ .Values.agent.name }}
           image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag | default .Chart.AppVersion }}"
@@ -48,8 +50,6 @@ spec:
             - name: {{ .Values.agent.persistence.name }}
               mountPath: {{ .Values.agent.persistence.mountPath }}
           {{- end }}
-          securityContext:
-            fsGroup: 1001
       {{- if .Values.agent.persistence.enabled }}
       volumes:
         - name: {{ .Values.agent.persistence.name }}
