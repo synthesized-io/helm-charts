@@ -90,6 +90,7 @@ agent:
       AGENT_TAGS: 'default'
       AGENT_DATASOURCES: '*'
       AGENT_USEPLAINTEXT: "false"
+      AGENT_USEKOTLINWATCHDOG: "true"
       AGENT_CONNECTIONS_POOL_SIZE: '20'
       SPIRE_SOCKET_PATH: unix:///spiffe-workload-api/spire-agent.sock
 
