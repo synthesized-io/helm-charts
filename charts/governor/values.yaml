@@ -1,6 +1,7 @@
 mode: self-hosted
 sandbox: false
-openshiftEnabled: false
+# Enables OpenShift-friendly mounts for nginx; auto-detected in templates via route.openshift.io.
+openShiftEnabled: false
 
 api:
   name: governor-api
@@ -8,9 +9,14 @@ api:
   image:
     repository: synthesizedio/synthesized-api
     pullPolicy: Always
-  securityContext:
-    runAsUser: 100
-    fsGroup: 65533
+  # securityContext:
+  #   runAsNonRoot: true
+  #   runAsUser: null
+  #   fsGroup: 1000660000
+  #   fsGroupChangePolicy: "OnRootMismatch"
+  #   seccompProfile:
+  #     type: RuntimeDefault
+  securityContext: null
   container:
     port: 8081
     grpcPort: 50055
@@ -42,6 +48,12 @@ front:
   image:
     repository: synthesizedio/synthesized-front
     pullPolicy: Always
+  # securityContext:
+  #   runAsNonRoot: true
+  #   runAsUser: null
+  #   fsGroup: 1000660000
+  #   fsGroupChangePolicy: "OnRootMismatch"
+  securityContext: null
   container:
     port: 8080
     config:
@@ -65,6 +77,12 @@ agent:
   image:
     repository: synthesizedio/synthesized-agent
     pullPolicy: Always
+  # securityContext:
+  #   runAsNonRoot: true
+  #   runAsUser: null
+  #   fsGroup: 1000660000
+  #   fsGroupChangePolicy: "OnRootMismatch"
+  securityContext: null
   container:
     config:
       AGENT_WORKING_DIRECTORY_PATH: '/app/rocksdb'

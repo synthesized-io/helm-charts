@@ -1,0 +1,48 @@
+openShiftEnabled: true
+
+# Replace UID/GID with the namespace range:
+#   oc get ns <ns> -o jsonpath='{.metadata.annotations.openshift\.io/sa\.scc\.uid-range}{"\n"}'
+# Example: 1002270000/10000 -> use 1002270000
+
+api:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1002270000
+    fsGroup: 1002270000
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+
+front:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1002270000
+    fsGroup: 1002270000
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+
+agent:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1002270000
+    fsGroup: 1002270000
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+
+director:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1002270000
+    fsGroup: 1002270000
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+
+# If you use OpenShift Routes, keep ingresses disabled and expose services manually.
+ingress:
+  enabled: false
+
+grpcIngress:
+  enabled: false

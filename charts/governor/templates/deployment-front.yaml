@@ -1,3 +1,4 @@
+{{- $openShift := or .Values.openShiftEnabled (.Capabilities.APIVersions.Has "route.openshift.io/v1") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,6 +17,20 @@ spec:
         app: {{ .Values.front.name }}
         group: {{ .Values.front.group }}
     spec:
+      {{- if $openShift }}
+      initContainers:
+        - name: init-frontend-assets
+          image: "{{ .Values.front.image.repository }}:{{ .Values.front.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.front.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - cp -R /apps/governor/. /work/
+          volumeMounts:
+            - name: app-data
+              mountPath: /work
+      {{- end }}
       {{- with .Values.front.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -57,7 +72,7 @@ spec:
               port: {{ .Values.front.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
-          {{- if .Values.openShiftEnabled }}
+          {{- if $openShift }}
           volumeMounts:
             - name: nginx-config
               mountPath: /etc/nginx/conf.d
@@ -65,14 +80,18 @@ spec:
               mountPath: /apps/governor
             - name: nginx-cache
               mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run/nginx
           {{- end }}
       volumes:
-        {{- if .Values.openShiftEnabled }}
+        {{- if $openShift }}
         - name: nginx-config
           emptyDir: {}
         - name: app-data
           emptyDir: {}
         - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
           emptyDir: {}
         {{- end }}
       {{- with .Values.nodeSelector }}
