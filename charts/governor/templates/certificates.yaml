@@ -1,0 +1,76 @@
+{{- if .Values.envoy.enabled }}
+---
+# Certificate for governor-api
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.api.name }}-cert
+  labels:
+    app: {{ .Values.api.name }}
+spec:
+  secretName: {{ .Values.api.name }}-tls
+  duration: {{ .Values.envoy.certificates.duration }}
+  renewBefore: {{ .Values.envoy.certificates.renewBefore }}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - {{ .Values.api.name }}
+    - {{ .Values.api.name }}.{{ .Release.Namespace }}
+    - {{ .Values.api.name }}.{{ .Release.Namespace }}.svc
+    - {{ .Values.api.name }}.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    name: {{ .Values.envoy.certificates.clusterIssuer }}
+    kind: ClusterIssuer
+---
+# Certificate for governor-front
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.front.name }}-cert
+  labels:
+    app: {{ .Values.front.name }}
+spec:
+  secretName: {{ .Values.front.name }}-tls
+  duration: {{ .Values.envoy.certificates.duration }}
+  renewBefore: {{ .Values.envoy.certificates.renewBefore }}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - {{ .Values.front.name }}
+    - {{ .Values.front.name }}.{{ .Release.Namespace }}
+    - {{ .Values.front.name }}.{{ .Release.Namespace }}.svc
+    - {{ .Values.front.name }}.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    name: {{ .Values.envoy.certificates.clusterIssuer }}
+    kind: ClusterIssuer
+---
+# Certificate for governor-agent (client cert only, no service)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.agent.name }}-cert
+  labels:
+    app: {{ .Values.agent.name }}
+spec:
+  secretName: {{ .Values.agent.name }}-tls
+  duration: {{ .Values.envoy.certificates.duration }}
+  renewBefore: {{ .Values.envoy.certificates.renewBefore }}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - client auth
+  dnsNames:
+    - {{ .Values.agent.name }}
+  issuerRef:
+    name: {{ .Values.envoy.certificates.clusterIssuer }}
+    kind: ClusterIssuer
+{{- end }}

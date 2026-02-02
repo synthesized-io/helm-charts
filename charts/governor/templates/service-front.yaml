@@ -9,6 +9,12 @@ spec:
   selector:
     app: {{ .Values.front.name }}
   ports:
+    {{- if .Values.envoy.enabled }}
+    - port: {{ .Values.front.service.port }}
+      targetPort: {{ .Values.envoy.ports.secureHttp }}
+      name: https
+    {{- else }}
     - port: {{ .Values.front.service.port }}
       targetPort: {{ .Values.front.container.port }}
       name: defaultport
+    {{- end }}

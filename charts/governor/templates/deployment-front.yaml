@@ -17,8 +17,9 @@ spec:
         app: {{ .Values.front.name }}
         group: {{ .Values.front.group }}
     spec:
-      {{- if $openShift }}
+      {{- if or $openShift .Values.envoy.enabled }}
       initContainers:
+        {{- if $openShift }}
         - name: init-frontend-assets
           image: "{{ .Values.front.image.repository }}:{{ .Values.front.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.front.image.pullPolicy }}
@@ -30,6 +31,10 @@ spec:
           volumeMounts:
             - name: app-data
               mountPath: /work
+        {{- end }}
+        {{- if .Values.envoy.enabled }}
+        {{- include "governor.envoy.initContainer" . | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.front.imagePullSecrets }}
       imagePullSecrets:
@@ -83,6 +88,9 @@ spec:
             - name: nginx-run
               mountPath: /var/run/nginx
           {{- end }}
+        {{- if .Values.envoy.enabled }}
+        {{- include "governor.envoy.sidecar" (dict "componentName" "front" "config" .Values.front "envoy" .Values.envoy "hasHttpPort" true "hasGrpcPort" false) | nindent 8 }}
+        {{- end }}
       volumes:
         {{- if $openShift }}
         - name: nginx-config
@@ -93,6 +101,9 @@ spec:
           emptyDir: {}
         - name: nginx-run
           emptyDir: {}
+        {{- end }}
+        {{- if .Values.envoy.enabled }}
+        {{- include "governor.envoy.volumes" (dict "componentName" "front" "config" .Values.front "envoy" .Values.envoy) | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

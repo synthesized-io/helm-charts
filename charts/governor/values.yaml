@@ -3,6 +3,44 @@ sandbox: false
 # Enables OpenShift-friendly mounts for nginx; auto-detected in templates via route.openshift.io.
 openShiftEnabled: false
 
+# Envoy sidecar configuration for mTLS
+envoy:
+  enabled: false
+  image:
+    repository: envoyproxy/envoy
+    tag: v1.36.4
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  # Certificate configuration
+  certificates:
+    # ClusterIssuer name for cert-manager
+    clusterIssuer: "internal-ca-issuer"
+    # Duration of certificates
+    duration: 8760h  # 1 year
+    # Renew before expiry
+    renewBefore: 720h  # 30 days
+  # CA bundle configuration
+  caBundle:
+    # Secret name containing the CA certificate
+    secretName: "governor-ca-bundle"
+    # Key within the secret containing the CA cert
+    key: "ca.crt"
+  # Port mappings for Envoy listeners
+  ports:
+    # Envoy admin port (for health checks)
+    admin: 9901
+    # Secure listener ports (external facing)
+    secureHttp: 8443
+    secureGrpc: 50443
+  # Log level for Envoy
+  logLevel: info
+
 api:
   name: governor-api
   group: governor-api
@@ -98,29 +136,6 @@ agent:
     mountPath: /app/rocksdb
     claimName: agent-pvc
     size: 10Gi
-
-director:
-  name: governor-director
-  group: governor-director
-  image:
-    repository: synthesized.azurecr.io/synthesized-director
-    pullPolicy: Always
-  container:
-    port: 50051
-    config:
-      OPENAI_API_VERSION: "2023-03-15-preview"
-      AZURE_DEPLOYMENT: "gpt-35-turbo"
-      AZURE_OPENAI_ENDPOINT: "https://director-openai.openai.azure.com/"
-    secretConfig:
-      AZURE_OPENAI_API_KEY: ""
-      DATABASE_URL_POSTGRES: ""
-    command:
-      - python3.9
-      - director/server.py
-    healthchecks:
-  service:
-    type: ClusterIP
-    port: 50051
 
 nodeSelector: {}
 

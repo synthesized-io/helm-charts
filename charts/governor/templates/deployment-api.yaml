@@ -24,6 +24,10 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.envoy.enabled }}
+      initContainers:
+        {{- include "governor.envoy.initContainer" . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Values.api.name }}
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag | default .Chart.AppVersion }}"
@@ -56,16 +60,26 @@ spec:
               port: {{ .Values.api.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
-          {{- if .Values.api.persistence.enabled }}
+          {{- if or .Values.api.persistence.enabled .Values.envoy.enabled }}
           volumeMounts:
+            {{- if .Values.api.persistence.enabled }}
             - name: {{ .Values.api.persistence.name }}
               mountPath: {{ .Values.api.persistence.mountPath }}
+            {{- end }}
           {{- end }}
-      {{- if .Values.api.persistence.enabled }}
+        {{- if .Values.envoy.enabled }}
+        {{- include "governor.envoy.sidecar" (dict "componentName" "api" "config" .Values.api "envoy" .Values.envoy "hasHttpPort" true "hasGrpcPort" true) | nindent 8 }}
+        {{- end }}
+      {{- if or .Values.api.persistence.enabled .Values.envoy.enabled }}
       volumes:
+        {{- if .Values.api.persistence.enabled }}
         - name: {{ .Values.api.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ .Values.api.persistence.claimName }}
+        {{- end }}
+        {{- if .Values.envoy.enabled }}
+        {{- include "governor.envoy.volumes" (dict "componentName" "api" "config" .Values.api "envoy" .Values.envoy) | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
