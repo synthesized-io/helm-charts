@@ -46,16 +46,12 @@ data:
                 name: envoy.transport_sockets.tls
                 typed_config:
                   "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-                  require_client_certificate: true
                   common_tls_context:
                     tls_certificates:
                       - certificate_chain:
                           filename: /etc/envoy/certs/tls.crt
                         private_key:
                           filename: /etc/envoy/certs/tls.key
-                    validation_context:
-                      trusted_ca:
-                        filename: /etc/envoy/ca/ca.crt
 
         # gRPCS inbound listener (for agent -> api and front -> api gRPC calls)
         - name: grpcs_inbound
@@ -88,16 +84,12 @@ data:
                 name: envoy.transport_sockets.tls
                 typed_config:
                   "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-                  require_client_certificate: true
                   common_tls_context:
                     tls_certificates:
                       - certificate_chain:
                           filename: /etc/envoy/certs/tls.crt
                         private_key:
                           filename: /etc/envoy/certs/tls.key
-                    validation_context:
-                      trusted_ca:
-                        filename: /etc/envoy/ca/ca.crt
 
       clusters:
         # Local HTTP backend (api container)

@@ -46,18 +46,14 @@ data:
                 name: envoy.transport_sockets.tls
                 typed_config:
                   "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-                  require_client_certificate: true
                   common_tls_context:
                     tls_certificates:
                       - certificate_chain:
                           filename: /etc/envoy/certs/tls.crt
                         private_key:
                           filename: /etc/envoy/certs/tls.key
-                    validation_context:
-                      trusted_ca:
-                        filename: /etc/envoy/ca/ca.crt
 
-        # Egress listener for api HTTP (front connects here, envoy does mTLS to api)
+        # Egress listener for api HTTP (front connects here, envoy does TLS to api)
         - name: api_http_egress
           address:
             socket_address:
@@ -70,6 +66,8 @@ data:
                     "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                     stat_prefix: api_http_egress
                     codec_type: AUTO
+                    http_protocol_options:
+                      accept_http_10: true
                     route_config:
                       name: api_route
                       virtual_hosts:
@@ -128,7 +126,7 @@ data:
                           address: 127.0.0.1
                           port_value: {{ .Values.front.container.port }}
 
-        # Outbound to api HTTPS (with mTLS)
+        # Outbound to api HTTPS (with TLS)
         - name: api_https
           type: STRICT_DNS
           connect_timeout: 5s
@@ -140,22 +138,17 @@ data:
                       address:
                         socket_address:
                           address: {{ .Values.api.name }}
-                          port_value: {{ .Values.envoy.ports.secureHttp }}
+                          port_value: {{ .Values.api.service.port }}
           transport_socket:
             name: envoy.transport_sockets.tls
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
               common_tls_context:
-                tls_certificates:
-                  - certificate_chain:
-                      filename: /etc/envoy/certs/tls.crt
-                    private_key:
-                      filename: /etc/envoy/certs/tls.key
                 validation_context:
                   trusted_ca:
-                    filename: /etc/envoy/ca/ca.crt
+                    filename: /etc/envoy/certs/ca.crt
 
-        # Outbound to api gRPCS (with mTLS)
+        # Outbound to api gRPCS (with TLS)
         - name: api_grpcs
           type: STRICT_DNS
           connect_timeout: 5s
@@ -168,18 +161,13 @@ data:
                       address:
                         socket_address:
                           address: {{ .Values.api.name }}
-                          port_value: {{ .Values.envoy.ports.secureGrpc }}
+                          port_value: {{ .Values.api.service.grpcPort }}
           transport_socket:
             name: envoy.transport_sockets.tls
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
               common_tls_context:
-                tls_certificates:
-                  - certificate_chain:
-                      filename: /etc/envoy/certs/tls.crt
-                    private_key:
-                      filename: /etc/envoy/certs/tls.key
                 validation_context:
                   trusted_ca:
-                    filename: /etc/envoy/ca/ca.crt
+                    filename: /etc/envoy/certs/ca.crt
 {{- end }}

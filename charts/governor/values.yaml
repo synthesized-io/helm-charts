@@ -1,22 +1,16 @@
 mode: self-hosted
-sandbox: false
+sandbox: true
 # Enables OpenShift-friendly mounts for nginx; auto-detected in templates via route.openshift.io.
-openShiftEnabled: false
+openShiftEnabled: true
 
 # Envoy sidecar configuration for mTLS
 envoy:
-  enabled: false
+  enabled: true
   image:
     repository: envoyproxy/envoy
     tag: v1.36.4
     pullPolicy: IfNotPresent
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 500m
-      memory: 256Mi
+  resources: {}
   # Certificate configuration
   certificates:
     # ClusterIssuer name for cert-manager
@@ -25,12 +19,6 @@ envoy:
     duration: 8760h  # 1 year
     # Renew before expiry
     renewBefore: 720h  # 30 days
-  # CA bundle configuration
-  caBundle:
-    # Secret name containing the CA certificate
-    secretName: "governor-ca-bundle"
-    # Key within the secret containing the CA cert
-    key: "ca.crt"
   # Port mappings for Envoy listeners
   ports:
     # Envoy admin port (for health checks)
@@ -40,6 +28,9 @@ envoy:
     secureGrpc: 50443
   # Log level for Envoy
   logLevel: info
+
+imagePullSecrets:
+  - name: dockerhub-creds
 
 api:
   name: governor-api
@@ -63,12 +54,12 @@ api:
       VERSION: 'not-specified'
     # Sensitive configuration variables that will be rendered as a new secret
     secretConfig:
-      SPRING_DATASOURCE_URL: ""
-      SPRING_DATASOURCE_USERNAME: ""
-      SPRING_DATASOURCE_PASSWORD: ""
-      JWT_SECRET: ""
-      ADMIN_EMAIL: ""
-      ADMIN_DEFAULT_PASSWORD: ""
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://governor-postgresql:5432/governor"
+      SPRING_DATASOURCE_USERNAME: "governor"
+      SPRING_DATASOURCE_PASSWORD: "governor"
+      JWT_SECRET: "75gCe94oOW4CPsuHhfRY2m62ylf73mJxmMyZCFifNQKewULlp2/LeAXWpDht35tKKLp8gEaMZ9l10OolJe+QFYcq+9sJfH3yFc6/wwmrk4QAuiCX2gPMIvyOHRlYVLQoTZ87miJBtyqIQbFQ9CRGrS0l13F+XGbEF1q83dOzEp1yS+L9b6TAEOGDgSP3sLBcr1fK3+Qfto2Nv+Qd3DdJtqXcqlYSm1B8aafWl+YValM2Rj/tgs7DrBdWFnQpowE4gV+kdbYOpFIIn93unnDGG5JvFc95hKDPTBLighaerLVPVSMqcLnb9v0Xn81MOw5qNZsihNsXIHCNZu2VI6DxyA=="
+      ADMIN_EMAIL: "yuri@synthesized.io"
+      ADMIN_DEFAULT_PASSWORD: "aaa1111@#%@ASd"
   persistence:
     enabled: false
     name: api-pv
@@ -136,6 +127,24 @@ agent:
     mountPath: /app/rocksdb
     claimName: agent-pvc
     size: 10Gi
+
+postgresql:
+  enabled: true
+  name: governor-postgresql
+  image:
+    repository: postgres
+    tag: "17"
+    pullPolicy: IfNotPresent
+  securityContext: null
+  port: 5432
+  database: governor
+  username: governor
+  password: governor
+  persistence:
+    enabled: true
+    size: 10Gi
+    claimName: postgresql-pvc
+  resources: {}
 
 nodeSelector: {}
 

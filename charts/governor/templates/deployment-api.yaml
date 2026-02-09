@@ -16,7 +16,7 @@ spec:
         app: {{ .Values.api.name }}
         group: {{ .Values.api.group }}
     spec:
-      {{- with .Values.api.imagePullSecrets }}
+      {{- with .Values.api.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}

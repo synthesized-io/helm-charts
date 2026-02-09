@@ -44,7 +44,7 @@ data:
                           "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 
       clusters:
-        # Outbound to api gRPCS (with mTLS)
+        # Outbound to api gRPCS (with TLS)
         - name: api_grpcs
           type: STRICT_DNS
           connect_timeout: 5s
@@ -57,18 +57,13 @@ data:
                       address:
                         socket_address:
                           address: {{ .Values.api.name }}
-                          port_value: {{ .Values.envoy.ports.secureGrpc }}
+                          port_value: {{ .Values.api.service.grpcPort }}
           transport_socket:
             name: envoy.transport_sockets.tls
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
               common_tls_context:
-                tls_certificates:
-                  - certificate_chain:
-                      filename: /etc/envoy/certs/tls.crt
-                    private_key:
-                      filename: /etc/envoy/certs/tls.key
                 validation_context:
                   trusted_ca:
-                    filename: /etc/envoy/ca/ca.crt
+                    filename: /etc/envoy/certs/ca.crt
 {{- end }}

@@ -16,7 +16,7 @@ spec:
         app: {{ .Values.agent.name }}
         group: {{ .Values.agent.group }}
     spec:
-      {{- with .Values.agent.imagePullSecrets }}
+      {{- with .Values.agent.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}

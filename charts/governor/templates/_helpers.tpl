@@ -60,9 +60,6 @@ Usage: {{ include "governor.envoy.sidecar" (dict "componentName" "api" "config" 
     - name: tls-certs
       mountPath: /etc/envoy/certs
       readOnly: true
-    - name: ca-bundle
-      mountPath: /etc/envoy/ca
-      readOnly: true
 {{- end }}
 
 {{/*
@@ -99,10 +96,4 @@ Usage: {{ include "governor.envoy.volumes" (dict "componentName" "api" "config" 
 - name: tls-certs
   secret:
     secretName: {{ .config.name }}-tls
-- name: ca-bundle
-  secret:
-    secretName: {{ .envoy.caBundle.secretName }}
-    items:
-      - key: {{ .envoy.caBundle.key }}
-        path: ca.crt
 {{- end }}
