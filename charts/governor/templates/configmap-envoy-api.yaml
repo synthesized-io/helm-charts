@@ -39,19 +39,8 @@ data:
                               route:
                                 cluster: local_http
                     http_filters:
-                      - name: envoy.filters.http.router
-                        typed_config:
-                          "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-              transport_socket:
-                name: envoy.transport_sockets.tls
-                typed_config:
-                  "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-                  common_tls_context:
-                    tls_certificates:
-                      - certificate_chain:
-                          filename: /etc/envoy/certs/tls.crt
-                        private_key:
-                          filename: /etc/envoy/certs/tls.key
+                      {{- include "governor.envoy.httpRouter" . | nindent 22 }}
+              {{- include "governor.envoy.downstreamTls" . | nindent 14 }}
 
         # gRPCS inbound listener (for agent -> api and front -> api gRPC calls)
         - name: grpcs_inbound
@@ -77,19 +66,8 @@ data:
                               route:
                                 cluster: local_grpc
                     http_filters:
-                      - name: envoy.filters.http.router
-                        typed_config:
-                          "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-              transport_socket:
-                name: envoy.transport_sockets.tls
-                typed_config:
-                  "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-                  common_tls_context:
-                    tls_certificates:
-                      - certificate_chain:
-                          filename: /etc/envoy/certs/tls.crt
-                        private_key:
-                          filename: /etc/envoy/certs/tls.key
+                      {{- include "governor.envoy.httpRouter" . | nindent 22 }}
+              {{- include "governor.envoy.downstreamTls" . | nindent 14 }}
 
       clusters:
         # Local HTTP backend (api container)

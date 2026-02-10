@@ -15,55 +15,8 @@ data:
 
     static_resources:
       listeners:
-        # Egress listener for api gRPC (agent connects here locally)
-        - name: api_grpc_egress
-          address:
-            socket_address:
-              address: 127.0.0.1
-              port_value: {{ .Values.tlsInternal.ports.egressGrpc }}
-          filter_chains:
-            - filters:
-                - name: envoy.filters.network.http_connection_manager
-                  typed_config:
-                    "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-                    stat_prefix: api_grpc_egress
-                    codec_type: HTTP2
-                    route_config:
-                      name: api_grpc_route
-                      virtual_hosts:
-                        - name: api_grpc_service
-                          domains: ["*"]
-                          routes:
-                            - match:
-                                prefix: "/"
-                              route:
-                                cluster: api_grpcs
-                    http_filters:
-                      - name: envoy.filters.http.router
-                        typed_config:
-                          "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+        {{- include "governor.envoy.apiGrpcEgressListener" (dict "egressGrpcPort" .Values.tlsInternal.ports.egressGrpc) | nindent 8 }}
 
       clusters:
-        # Outbound to api gRPCS (with TLS)
-        - name: api_grpcs
-          type: STRICT_DNS
-          connect_timeout: 5s
-          http2_protocol_options: {}
-          load_assignment:
-            cluster_name: api_grpcs
-            endpoints:
-              - lb_endpoints:
-                  - endpoint:
-                      address:
-                        socket_address:
-                          address: {{ .Values.api.name }}
-                          port_value: {{ .Values.api.service.grpcPort }}
-          transport_socket:
-            name: envoy.transport_sockets.tls
-            typed_config:
-              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-              common_tls_context:
-                validation_context:
-                  trusted_ca:
-                    filename: /etc/envoy/certs/ca.crt
+        {{- include "governor.envoy.apiGrpcsCluster" (dict "apiName" .Values.api.name "apiGrpcPort" .Values.api.service.grpcPort) | nindent 8 }}
 {{- end }}
