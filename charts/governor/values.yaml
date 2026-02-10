@@ -13,8 +13,14 @@ envoy:
   resources: {}
   # Certificate configuration
   certificates:
-    # ClusterIssuer name for cert-manager
-    clusterIssuer: "internal-ca-issuer"
+    # cert-manager issuer reference
+    issuerRef:
+      name: "internal-ca-issuer"
+      kind: "ClusterIssuer"
+    # Private key configuration
+    privateKey:
+      algorithm: ECDSA
+      size: 256
     # Duration of certificates
     duration: 8760h  # 1 year
     # Renew before expiry
