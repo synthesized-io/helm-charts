@@ -1,11 +1,11 @@
 mode: self-hosted
-sandbox: true
+sandbox: false
 # Enables OpenShift-friendly mounts for nginx; auto-detected in templates via route.openshift.io.
-openShiftEnabled: true
+openShiftEnabled: false
 
-# Envoy sidecar configuration for mTLS
+# Envoy sidecar configuration for internal TLS
 envoy:
-  enabled: true
+  enabled: false
   image:
     repository: envoyproxy/envoy
     tag: v1.36.4
@@ -26,11 +26,13 @@ envoy:
     # Secure listener ports (external facing)
     secureHttp: 8443
     secureGrpc: 50443
+    # Local egress ports (app connects here, envoy does TLS upstream)
+    egressHttp: 15001
+    egressGrpc: 15002
   # Log level for Envoy
   logLevel: info
 
-imagePullSecrets:
-  - name: dockerhub-creds
+imagePullSecrets: []
 
 api:
   name: governor-api
@@ -54,12 +56,12 @@ api:
       VERSION: 'not-specified'
     # Sensitive configuration variables that will be rendered as a new secret
     secretConfig:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://governor-postgresql:5432/governor"
-      SPRING_DATASOURCE_USERNAME: "governor"
-      SPRING_DATASOURCE_PASSWORD: "governor"
-      JWT_SECRET: "75gCe94oOW4CPsuHhfRY2m62ylf73mJxmMyZCFifNQKewULlp2/LeAXWpDht35tKKLp8gEaMZ9l10OolJe+QFYcq+9sJfH3yFc6/wwmrk4QAuiCX2gPMIvyOHRlYVLQoTZ87miJBtyqIQbFQ9CRGrS0l13F+XGbEF1q83dOzEp1yS+L9b6TAEOGDgSP3sLBcr1fK3+Qfto2Nv+Qd3DdJtqXcqlYSm1B8aafWl+YValM2Rj/tgs7DrBdWFnQpowE4gV+kdbYOpFIIn93unnDGG5JvFc95hKDPTBLighaerLVPVSMqcLnb9v0Xn81MOw5qNZsihNsXIHCNZu2VI6DxyA=="
-      ADMIN_EMAIL: "yuri@synthesized.io"
-      ADMIN_DEFAULT_PASSWORD: "aaa1111@#%@ASd"
+      SPRING_DATASOURCE_URL: ""
+      SPRING_DATASOURCE_USERNAME: ""
+      SPRING_DATASOURCE_PASSWORD: ""
+      JWT_SECRET: ""
+      ADMIN_EMAIL: ""
+      ADMIN_DEFAULT_PASSWORD: ""
   persistence:
     enabled: false
     name: api-pv
@@ -129,7 +131,7 @@ agent:
     size: 10Gi
 
 postgresql:
-  enabled: true
+  enabled: false
   name: governor-postgresql
   image:
     repository: postgres
@@ -138,8 +140,8 @@ postgresql:
   securityContext: null
   port: 5432
   database: governor
-  username: governor
-  password: governor
+  username: ""
+  password: ""
   persistence:
     enabled: true
     size: 10Gi

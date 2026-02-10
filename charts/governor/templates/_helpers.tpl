@@ -1,18 +1,4 @@
 {{/*
-Expand the name of the chart.
-*/}}
-{{- define "governor.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "governor.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
 Envoy sidecar container template
 Usage: {{ include "governor.envoy.sidecar" (dict "componentName" "api" "config" .Values.api "envoy" .Values.envoy "hasHttpPort" true "hasGrpcPort" true) }}
 */}}

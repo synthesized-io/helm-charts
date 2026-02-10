@@ -7,7 +7,7 @@ data:
 {{- if .Values.envoy.enabled }}
   # Override API connection to use local Envoy egress
   AGENT_SERVERHOST: '127.0.0.1'
-  AGENT_SERVERPORT: '15002'
+  AGENT_SERVERPORT: '{{ .Values.envoy.ports.egressGrpc }}'
   AGENT_USEPLAINTEXT: "true"
   # Include other config values except the server connection ones
   {{- range $key, $value := .Values.agent.container.config }}

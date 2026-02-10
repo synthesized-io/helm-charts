@@ -31,15 +31,6 @@ agent:
     seccompProfile:
       type: RuntimeDefault
 
-director:
-  securityContext:
-    runAsNonRoot: true
-    runAsUser: 1000660000
-    fsGroup: 1000660000
-    fsGroupChangePolicy: OnRootMismatch
-    seccompProfile:
-      type: RuntimeDefault
-
 postgresql:
   securityContext:
     runAsNonRoot: true
