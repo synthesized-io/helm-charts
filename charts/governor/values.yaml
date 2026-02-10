@@ -136,24 +136,6 @@ agent:
     claimName: agent-pvc
     size: 10Gi
 
-postgresql:
-  enabled: false
-  name: governor-postgresql
-  image:
-    repository: postgres
-    tag: "17"
-    pullPolicy: IfNotPresent
-  securityContext: null
-  port: 5432
-  database: governor
-  username: ""
-  password: ""
-  persistence:
-    enabled: true
-    size: 10Gi
-    claimName: postgresql-pvc
-  resources: {}
-
 nodeSelector: {}
 
 tolerations: []
