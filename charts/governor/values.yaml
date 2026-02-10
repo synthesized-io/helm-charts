@@ -4,7 +4,7 @@ sandbox: false
 openShiftEnabled: false
 
 # Envoy sidecar configuration for internal TLS
-envoy:
+tlsInternal:
   enabled: false
   image:
     repository: envoyproxy/envoy

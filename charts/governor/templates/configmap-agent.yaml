@@ -4,10 +4,10 @@ metadata:
   name: {{ .Values.agent.name }}-configmap
 data:
 {{- if .Values.agent.container.config }}
-{{- if .Values.envoy.enabled }}
+{{- if .Values.tlsInternal.enabled }}
   # Override API connection to use local Envoy egress
   AGENT_SERVERHOST: '127.0.0.1'
-  AGENT_SERVERPORT: '{{ .Values.envoy.ports.egressGrpc }}'
+  AGENT_SERVERPORT: '{{ .Values.tlsInternal.ports.egressGrpc }}'
   AGENT_USEPLAINTEXT: "true"
   # Include other config values except the server connection ones
   {{- range $key, $value := .Values.agent.container.config }}

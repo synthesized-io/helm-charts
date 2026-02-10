@@ -1,4 +1,4 @@
-{{- if .Values.envoy.enabled }}
+{{- if .Values.tlsInternal.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,7 +11,7 @@ data:
       address:
         socket_address:
           address: 0.0.0.0
-          port_value: {{ .Values.envoy.ports.admin }}
+          port_value: {{ .Values.tlsInternal.ports.admin }}
 
     static_resources:
       listeners:
@@ -20,7 +20,7 @@ data:
           address:
             socket_address:
               address: 127.0.0.1
-              port_value: {{ .Values.envoy.ports.egressGrpc }}
+              port_value: {{ .Values.tlsInternal.ports.egressGrpc }}
           filter_chains:
             - filters:
                 - name: envoy.filters.network.http_connection_manager

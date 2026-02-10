@@ -9,9 +9,9 @@ spec:
   selector:
     app: {{ .Values.front.name }}
   ports:
-    {{- if .Values.envoy.enabled }}
+    {{- if .Values.tlsInternal.enabled }}
     - port: {{ .Values.front.service.port }}
-      targetPort: {{ .Values.envoy.ports.secureHttp }}
+      targetPort: {{ .Values.tlsInternal.ports.secureHttp }}
       name: https
     {{- else }}
     - port: {{ .Values.front.service.port }}

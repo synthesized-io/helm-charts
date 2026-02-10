@@ -4,11 +4,11 @@ metadata:
   name: {{ .Values.front.name }}-configmap
 data:
 {{- if .Values.front.container.config }}
-{{- if .Values.envoy.enabled }}
+{{- if .Values.tlsInternal.enabled }}
   # Override API connection to use local Envoy egress
   API_INTERNAL_HOST: '127.0.0.1'
-  API_HTTP_INTERNAL_PORT: '{{ .Values.envoy.ports.egressHttp }}'
-  API_GRPC_INTERNAL_PORT: '{{ .Values.envoy.ports.egressGrpc }}'
+  API_HTTP_INTERNAL_PORT: '{{ .Values.tlsInternal.ports.egressHttp }}'
+  API_GRPC_INTERNAL_PORT: '{{ .Values.tlsInternal.ports.egressGrpc }}'
   # Include other config values except the API connection ones
   {{- range $key, $value := .Values.front.container.config }}
   {{- if and (ne $key "API_INTERNAL_HOST") (ne $key "API_HTTP_INTERNAL_PORT") (ne $key "API_GRPC_INTERNAL_PORT") }}

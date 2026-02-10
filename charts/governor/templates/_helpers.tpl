@@ -1,44 +1,44 @@
 {{/*
 Envoy sidecar container template
-Usage: {{ include "governor.envoy.sidecar" (dict "componentName" "api" "config" .Values.api "envoy" .Values.envoy "hasHttpPort" true "hasGrpcPort" true) }}
+Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.envoy "hasHttpPort" true "hasGrpcPort" true) }}
 */}}
-{{- define "governor.envoy.sidecar" -}}
+{{- define "governor.tlsInternal.sidecar" -}}
 - name: envoy-sidecar
-  image: "{{ .envoy.image.repository }}:{{ .envoy.image.tag }}"
-  imagePullPolicy: {{ .envoy.image.pullPolicy }}
+  image: "{{ .tlsInternal.image.repository }}:{{ .tlsInternal.image.tag }}"
+  imagePullPolicy: {{ .tlsInternal.image.pullPolicy }}
   args:
     - -c
     - /etc/envoy/envoy.yaml
     - --log-level
-    - {{ .envoy.logLevel }}
+    - {{ .tlsInternal.logLevel }}
   ports:
     {{- if .hasHttpPort }}
     - name: https
-      containerPort: {{ .envoy.ports.secureHttp }}
+      containerPort: {{ .tlsInternal.ports.secureHttp }}
       protocol: TCP
     {{- end }}
     {{- if .hasGrpcPort }}
     - name: grpcs
-      containerPort: {{ .envoy.ports.secureGrpc }}
+      containerPort: {{ .tlsInternal.ports.secureGrpc }}
       protocol: TCP
     {{- end }}
     - name: admin
-      containerPort: {{ .envoy.ports.admin }}
+      containerPort: {{ .tlsInternal.ports.admin }}
       protocol: TCP
   readinessProbe:
     httpGet:
       path: /ready
-      port: {{ .envoy.ports.admin }}
+      port: {{ .tlsInternal.ports.admin }}
     initialDelaySeconds: 5
     periodSeconds: 10
   livenessProbe:
     httpGet:
       path: /ready
-      port: {{ .envoy.ports.admin }}
+      port: {{ .tlsInternal.ports.admin }}
     initialDelaySeconds: 10
     periodSeconds: 15
   resources:
-    {{- toYaml .envoy.resources | nindent 4 }}
+    {{- toYaml .tlsInternal.resources | nindent 4 }}
   volumeMounts:
     - name: envoy-config
       mountPath: /etc/envoy
@@ -50,9 +50,9 @@ Usage: {{ include "governor.envoy.sidecar" (dict "componentName" "api" "config" 
 
 {{/*
 Envoy init container to wait for certificates
-Usage: {{ include "governor.envoy.initContainer" . }}
+Usage: {{ include "governor.tlsInternal.initContainer" . }}
 */}}
-{{- define "governor.envoy.initContainer" -}}
+{{- define "governor.tlsInternal.initContainer" -}}
 - name: wait-for-certs
   image: busybox:1.36
   command:
@@ -73,9 +73,9 @@ Usage: {{ include "governor.envoy.initContainer" . }}
 
 {{/*
 Envoy volumes template
-Usage: {{ include "governor.envoy.volumes" (dict "componentName" "api" "config" .Values.api "envoy" .Values.envoy) }}
+Usage: {{ include "governor.tlsInternal.volumes" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.envoy) }}
 */}}
-{{- define "governor.envoy.volumes" -}}
+{{- define "governor.tlsInternal.volumes" -}}
 - name: envoy-config
   configMap:
     name: {{ .config.name }}-envoy-config

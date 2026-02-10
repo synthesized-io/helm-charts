@@ -24,9 +24,9 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.envoy.enabled }}
+      {{- if .Values.tlsInternal.enabled }}
       initContainers:
-        {{- include "governor.envoy.initContainer" . | nindent 8 }}
+        {{- include "governor.tlsInternal.initContainer" . | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ .Values.api.name }}
@@ -60,25 +60,25 @@ spec:
               port: {{ .Values.api.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
-          {{- if or .Values.api.persistence.enabled .Values.envoy.enabled }}
+          {{- if or .Values.api.persistence.enabled .Values.tlsInternal.enabled }}
           volumeMounts:
             {{- if .Values.api.persistence.enabled }}
             - name: {{ .Values.api.persistence.name }}
               mountPath: {{ .Values.api.persistence.mountPath }}
             {{- end }}
           {{- end }}
-        {{- if .Values.envoy.enabled }}
-        {{- include "governor.envoy.sidecar" (dict "componentName" "api" "config" .Values.api "envoy" .Values.envoy "hasHttpPort" true "hasGrpcPort" true) | nindent 8 }}
+        {{- if .Values.tlsInternal.enabled }}
+        {{- include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal "hasHttpPort" true "hasGrpcPort" true) | nindent 8 }}
         {{- end }}
-      {{- if or .Values.api.persistence.enabled .Values.envoy.enabled }}
+      {{- if or .Values.api.persistence.enabled .Values.tlsInternal.enabled }}
       volumes:
         {{- if .Values.api.persistence.enabled }}
         - name: {{ .Values.api.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ .Values.api.persistence.claimName }}
         {{- end }}
-        {{- if .Values.envoy.enabled }}
-        {{- include "governor.envoy.volumes" (dict "componentName" "api" "config" .Values.api "envoy" .Values.envoy) | nindent 8 }}
+        {{- if .Values.tlsInternal.enabled }}
+        {{- include "governor.tlsInternal.volumes" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal) | nindent 8 }}
         {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
