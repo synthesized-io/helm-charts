@@ -1,0 +1,16 @@
+{{- if eq .Values.mode "saas" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.director.name }}
+  labels:
+    group: {{ .Values.director.group }}
+spec:
+  type: {{ .Values.director.service.type }}
+  selector:
+    app: {{ .Values.director.name }}
+  ports:
+    - port: {{ .Values.director.service.port }}
+      targetPort: {{ .Values.director.container.port }}
+      name: defaultport
+{{- end }}

@@ -136,6 +136,29 @@ agent:
     claimName: agent-pvc
     size: 10Gi
 
+director:
+  name: governor-director
+  group: governor-director
+  image:
+    repository: synthesized.azurecr.io/synthesized-director
+    pullPolicy: Always
+  container:
+    port: 50051
+    config:
+      OPENAI_API_VERSION: "2023-03-15-preview"
+      AZURE_DEPLOYMENT: "gpt-35-turbo"
+      AZURE_OPENAI_ENDPOINT: "https://director-openai.openai.azure.com/"
+    secretConfig:
+      AZURE_OPENAI_API_KEY: ""
+      DATABASE_URL_POSTGRES: ""
+    command:
+      - python3.9
+      - director/server.py
+    healthchecks:
+  service:
+    type: ClusterIP
+    port: 50051
+
 nodeSelector: {}
 
 tolerations: []
