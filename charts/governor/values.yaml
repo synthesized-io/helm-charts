@@ -3,6 +3,43 @@ sandbox: false
 # Enables OpenShift-friendly mounts for nginx; auto-detected in templates via route.openshift.io.
 openShiftEnabled: false
 
+# Envoy sidecar configuration for internal TLS
+tlsInternal:
+  enabled: false
+  image:
+    repository: envoyproxy/envoy
+    tag: v1.36.4
+    pullPolicy: IfNotPresent
+  resources: {}
+  # Certificate configuration
+  certificates:
+    # cert-manager issuer reference
+    issuerRef:
+      name: "internal-ca-issuer"
+      kind: "ClusterIssuer"
+    # Private key configuration
+    privateKey:
+      algorithm: ECDSA
+      size: 256
+    # Duration of certificates
+    duration: 8760h  # 1 year
+    # Renew before expiry
+    renewBefore: 720h  # 30 days
+  # Port mappings for Envoy listeners
+  ports:
+    # Envoy admin port (for health checks)
+    admin: 9901
+    # Secure listener ports (external facing)
+    secureHttp: 8443
+    secureGrpc: 50443
+    # Local egress ports (app connects here, envoy does TLS upstream)
+    egressHttp: 15001
+    egressGrpc: 15002
+  # Log level for Envoy
+  logLevel: info
+
+imagePullSecrets: []
+
 api:
   name: governor-api
   group: governor-api

@@ -1,0 +1,22 @@
+{{- if .Values.tlsInternal.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.agent.name }}-envoy-config
+  labels:
+    app: {{ .Values.agent.name }}
+data:
+  envoy.yaml: |
+    admin:
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: {{ .Values.tlsInternal.ports.admin }}
+
+    static_resources:
+      listeners:
+        {{- include "governor.envoy.apiGrpcEgressListener" (dict "egressGrpcPort" .Values.tlsInternal.ports.egressGrpc) | nindent 8 }}
+
+      clusters:
+        {{- include "governor.envoy.apiGrpcsCluster" (dict "apiName" .Values.api.name "apiGrpcPort" .Values.api.service.grpcPort) | nindent 8 }}
+{{- end }}

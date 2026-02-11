@@ -1,0 +1,76 @@
+{{- if .Values.tlsInternal.enabled }}
+---
+# Certificate for governor-api
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.api.name }}-cert
+  labels:
+    app: {{ .Values.api.name }}
+spec:
+  secretName: {{ .Values.api.name }}-tls
+  duration: {{ .Values.tlsInternal.certificates.duration }}
+  renewBefore: {{ .Values.tlsInternal.certificates.renewBefore }}
+  privateKey:
+    algorithm: {{ .Values.tlsInternal.certificates.privateKey.algorithm }}
+    size: {{ .Values.tlsInternal.certificates.privateKey.size }}
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - {{ .Values.api.name }}
+    - {{ .Values.api.name }}.{{ .Release.Namespace }}
+    - {{ .Values.api.name }}.{{ .Release.Namespace }}.svc
+    - {{ .Values.api.name }}.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    name: {{ .Values.tlsInternal.certificates.issuerRef.name }}
+    kind: {{ .Values.tlsInternal.certificates.issuerRef.kind }}
+---
+# Certificate for governor-front
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.front.name }}-cert
+  labels:
+    app: {{ .Values.front.name }}
+spec:
+  secretName: {{ .Values.front.name }}-tls
+  duration: {{ .Values.tlsInternal.certificates.duration }}
+  renewBefore: {{ .Values.tlsInternal.certificates.renewBefore }}
+  privateKey:
+    algorithm: {{ .Values.tlsInternal.certificates.privateKey.algorithm }}
+    size: {{ .Values.tlsInternal.certificates.privateKey.size }}
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - {{ .Values.front.name }}
+    - {{ .Values.front.name }}.{{ .Release.Namespace }}
+    - {{ .Values.front.name }}.{{ .Release.Namespace }}.svc
+    - {{ .Values.front.name }}.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    name: {{ .Values.tlsInternal.certificates.issuerRef.name }}
+    kind: {{ .Values.tlsInternal.certificates.issuerRef.kind }}
+---
+# Certificate for governor-agent
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.agent.name }}-cert
+  labels:
+    app: {{ .Values.agent.name }}
+spec:
+  secretName: {{ .Values.agent.name }}-tls
+  duration: {{ .Values.tlsInternal.certificates.duration }}
+  renewBefore: {{ .Values.tlsInternal.certificates.renewBefore }}
+  privateKey:
+    algorithm: {{ .Values.tlsInternal.certificates.privateKey.algorithm }}
+    size: {{ .Values.tlsInternal.certificates.privateKey.size }}
+  usages:
+    - client auth
+  dnsNames:
+    - {{ .Values.agent.name }}
+  issuerRef:
+    name: {{ .Values.tlsInternal.certificates.issuerRef.name }}
+    kind: {{ .Values.tlsInternal.certificates.issuerRef.kind }}
+{{- end }}

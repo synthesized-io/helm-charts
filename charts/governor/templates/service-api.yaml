@@ -9,9 +9,20 @@ spec:
   selector:
     app: {{ .Values.api.name }}
   ports:
+    {{- if .Values.tlsInternal.enabled }}
+    # When Envoy is enabled, route through secure ports
+    - port: {{ .Values.api.service.port }}
+      targetPort: {{ .Values.tlsInternal.ports.secureHttp }}
+      name: https
+    - port: {{ .Values.api.service.grpcPort }}
+      targetPort: {{ .Values.tlsInternal.ports.secureGrpc }}
+      name: grpcs
+    {{- else }}
+    # Original plaintext ports
     - port: {{ .Values.api.service.port }}
       targetPort: {{ .Values.api.container.port }}
       name: defaultport
     - port: {{ .Values.api.service.grpcPort }}
-      targetPort: {{ .Values.api.container.grpcPort}}
+      targetPort: {{ .Values.api.container.grpcPort }}
       name: grpcport
+    {{- end }}
