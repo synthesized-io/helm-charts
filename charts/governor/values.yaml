@@ -25,6 +25,14 @@ tlsInternal:
     duration: 8760h  # 1 year
     # Renew before expiry
     renewBefore: 720h  # 30 days
+    # CA certificate for upstream TLS validation.
+    # By default, ca.crt is read from a separate secret (e.g. copied from the CA
+    # or provided by an external PKI). Set bundled=true to fall back to using
+    # the ca.crt that cert-manager bundles into each per-component TLS secret.
+    ca:
+      bundled: false
+      secretName: "internal-ca-cert"
+      key: "ca.crt"
   # Port mappings for Envoy listeners
   ports:
     # Envoy admin port (for health checks)
