@@ -21,6 +21,7 @@ tlsInternal:
     privateKey:
       algorithm: ECDSA
       size: 256
+      encoding: PKCS8
     # Duration of certificates
     duration: 8760h  # 1 year
     # Renew before expiry
