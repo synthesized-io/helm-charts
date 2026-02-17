@@ -1,6 +1,6 @@
 {{/*
 Envoy sidecar container template
-Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.envoy "hasHttpPort" true "hasGrpcPort" true) }}
+Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal "hasHttpPort" true "hasGrpcPort" true) }}
 */}}
 {{- define "governor.tlsInternal.sidecar" -}}
 - name: envoy-sidecar
@@ -46,6 +46,9 @@ Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "co
     - name: tls-certs
       mountPath: /etc/envoy/certs
       readOnly: true
+    - name: ca-cert
+      mountPath: /etc/envoy/ca
+      readOnly: true
 {{- end }}
 
 {{/*
@@ -54,13 +57,17 @@ Usage: {{ include "governor.tlsInternal.initContainer" . }}
 */}}
 {{- define "governor.tlsInternal.initContainer" -}}
 - name: wait-for-certs
-  image: busybox:1.36
+  {{/*
+  We use the same image as the main sidecar, because convenience images such as 'busybox' might
+  not be readily available in the target environment.
+  */}}
+  image: "{{ .Values.tlsInternal.image.repository }}:{{ .Values.tlsInternal.image.tag }}"
   command:
     - /bin/sh
     - -c
     - |
       echo "Waiting for TLS certificates..."
-      while [ ! -f /etc/envoy/certs/tls.crt ] || [ ! -f /etc/envoy/certs/tls.key ]; do
+      while [ ! -f /etc/envoy/certs/tls.crt ] || [ ! -f /etc/envoy/certs/tls.key ] || [ ! -f /etc/envoy/ca/ca.crt ]; do
         echo "Certificates not ready, waiting..."
         sleep 2
       done
@@ -69,11 +76,14 @@ Usage: {{ include "governor.tlsInternal.initContainer" . }}
     - name: tls-certs
       mountPath: /etc/envoy/certs
       readOnly: true
+    - name: ca-cert
+      mountPath: /etc/envoy/ca
+      readOnly: true
 {{- end }}
 
 {{/*
 Envoy volumes template
-Usage: {{ include "governor.tlsInternal.volumes" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.envoy) }}
+Usage: {{ include "governor.tlsInternal.volumes" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal) }}
 */}}
 {{- define "governor.tlsInternal.volumes" -}}
 - name: envoy-config
@@ -82,6 +92,19 @@ Usage: {{ include "governor.tlsInternal.volumes" (dict "componentName" "api" "co
 - name: tls-certs
   secret:
     secretName: {{ .config.name }}-tls
+- name: ca-cert
+  secret:
+    {{- if .tlsInternal.certificates.ca.bundled }}
+    secretName: {{ .config.name }}-tls
+    items:
+      - key: ca.crt
+        path: ca.crt
+    {{- else }}
+    secretName: {{ .tlsInternal.certificates.ca.secretName }}
+    items:
+      - key: {{ .tlsInternal.certificates.ca.key }}
+        path: ca.crt
+    {{- end }}
 {{- end }}
 
 {{/*
@@ -120,7 +143,7 @@ transport_socket:
     common_tls_context:
       validation_context:
         trusted_ca:
-          filename: /etc/envoy/certs/ca.crt
+          filename: /etc/envoy/ca/ca.crt
 {{- end }}
 
 {{/*

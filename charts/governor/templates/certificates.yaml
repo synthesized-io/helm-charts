@@ -14,14 +14,21 @@ spec:
   privateKey:
     algorithm: {{ .Values.tlsInternal.certificates.privateKey.algorithm }}
     size: {{ .Values.tlsInternal.certificates.privateKey.size }}
+    encoding: {{ .Values.tlsInternal.certificates.privateKey.encoding }}
   usages:
     - server auth
     - client auth
+  {{- if .Values.api.tlsInternal.certificate }}
+  {{- with .Values.api.tlsInternal.certificate.commonName }}
+  commonName: {{ . }}
+  {{- end }}
+  {{- end }}
   dnsNames:
-    - {{ .Values.api.name }}
-    - {{ .Values.api.name }}.{{ .Release.Namespace }}
-    - {{ .Values.api.name }}.{{ .Release.Namespace }}.svc
+    {{- if and .Values.api.tlsInternal.certificate .Values.api.tlsInternal.certificate.dnsNames }}
+    {{- toYaml .Values.api.tlsInternal.certificate.dnsNames | nindent 4 }}
+    {{- else }}
     - {{ .Values.api.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    {{- end }}
   issuerRef:
     name: {{ .Values.tlsInternal.certificates.issuerRef.name }}
     kind: {{ .Values.tlsInternal.certificates.issuerRef.kind }}
@@ -40,14 +47,21 @@ spec:
   privateKey:
     algorithm: {{ .Values.tlsInternal.certificates.privateKey.algorithm }}
     size: {{ .Values.tlsInternal.certificates.privateKey.size }}
+    encoding: {{ .Values.tlsInternal.certificates.privateKey.encoding }}
   usages:
     - server auth
     - client auth
+  {{- if .Values.front.tlsInternal.certificate }}
+  {{- with .Values.front.tlsInternal.certificate.commonName }}
+  commonName: {{ . }}
+  {{- end }}
+  {{- end }}
   dnsNames:
-    - {{ .Values.front.name }}
-    - {{ .Values.front.name }}.{{ .Release.Namespace }}
-    - {{ .Values.front.name }}.{{ .Release.Namespace }}.svc
+    {{- if and .Values.front.tlsInternal.certificate .Values.front.tlsInternal.certificate.dnsNames }}
+    {{- toYaml .Values.front.tlsInternal.certificate.dnsNames | nindent 4 }}
+    {{- else }}
     - {{ .Values.front.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    {{- end }}
   issuerRef:
     name: {{ .Values.tlsInternal.certificates.issuerRef.name }}
     kind: {{ .Values.tlsInternal.certificates.issuerRef.kind }}
@@ -66,10 +80,20 @@ spec:
   privateKey:
     algorithm: {{ .Values.tlsInternal.certificates.privateKey.algorithm }}
     size: {{ .Values.tlsInternal.certificates.privateKey.size }}
+    encoding: {{ .Values.tlsInternal.certificates.privateKey.encoding }}
   usages:
     - client auth
+  {{- if .Values.agent.tlsInternal.certificate }}
+  {{- with .Values.agent.tlsInternal.certificate.commonName }}
+  commonName: {{ . }}
+  {{- end }}
+  {{- end }}
   dnsNames:
-    - {{ .Values.agent.name }}
+    {{- if and .Values.agent.tlsInternal.certificate .Values.agent.tlsInternal.certificate.dnsNames }}
+    {{- toYaml .Values.agent.tlsInternal.certificate.dnsNames | nindent 4 }}
+    {{- else }}
+    - {{ .Values.agent.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    {{- end }}
   issuerRef:
     name: {{ .Values.tlsInternal.certificates.issuerRef.name }}
     kind: {{ .Values.tlsInternal.certificates.issuerRef.kind }}

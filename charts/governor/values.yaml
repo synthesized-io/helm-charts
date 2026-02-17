@@ -21,10 +21,19 @@ tlsInternal:
     privateKey:
       algorithm: ECDSA
       size: 256
+      encoding: PKCS8
     # Duration of certificates
     duration: 8760h  # 1 year
     # Renew before expiry
     renewBefore: 720h  # 30 days
+    # CA certificate for upstream TLS validation.
+    # By default, ca.crt is read from a separate secret (e.g. copied from the CA
+    # or provided by an external PKI). Set bundled=true to fall back to using
+    # the ca.crt that cert-manager bundles into each per-component TLS secret.
+    ca:
+      bundled: false
+      secretName: "internal-ca-cert"
+      key: "ca.crt"
   # Port mappings for Envoy listeners
   ports:
     # Envoy admin port (for health checks)
@@ -78,6 +87,11 @@ api:
     type: ClusterIP
     port: 80
     grpcPort: 50055
+  tlsInternal:
+    certificate:
+      # commonName: governor-api
+      # dnsNames:
+      #   - governor-api.governor.svc.cluster.local
 
 front:
   name: governor-front
@@ -107,6 +121,11 @@ front:
   service:
     type: ClusterIP
     port: 80
+  tlsInternal:
+    certificate:
+      # commonName: governor-front
+      # dnsNames:
+      #   - governor-front.governor.svc.cluster.local
 
 agent:
   name: governor-agent
@@ -135,6 +154,11 @@ agent:
     mountPath: /app/rocksdb
     claimName: agent-pvc
     size: 10Gi
+  tlsInternal:
+    certificate:
+      # commonName: governor-agent
+      # dnsNames:
+      #   - governor-agent.governor.svc.cluster.local
 
 director:
   name: governor-director
