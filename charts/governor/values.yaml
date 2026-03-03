@@ -145,6 +145,8 @@ api:
       # commonName: governor-api
       # dnsNames:
       #   - governor-api.governor.svc.cluster.local
+      # usages:
+      #   - server auth
 
 front:
   name: governor-front
@@ -188,6 +190,8 @@ front:
       # commonName: governor-front
       # dnsNames:
       #   - governor-front.governor.svc.cluster.local
+      # usages:
+      #   - server auth
 
 agent:
   name: governor-agent
@@ -231,6 +235,8 @@ agent:
       # commonName: governor-agent
       # dnsNames:
       #   - governor-agent.governor.svc.cluster.local
+      # usages:
+      #   - server auth
 
 director:
   name: governor-director
