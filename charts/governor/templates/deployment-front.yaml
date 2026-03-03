@@ -77,8 +77,9 @@ spec:
               port: {{ .Values.front.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
-          {{- if $openShift }}
+          {{- if or $openShift .Values.front.container.extraVolumeMounts }}
           volumeMounts:
+            {{- if $openShift }}
             - name: nginx-config
               mountPath: /etc/nginx/conf.d
             - name: app-data
@@ -87,6 +88,10 @@ spec:
               mountPath: /var/cache/nginx
             - name: nginx-run
               mountPath: /var/run/nginx
+            {{- end }}
+            {{- with .Values.front.container.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
         {{- if .Values.tlsInternal.enabled }}
         {{- include "governor.tlsInternal.sidecar" (dict "componentName" "front" "config" .Values.front "tlsInternal" .Values.tlsInternal "hasHttpPort" true "hasGrpcPort" false) | nindent 8 }}
@@ -104,6 +109,9 @@ spec:
         {{- end }}
         {{- if .Values.tlsInternal.enabled }}
         {{- include "governor.tlsInternal.volumes" (dict "componentName" "front" "config" .Values.front "tlsInternal" .Values.tlsInternal) | nindent 8 }}
+        {{- end }}
+        {{- with .Values.front.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
