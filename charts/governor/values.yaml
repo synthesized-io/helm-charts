@@ -54,6 +54,11 @@ tlsInternal:
     # Local egress ports (app connects here, envoy does TLS upstream)
     egressHttp: 15001
     egressGrpc: 15002
+  # Route /api requests directly from the front Envoy to the API backend.
+  # This is good for cases where the frontend Envoy sidecar is used to terminate
+  # external traffic and needs some backend-provided endpoints - for example,
+  # for OIDC redirection.
+  frontendProxiesBackend: true
   # Log level for Envoy
   logLevel: info
 
