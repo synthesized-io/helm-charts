@@ -19,3 +19,24 @@ data:
 {{ toYaml .Values.agent.container.config | indent 2}}
 {{- end }}
 {{- end }}
+{{- if .Values.agent.persistence.enabled }}
+  TDK_WORKINGDIRECTORY_ENABLED: "true"
+  TDK_WORKING_DIRECTORY_PATH: {{ printf "%s/storage" .Values.agent.persistence.mountPath | quote }}
+  AGENT_WORKING_DIRECTORY_PATH: {{ printf "%s/storage" .Values.agent.persistence.mountPath | quote }}
+{{- else }}
+  TDK_WORKINGDIRECTORY_ENABLED: "false"
+{{- end }}
+  {{- with .Values.s3Client }}
+  {{- if .forcePathStyle }}
+  TDK_S3_FORCE_PATH_STYLE: {{ .forcePathStyle | quote }}
+  {{- end }}
+  {{- if .protocol }}
+  TDK_S3_PROTOCOL: {{ .protocol | quote }}
+  {{- end }}
+  {{- if .region }}
+  TDK_S3_REGION: {{ .region | quote }}
+  {{- end }}
+  {{- if .endpoint }}
+  TDK_S3_ENDPOINT: {{ .endpoint | quote }}
+  {{- end }}
+  {{- end }}

@@ -4,7 +4,29 @@ metadata:
   name: {{ .Values.api.name }}-configmap
 data:
 {{- if .Values.api.container.config }}
-{{ toYaml .Values.api.container.config | indent 2}}
+{{ toYaml .Values.api.container.config | indent 2 }}
+{{- end }}
+  UI_TDK_AGENTS: {{ .Values.tdkAgents.enabled | quote }}
+  UI_TDK_AGENTS_BY_DEFAULT: {{ .Values.tdkAgents.useByDefault | quote }}
+  {{- with .Values.s3Client }}
+  {{- if .forcePathStyle }}
+  TDK_S3_FORCE_PATH_STYLE: {{ .forcePathStyle | quote }}
+  {{- end }}
+  {{- if .protocol }}
+  TDK_S3_PROTOCOL: {{ .protocol | quote }}
+  {{- end }}
+  {{- if .region }}
+  TDK_S3_REGION: {{ .region | quote }}
+  {{- end }}
+  {{- if .endpoint }}
+  TDK_S3_ENDPOINT: {{ .endpoint | quote }}
+  {{- end }}
+  {{- end }}
+{{- if .Values.api.persistence.enabled }}
+  TDK_WORKINGDIRECTORY_ENABLED: "true"
+  TDK_WORKING_DIRECTORY_PATH: {{ printf "%s/storage" .Values.api.persistence.mountPath | quote }}
+{{- else }}
+  TDK_WORKINGDIRECTORY_ENABLED: "false"
 {{- end }}
 {{- if eq .Values.mode "saas" }}
   DIRECTOR_SERVERHOST: "{{ .Values.director.name }}"

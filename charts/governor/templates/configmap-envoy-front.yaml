@@ -34,6 +34,12 @@ data:
                         - name: local_service
                           domains: ["*"]
                           routes:
+                            {{- if .Values.tlsInternal.frontendProxiesBackend }}
+                            - match:
+                                prefix: "/api"
+                              route:
+                                cluster: api_https
+                            {{- end }}
                             - match:
                                 prefix: "/"
                               route:
