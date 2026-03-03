@@ -44,7 +44,7 @@ spec:
             - secretRef:
                 name: {{ .Values.agent.name }}-secret
           env:
-            {{- range .Values.agent.container.secretenv }}
+            {{- range .Values.agent.container.secretEnv }}
             - name: {{ .name }}
               valueFrom:
                 secretKeyRef:

@@ -19,6 +19,8 @@ data:
 {{ toYaml .Values.front.container.config | indent 2}}
 {{- end }}
 {{- end }}
+  UI_TDK_AGENTS: {{ .Values.tdkAgents.enabled | quote }}
+  UI_TDK_AGENTS_BY_DEFAULT: {{ .Values.tdkAgents.useByDefault | quote }}
 {{- if eq .Values.mode "saas" }}
   UI_POSTHOG_ANALYTICS_API_HOST: 'https://eu.posthog.com'
   UI_ENVIRONMENT: "cloud"

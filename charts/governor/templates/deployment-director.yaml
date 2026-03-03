@@ -39,7 +39,7 @@ spec:
             - secretRef:
                 name: {{ .Values.director.name }}-secret
           env:
-            {{- range .Values.director.container.secretenv }}
+            {{- range .Values.director.container.secretEnv }}
             - name: {{ .name }}
               valueFrom:
                 secretKeyRef:
