@@ -65,9 +65,6 @@ Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "co
     - name: tls-certs
       mountPath: /etc/envoy/certs
       readOnly: true
-    - name: ca-cert
-      mountPath: /etc/envoy/ca
-      readOnly: true
 {{- end }}
 
 {{/*
@@ -86,7 +83,7 @@ Usage: {{ include "governor.tlsInternal.initContainer" . }}
     - -c
     - |
       echo "Waiting for TLS certificates..."
-      while [ ! -f /etc/envoy/certs/tls.crt ] || [ ! -f /etc/envoy/certs/tls.key ] || [ ! -f /etc/envoy/ca/ca.crt ]; do
+      while [ ! -f /etc/envoy/certs/tls.crt ] || [ ! -f /etc/envoy/certs/tls.key ] || [ ! -f /etc/envoy/certs/ca.crt ]; do
         echo "Certificates not ready, waiting..."
         sleep 2
       done
@@ -94,9 +91,6 @@ Usage: {{ include "governor.tlsInternal.initContainer" . }}
   volumeMounts:
     - name: tls-certs
       mountPath: /etc/envoy/certs
-      readOnly: true
-    - name: ca-cert
-      mountPath: /etc/envoy/ca
       readOnly: true
 {{- end }}
 
@@ -109,21 +103,28 @@ Usage: {{ include "governor.tlsInternal.volumes" (dict "componentName" "api" "co
   configMap:
     name: {{ .config.name }}-envoy-config
 - name: tls-certs
-  secret:
-    secretName: {{ .config.name }}-tls
-- name: ca-cert
-  secret:
-    {{- if .tlsInternal.certificates.ca.bundled }}
-    secretName: {{ .config.name }}-tls
-    items:
-      - key: ca.crt
-        path: ca.crt
-    {{- else }}
-    secretName: {{ .tlsInternal.certificates.ca.secretName }}
-    items:
-      - key: {{ .tlsInternal.certificates.ca.key }}
-        path: ca.crt
-    {{- end }}
+  projected:
+    defaultMode: 420
+    sources:
+      - secret:
+          name: {{ .config.name }}-tls
+          items:
+            - key: tls.crt
+              path: tls.crt
+            - key: tls.key
+              path: tls.key
+      - secret:
+          {{- if .tlsInternal.certificates.ca.bundled }}
+          name: {{ .config.name }}-tls
+          items:
+            - key: ca.crt
+              path: ca.crt
+          {{- else }}
+          name: {{ .tlsInternal.certificates.ca.secretName }}
+          items:
+            - key: {{ .tlsInternal.certificates.ca.key }}
+              path: ca.crt
+          {{- end }}
 {{- end }}
 
 {{/*
@@ -162,7 +163,7 @@ transport_socket:
     common_tls_context:
       validation_context:
         trusted_ca:
-          filename: /etc/envoy/ca/ca.crt
+          filename: /etc/envoy/certs/ca.crt
 {{- end }}
 
 {{/*
