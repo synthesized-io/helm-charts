@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: {{ .Values.director.name }}
   labels:
-    group: {{ .Values.director.group }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
   type: {{ .Values.director.service.type }}
   selector:
