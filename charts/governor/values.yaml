@@ -62,6 +62,9 @@ tlsInternal:
   # Log level for Envoy
   logLevel: info
 
+# Additional labels to apply to all resources (appended to the standard labels).
+commonLabels: {}
+
 imagePullSecrets: []
 
 api:

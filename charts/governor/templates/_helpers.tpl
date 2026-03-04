@@ -6,12 +6,15 @@ Chart name, truncated to 63 chars.
 {{- end }}
 
 {{/*
-Selector labels applied to all resources.
+Standard labels applied to all resources.
 */}}
 {{- define "governor.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "governor.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: Helm
+{{- with .Values.commonLabels }}
+{{ toYaml . }}
+{{- end }}
 {{- end }}
 
 {{/*
