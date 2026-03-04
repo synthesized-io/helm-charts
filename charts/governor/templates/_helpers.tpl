@@ -1,4 +1,20 @@
 {{/*
+Chart name, truncated to 63 chars.
+*/}}
+{{- define "governor.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Selector labels applied to all resources.
+*/}}
+{{- define "governor.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "governor.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/managed-by: Helm
+{{- end }}
+
+{{/*
 Envoy sidecar container template
 Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal "hasHttpPort" true "hasGrpcPort" true) }}
 */}}

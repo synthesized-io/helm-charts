@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.api.name }}
   labels:
     app: {{ .Values.api.name }}
-    group: {{ .Values.api.group }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.api.replicaCount }}
   selector:
@@ -14,7 +14,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.api.name }}
-        group: {{ .Values.api.group }}
+        {{- include "governor.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.api.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:

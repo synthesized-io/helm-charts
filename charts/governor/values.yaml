@@ -66,7 +66,6 @@ imagePullSecrets: []
 
 api:
   name: governor-api
-  group: governor-api
   image:
     repository: synthesizedio/synthesized-api
     pullPolicy: Always
@@ -150,7 +149,6 @@ api:
 
 front:
   name: governor-front
-  group: governor-front
   image:
     repository: synthesizedio/synthesized-front
     pullPolicy: Always
@@ -195,7 +193,6 @@ front:
 
 agent:
   name: governor-agent
-  group: governor-director
   image:
     repository: synthesizedio/synthesized-agent
     pullPolicy: Always
@@ -240,7 +237,6 @@ agent:
 
 director:
   name: governor-director
-  group: governor-director
   image:
     repository: synthesized.azurecr.io/synthesized-director
     pullPolicy: Always

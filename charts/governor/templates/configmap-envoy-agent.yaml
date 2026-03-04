@@ -5,6 +5,7 @@ metadata:
   name: {{ .Values.agent.name }}-envoy-config
   labels:
     app: {{ .Values.agent.name }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
 data:
   envoy.yaml: |
     admin:

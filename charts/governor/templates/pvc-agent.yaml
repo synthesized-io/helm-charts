@@ -6,6 +6,7 @@ metadata:
   name: {{ .Values.agent.persistence.claimName }}
   labels:
     app: {{ .Values.agent.name }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
   accessModes:
     - ReadWriteOnce

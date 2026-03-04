@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ .Values.api.name }}
   labels:
-    group: {{ .Values.api.group }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
   type: {{ .Values.api.service.type }}
   selector:

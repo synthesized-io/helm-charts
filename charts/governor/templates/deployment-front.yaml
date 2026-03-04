@@ -5,7 +5,7 @@ metadata:
   name: {{ .Values.front.name }}
   labels:
     app: {{ .Values.front.name }}
-    group: {{ .Values.front.group }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.front.replicaCount }}
   selector:
@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.front.name }}
-        group: {{ .Values.front.group }}
+        {{- include "governor.selectorLabels" . | nindent 8 }}
     spec:
       {{- if or $openShift .Values.tlsInternal.enabled }}
       initContainers:
