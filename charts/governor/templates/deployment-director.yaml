@@ -5,7 +5,7 @@ metadata:
   name: {{ .Values.director.name }}
   labels:
     app: {{ .Values.director.name }}
-    group: {{ .Values.director.group }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.director.replicaCount }}
   selector:
@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.director.name }}
-        group: {{ .Values.director.group }}
+        {{- include "governor.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.director.imagePullSecrets }}
       imagePullSecrets:

@@ -5,6 +5,7 @@ metadata:
   name: {{ .Release.Name }}-ingress
   labels:
     app: {{ .Release.Name }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
   annotations:
 {{- range $key, $value := .Values.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}

@@ -5,6 +5,7 @@ metadata:
   name: {{ .Values.agent.name }}-cert
   labels:
     app: {{ .Values.agent.name }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
   secretName: {{ .Values.agent.name }}-tls
   duration: {{ .Values.tlsInternal.certificates.duration }}
