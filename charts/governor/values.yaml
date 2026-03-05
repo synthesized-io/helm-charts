@@ -91,32 +91,32 @@ api:
       - name: SPRING_DATASOURCE_URL
         valueFrom:
           secretKeyRef:
-            name: governor-external-secret
+            name: governor-api-secret
             key: SPRING_DATASOURCE_URL
       - name: SPRING_DATASOURCE_USERNAME
         valueFrom:
           secretKeyRef:
-            name: governor-external-secret
+            name: governor-api-secret
             key: SPRING_DATASOURCE_USERNAME
       - name: SPRING_DATASOURCE_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: governor-external-secret
+            name: governor-api-secret
             key: SPRING_DATASOURCE_PASSWORD
       - name: JWT_SECRET
         valueFrom:
           secretKeyRef:
-            name: governor-external-secret
+            name: governor-api-secret
             key: JWT_SECRET
       - name: ADMIN_EMAIL
         valueFrom:
           secretKeyRef:
-            name: governor-external-secret
+            name: governor-api-secret
             key: ADMIN_EMAIL
       - name: ADMIN_DEFAULT_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: governor-external-secret
+            name: governor-api-secret
             key: ADMIN_DEFAULT_PASSWORD
   # Extra volume mounts for the api container
   # extraVolumeMounts:
