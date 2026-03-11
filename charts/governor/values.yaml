@@ -135,6 +135,7 @@ api:
     mountPath: /data
     claimName: api-pvc
     size: 10Gi
+    storageClassName: ""
   service:
     type: ClusterIP
     port: 80
@@ -227,6 +228,7 @@ agent:
     mountPath: /app/rocksdb
     claimName: agent-pvc
     size: 10Gi
+    storageClassName: ""
   tlsInternal:
     certificate:
       # commonName: governor-agent
