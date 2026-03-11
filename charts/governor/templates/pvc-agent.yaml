@@ -8,6 +8,9 @@ metadata:
     app: {{ .Values.agent.name }}
     {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
+  {{- if .Values.agent.persistence.storageClassName }}
+  storageClassName: {{ .Values.agent.persistence.storageClassName }}
+  {{- end }}
   accessModes:
     - ReadWriteOnce
   resources:
