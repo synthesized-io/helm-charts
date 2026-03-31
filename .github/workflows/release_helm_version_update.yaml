@@ -1,0 +1,74 @@
+name: Update helm chart version
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: 'Expected release version in format: 1.x.y'
+        required: true
+        type: string
+  repository_dispatch:
+    types: [update-helm-version]
+
+env:
+  RELEASE_VERSION: ${{ github.event.inputs.release-version || github.event.client_payload.version }}
+
+jobs:
+  update-chart-version:
+    name: Update chart version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: generate-token
+        with:
+          app-id: ${{ vars.TDK_GOVERNOR_RELEASE_APP_ID }}
+          private-key: ${{ secrets.TDK_GOVERNOR_RELEASE_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ env.RELEASE_VERSION }}"
+          if [ -z "$VERSION" ]; then
+            echo "::error::No version provided"
+            exit 1
+          fi
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Version must be in format X.Y.Z (e.g. 1.150.4), got: $VERSION"
+            exit 1
+          fi
+
+      - name: Update Chart.yaml
+        run: |
+          yq -i '.version = strenv(RELEASE_VERSION)' charts/governor/Chart.yaml
+          yq -i '.appVersion = strenv(RELEASE_VERSION)' charts/governor/Chart.yaml
+
+      - name: Create branch and commit
+        run: |
+          BRANCH_NAME="chore/release-v${{ env.RELEASE_VERSION }}"
+
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "::error::Branch $BRANCH_NAME already exists. A release PR for this version may already be open."
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH_NAME"
+          git add charts/governor/Chart.yaml
+          git commit -m "Release v${{ env.RELEASE_VERSION }}"
+          git push origin "$BRANCH_NAME"
+
+      - name: Create and auto-merge Pull Request
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          BRANCH_NAME="chore/release-v${{ env.RELEASE_VERSION }}"
+          pr=$(gh pr create --base main \
+            --head "$BRANCH_NAME" \
+            --title "Release v${{ env.RELEASE_VERSION }}" \
+            --body "Automated chart version update to v${{ env.RELEASE_VERSION }}.
+
+          ### Changes
+          - \`charts/governor/Chart.yaml\`: version and appVersion -> ${{ env.RELEASE_VERSION }}")
+          gh pr merge $pr --auto --squash
