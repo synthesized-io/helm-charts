@@ -18,10 +18,10 @@ jobs:
     name: Update chart version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@v1
         id: generate-token
         with:
-          app-id: ${{ vars.TDK_GOVERNOR_RELEASE_APP_ID }}
+          app-id: ${{ secrets.TDK_GOVERNOR_RELEASE_APP_ID }}
           private-key: ${{ secrets.TDK_GOVERNOR_RELEASE_APP_PRIVATE_KEY }}
 
       - uses: actions/checkout@v4
