@@ -1,0 +1,46 @@
+{{- if .Values.agent }}
+
+============================================================
+DEPRECATION WARNING
+============================================================
+You are using the legacy `agent:` values block. It has been
+renamed to `worker:` and will be removed in a future release.
+
+For now, your `agent:` values are automatically merged into
+`worker:` (with `worker:` taking precedence if both are set),
+so no immediate action is required.
+
+To migrate, rename `agent:` to `worker:` in your values file.
+The structure is identical except for env var names:
+
+  agent:                          worker:
+    container:                      container:
+      config:                         config:
+        AGENT_SERVERHOST: ...           WORKER_SERVERHOST: ...
+        AGENT_TAGS: ...                 WORKER_TAGS: ...
+
+`AGENT_*` environment variables are still accepted by the
+worker container at runtime — they are remapped to `WORKER_*`
+automatically — but switching to the new names in your values
+file is recommended.
+============================================================
+
+{{- end }}
+
+{{- if .Values.tdkAgents }}
+
+============================================================
+DEPRECATION WARNING
+============================================================
+You are using the legacy `tdkAgents:` feature flag. It has
+been renamed to `tdkWorkers:` and will be removed in a future
+release.
+
+To migrate:
+
+  tdkAgents:           ->   tdkWorkers:
+    enabled: true             enabled: true
+    useByDefault: true        useByDefault: true
+============================================================
+
+{{- end }}
