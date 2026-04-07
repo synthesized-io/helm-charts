@@ -4,9 +4,12 @@ sandbox: false
 openShiftEnabled: false
 
 # Feature flags shared across components
-tdkAgents:
+tdkWorkers:
   enabled: true
   useByDefault: true
+
+# DEPRECATED: Use tdkWorkers instead. Kept for backward compatibility.
+# tdkAgents:
 s3Client:
   # forcePathStyle: true
   # protocol: "http"
@@ -192,10 +195,10 @@ front:
       # usages:
       #   - server auth
 
-agent:
-  name: governor-agent
+worker:
+  name: governor-worker
   image:
-    repository: synthesizedio/synthesized-agent
+    repository: synthesizedio/synthesized-worker
     pullPolicy: Always
   # securityContext:
   #   runAsNonRoot: true
@@ -205,13 +208,13 @@ agent:
   securityContext: null
   container:
     config:
-      AGENT_SERVERHOST: 'governor-api'
-      AGENT_SERVERPORT: '50055'
-      AGENT_TAGS: 'default'
-      AGENT_DATASOURCES: '*'
-      AGENT_USEPLAINTEXT: "true"
-      AGENT_CONNECTIONS_POOL_SIZE: '20'
-  # Extra volume mounts for the agent container
+      WORKER_SERVERHOST: 'governor-api'
+      WORKER_SERVERPORT: '50055'
+      WORKER_TAGS: 'default'
+      WORKER_DATASOURCES: '*'
+      WORKER_USEPLAINTEXT: "true"
+      WORKER_CONNECTIONS_POOL_SIZE: '20'
+  # Extra volume mounts for the worker container
   # extraVolumeMounts:
   #   - name: my-secret
   #     mountPath: /mnt/secrets
@@ -224,18 +227,22 @@ agent:
   #       defaultMode: 420
   persistence:
     enabled: false
-    name: agent-pv
+    name: worker-pv
     mountPath: /app/rocksdb
-    claimName: agent-pvc
+    claimName: worker-pvc
     size: 10Gi
     storageClassName: ""
   tlsInternal:
     certificate:
-      # commonName: governor-agent
+      # commonName: governor-worker
       # dnsNames:
-      #   - governor-agent.governor.svc.cluster.local
+      #   - governor-worker.governor.svc.cluster.local
       # usages:
       #   - server auth
+
+# DEPRECATED: Use "worker" instead. Kept for backward compatibility — values
+# defined here are merged under "worker" (worker takes precedence).
+# agent:
 
 director:
   name: governor-director

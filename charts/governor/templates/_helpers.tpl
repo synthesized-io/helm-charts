@@ -15,6 +15,33 @@ app.kubernetes.io/managed-by: Helm
 {{- end }}
 
 {{/*
+Resolve worker values with backward-compatible fallback from legacy "agent" key.
+.Values.worker takes precedence; .Values.agent is merged underneath.
+Usage: {{ include "governor.workerValues" . }}
+Returns: the merged dict as YAML
+*/}}
+{{- define "governor.workerValues" -}}
+{{- $worker := .Values.worker | default dict -}}
+{{- $agent := .Values.agent | default dict -}}
+{{- mergeOverwrite (deepCopy $agent) $worker | toYaml -}}
+{{- end -}}
+
+{{/*
+Shorthand to get the resolved worker config dict.
+Must be used via `fromYaml` in templates:
+  {{- $w := include "governor.workerValues" . | fromYaml -}}
+*/}}
+
+{{/*
+Resolve tdkWorkers feature flag with fallback from legacy "tdkAgents" key.
+*/}}
+{{- define "governor.tdkWorkersValues" -}}
+{{- $workers := .Values.tdkWorkers | default dict -}}
+{{- $agents := .Values.tdkAgents | default dict -}}
+{{- mergeOverwrite (deepCopy $agents) $workers | toYaml -}}
+{{- end -}}
+
+{{/*
 Envoy sidecar container template
 Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal "hasHttpPort" true "hasGrpcPort" true) }}
 */}}

@@ -1,19 +1,19 @@
-
-{{- if .Values.agent.persistence.enabled }}
+{{- $w := include "governor.workerValues" . | fromYaml -}}
+{{- if $w.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.agent.persistence.claimName }}
+  name: {{ $w.persistence.claimName }}
   labels:
-    app: {{ .Values.agent.name }}
+    app: {{ $w.name }}
     {{- include "governor.selectorLabels" . | nindent 4 }}
 spec:
-  {{- if .Values.agent.persistence.storageClassName }}
-  storageClassName: {{ .Values.agent.persistence.storageClassName }}
+  {{- if $w.persistence.storageClassName }}
+  storageClassName: {{ $w.persistence.storageClassName }}
   {{- end }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.agent.persistence.size }}
+      storage: {{ $w.persistence.size }}
 {{- end }}

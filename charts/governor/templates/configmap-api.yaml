@@ -8,8 +8,9 @@ data:
 {{- if .Values.api.container.config }}
 {{ toYaml .Values.api.container.config | indent 2 }}
 {{- end }}
-  UI_TDK_AGENTS: {{ .Values.tdkAgents.enabled | quote }}
-  UI_TDK_AGENTS_BY_DEFAULT: {{ .Values.tdkAgents.useByDefault | quote }}
+  {{- $tdkW := include "governor.tdkWorkersValues" . | fromYaml }}
+  UI_TDK_AGENTS: {{ $tdkW.enabled | quote }}
+  UI_TDK_AGENTS_BY_DEFAULT: {{ $tdkW.useByDefault | quote }}
   {{- with .Values.s3Client }}
   {{- if .forcePathStyle }}
   TDK_S3_FORCE_PATH_STYLE: {{ .forcePathStyle | quote }}

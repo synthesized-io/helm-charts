@@ -1,0 +1,107 @@
+{{/*
+Pre-upgrade hook: clean up old "governor-agent" resources left from before the
+agent-to-worker rename.  Helm does not delete resources whose names change
+between revisions, so without this hook the old Deployment (and its pods)
+would keep running alongside the new "governor-worker" Deployment.
+
+This hook is idempotent — it uses --ignore-not-found so it is safe to run
+even after the old resources have already been removed.
+*/}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-agent-cleanup
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-agent-cleanup
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["delete"]
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-agent-cleanup
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-agent-cleanup
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-agent-cleanup
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-agent-cleanup
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}-agent-cleanup
+      restartPolicy: Never
+      containers:
+        - name: cleanup
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set +e
+              NS={{ .Release.Namespace }}
+              FAILED=""
+              echo "Cleaning up legacy governor-agent resources (best-effort)..."
+
+              for resource in deployment/governor-agent configmap/governor-agent-configmap secret/governor-agent-secret; do
+                if ! kubectl get "$resource" -n "$NS" >/dev/null 2>&1; then
+                  echo "  $resource: not found, skipping"
+                  continue
+                fi
+                if kubectl delete "$resource" -n "$NS" 2>/tmp/err; then
+                  echo "  $resource: deleted"
+                else
+                  echo "  $resource: FAILED to delete"
+                  cat /tmp/err
+                  FAILED="$FAILED $resource"
+                fi
+              done
+
+              if [ -n "$FAILED" ]; then
+                echo ""
+                echo "============================================================"
+                echo "WARNING: Some legacy resources could not be removed."
+                echo "The upgrade will continue, but you must clean them up manually"
+                echo "to avoid orphaned pods running alongside governor-worker."
+                echo ""
+                echo "Run these commands once you have sufficient permissions:"
+                for r in $FAILED; do
+                  echo "  kubectl delete $r -n $NS"
+                done
+                echo "============================================================"
+              else
+                echo "Cleanup complete."
+              fi
+              exit 0
