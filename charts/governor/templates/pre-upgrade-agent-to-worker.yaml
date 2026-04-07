@@ -73,8 +73,11 @@ spec:
               set +e
               NS={{ .Release.Namespace }}
               {{- $w := include "governor.workerValues" . | fromYaml }}
-              {{- /* Legacy resource name (what we may need to delete) */}}
-              LEGACY_NAME={{ default "governor-agent" ((.Values.agent).name) | quote }}
+              {{- /* Legacy resource name (what we may need to delete).
+                     Safe access: handle the case where `agent:` is not set
+                     in the values file at all (fresh installs from new chart). */}}
+              {{- $legacyAgent := .Values.agent | default dict }}
+              LEGACY_NAME={{ $legacyAgent.name | default "governor-agent" | quote }}
               {{- /* Resolved worker name (what the new resources are named) */}}
               WORKER_NAME={{ $w.name | quote }}
               FAILED=""

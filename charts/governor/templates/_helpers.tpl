@@ -16,40 +16,49 @@ app.kubernetes.io/managed-by: Helm
 
 {{/*
 Resolve worker values with backward-compatible fallback from legacy "agent" key.
-.Values.worker takes precedence; .Values.agent is merged underneath.
 
-Special handling for `name`: if `worker.name` is not explicitly set, prefer
-`agent.name` so that upgrades from charts using the old `agent:` key do not
-rename existing K8s resources (which would orphan the old Deployment and
-break NetworkPolicies, ServiceMonitors, dashboards, etc.). If neither is
-set, falls back to "governor-worker".
+The actual default values live in `_workerDefaults` and `_legacyAgentDefaults`
+inside values.yaml — they cannot live under the customer-facing `worker:` /
+`agent:` keys because that would prevent us from detecting which fields the
+customer has overridden.
 
-Usage: {{ include "governor.workerValues" . }}
-Returns: the merged dict as YAML
+If the user has any `agent:` values in their overrides, the chart starts
+from `_legacyAgentDefaults` (governor-agent, synthesized-agent, AGENT_*,
+agent-pvc) so unspecified fields keep their previous values. Otherwise it
+starts from `_workerDefaults`.
+
+Merge order: defaults < user's agent overrides < user's worker overrides
+
+Usage: {{- $w := include "governor.workerValues" . | fromYaml }}
 */}}
 {{- define "governor.workerValues" -}}
-{{- $worker := .Values.worker | default dict -}}
 {{- $agent := .Values.agent | default dict -}}
-{{- $merged := mergeOverwrite (deepCopy $agent) $worker -}}
-{{- if not $worker.name -}}
-{{- $_ := set $merged "name" ($agent.name | default "governor-worker") -}}
+{{- $worker := .Values.worker | default dict -}}
+{{- $useLegacy := gt (len $agent) 0 -}}
+{{- $defaults := dict -}}
+{{- if $useLegacy -}}
+{{- $defaults = .Values._legacyAgentDefaults | default dict -}}
+{{- else -}}
+{{- $defaults = .Values._workerDefaults | default dict -}}
 {{- end -}}
+{{- $merged := mergeOverwrite (deepCopy $defaults) (deepCopy $agent) -}}
+{{- $merged = mergeOverwrite $merged (deepCopy $worker) -}}
 {{- $merged | toYaml -}}
 {{- end -}}
 
 {{/*
-Shorthand to get the resolved worker config dict.
-Must be used via `fromYaml` in templates:
-  {{- $w := include "governor.workerValues" . | fromYaml -}}
-*/}}
+Resolve tdkWorkers feature flag with backward-compatible fallback from
+legacy "tdkAgents" key. Defaults live in `_tdkWorkersDefaults` in values.yaml.
 
-{{/*
-Resolve tdkWorkers feature flag with fallback from legacy "tdkAgents" key.
+Merge order: defaults < user's tdkAgents overrides < user's tdkWorkers overrides
 */}}
 {{- define "governor.tdkWorkersValues" -}}
-{{- $workers := .Values.tdkWorkers | default dict -}}
-{{- $agents := .Values.tdkAgents | default dict -}}
-{{- mergeOverwrite (deepCopy $agents) $workers | toYaml -}}
+{{- $defaults := .Values._tdkWorkersDefaults | default dict -}}
+{{- $tdkAgents := .Values.tdkAgents | default dict -}}
+{{- $tdkWorkers := .Values.tdkWorkers | default dict -}}
+{{- $merged := mergeOverwrite (deepCopy $defaults) (deepCopy $tdkAgents) -}}
+{{- $merged = mergeOverwrite $merged (deepCopy $tdkWorkers) -}}
+{{- $merged | toYaml -}}
 {{- end -}}
 
 {{/*
