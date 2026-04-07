@@ -1,28 +1,45 @@
 {{- if .Values.agent }}
 
 ============================================================
-DEPRECATION WARNING
+DEPRECATION WARNING — legacy `agent:` block detected
 ============================================================
-You are using the legacy `agent:` values block. It has been
-renamed to `worker:` and will be removed in a future release.
+The `agent:` values block is DEPRECATED. It has been renamed
+to `worker:` and will be removed in a future release.
 
-For now, your `agent:` values are automatically merged into
-`worker:` (with `worker:` taking precedence if both are set),
-so no immediate action is required.
+Your `agent:` values are still applied — they are merged on
+top of the `worker:` defaults, so your existing overrides
+continue to work.
 
-To migrate, rename `agent:` to `worker:` in your values file.
-The structure is identical except for env var names:
+IMPORTANT: if you set BOTH `agent.X` and `worker.X` for the
+same field, the LEGACY `agent.X` value wins. To avoid
+surprises, DO NOT mix the two blocks — pick one.
 
-  agent:                          worker:
-    container:                      container:
-      config:                         config:
-        AGENT_SERVERHOST: ...           WORKER_SERVERHOST: ...
-        AGENT_TAGS: ...                 WORKER_TAGS: ...
+To migrate, rename `agent:` to `worker:` in your values file
+(structure is identical) and remove the `agent:` block:
 
-`AGENT_*` environment variables are still accepted by the
-worker container at runtime — they are remapped to `WORKER_*`
-automatically — but switching to the new names in your values
-file is recommended.
+  agent:                    ->   worker:
+    image:                         image:
+      repository: my/image           repository: my/image
+    container:                     container:
+      config:                        config:
+        AGENT_TAGS: prod               WORKER_TAGS: prod
+
+At runtime, the worker container still accepts `AGENT_*`
+environment variables and remaps them to `WORKER_*`
+automatically — but using `WORKER_*` in your values file is
+recommended for clarity.
+
+NOTE: if you previously relied on the default K8s resource
+name `governor-agent` (e.g. for monitoring, NetworkPolicies,
+ServiceMonitors, or external scripts), set the following to
+keep the old name:
+
+  agent:
+    name: governor-agent
+
+Without this override, your deployment will be renamed to
+`governor-worker` on upgrade (a pre-upgrade hook handles the
+cleanup of the old resources automatically).
 ============================================================
 
 {{- end }}
@@ -30,11 +47,15 @@ file is recommended.
 {{- if .Values.tdkAgents }}
 
 ============================================================
-DEPRECATION WARNING
+DEPRECATION WARNING — legacy `tdkAgents:` flag detected
 ============================================================
-You are using the legacy `tdkAgents:` feature flag. It has
-been renamed to `tdkWorkers:` and will be removed in a future
+The `tdkAgents:` feature flag is DEPRECATED. It has been
+renamed to `tdkWorkers:` and will be removed in a future
 release.
+
+Your `tdkAgents:` values still take effect — they are merged
+on top of `tdkWorkers:` defaults (legacy values win on
+conflict). Do not mix the two blocks.
 
 To migrate:
 
