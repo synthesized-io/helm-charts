@@ -3,86 +3,14 @@ sandbox: false
 # Enables OpenShift-friendly mounts for nginx; auto-detected in templates via route.openshift.io.
 openShiftEnabled: false
 
-# ============================================================================
-# Internal default sections — DO NOT MODIFY
-# ----------------------------------------------------------------------------
-# These sections hold the chart's defaults for fields where customer overrides
-# under the customer-facing `worker:` / `tdkWorkers:` keys cannot be detected
-# separately from values.yaml defaults. The chart helper merges them in like
-# this:
-#
-#   defaults < legacy `agent:` overrides < new `worker:` overrides
-#
-# When the customer's values file has any `agent:` keys, the chart uses the
-# `_legacyAgentDefaults` block as the base so existing K8s resources keep
-# their old names, image, env vars, and PVC. Otherwise it uses
-# `_workerDefaults`. Customer overrides under `worker:` and `agent:` are
-# applied on top.
-#
-# To customise, add a `worker:` (or `tdkWorkers:`) block below — do NOT edit
-# the `_*Defaults` sections.
-# ============================================================================
-_workerDefaults:
-  name: governor-worker
-  image:
-    repository: synthesizedio/synthesized-worker
-    pullPolicy: Always
-  securityContext: null
-  container:
-    config:
-      WORKER_SERVERHOST: 'governor-api'
-      WORKER_SERVERPORT: '50055'
-      WORKER_TAGS: 'default'
-      WORKER_DATASOURCES: '*'
-      WORKER_USEPLAINTEXT: "true"
-      WORKER_CONNECTIONS_POOL_SIZE: '20'
-  persistence:
-    enabled: false
-    name: worker-pv
-    mountPath: /app/rocksdb
-    claimName: worker-pvc
-    size: 10Gi
-    storageClassName: ""
-  tlsInternal:
-    certificate: {}
-
-_legacyAgentDefaults:
-  name: governor-agent
-  image:
-    repository: synthesizedio/synthesized-agent
-    pullPolicy: Always
-  securityContext: null
-  container:
-    config:
-      AGENT_SERVERHOST: 'governor-api'
-      AGENT_SERVERPORT: '50055'
-      AGENT_TAGS: 'default'
-      AGENT_DATASOURCES: '*'
-      AGENT_USEPLAINTEXT: "true"
-      AGENT_CONNECTIONS_POOL_SIZE: '20'
-  persistence:
-    enabled: false
-    name: agent-pv
-    mountPath: /app/rocksdb
-    claimName: agent-pvc
-    size: 10Gi
-    storageClassName: ""
-  tlsInternal:
-    certificate: {}
-
-_tdkWorkersDefaults:
+# Feature flags shared across components.
+tdkWorkers:
   enabled: true
   useByDefault: true
-# ============================================================================
-# End of internal defaults
-# ============================================================================
 
-# Feature flags shared across components.
-# Override under `tdkWorkers:`. Legacy `tdkAgents:` overrides are still
-# accepted and merged automatically.
-# tdkWorkers:
-#   enabled: true
-#   useByDefault: true
+# DEPRECATED: legacy `tdkAgents:` overrides are merged on top of `tdkWorkers:`
+# (legacy values take precedence for any field they specify).
+# tdkAgents: {}
 s3Client:
   # forcePathStyle: true
   # protocol: "http"
@@ -268,45 +196,56 @@ front:
       # usages:
       #   - server auth
 
-# Worker (formerly "agent") configuration.
-#
-# Defaults are applied by the chart helper and only need to be listed here
-# when you want to override them. The reference defaults are:
-#
-#   worker:
-#     name: governor-worker
-#     image:
-#       repository: synthesizedio/synthesized-worker
-#       pullPolicy: Always
-#     securityContext: null
-#     container:
-#       config:
-#         WORKER_SERVERHOST: 'governor-api'
-#         WORKER_SERVERPORT: '50055'
-#         WORKER_TAGS: 'default'
-#         WORKER_DATASOURCES: '*'
-#         WORKER_USEPLAINTEXT: "true"
-#         WORKER_CONNECTIONS_POOL_SIZE: '20'
-#     persistence:
-#       enabled: false
-#       name: worker-pv
-#       mountPath: /app/rocksdb
-#       claimName: worker-pvc
-#       size: 10Gi
-#       storageClassName: ""
-#
-# Extra volume mounts and volumes are also supported via:
-#   worker:
-#     container:
-#       extraVolumeMounts: []
-#     extraVolumes: []
-#
-# DEPRECATED: legacy `agent:` key. If your existing values file uses `agent:`
-# the chart will automatically preserve the OLD defaults (governor-agent,
-# synthesized-agent, AGENT_* env vars, agent-pvc) so the upgrade does not
-# rename or recreate live K8s resources. Migrate to `worker:` at your own
-# pace; the structure is identical.
-# worker: {}
+worker:
+  name: governor-worker
+  image:
+    repository: synthesizedio/synthesized-worker
+    pullPolicy: Always
+  # securityContext:
+  #   runAsNonRoot: true
+  #   runAsUser: null
+  #   fsGroup: 1000660000
+  #   fsGroupChangePolicy: "OnRootMismatch"
+  securityContext: null
+  container:
+    config:
+      WORKER_SERVERHOST: 'governor-api'
+      WORKER_SERVERPORT: '50055'
+      WORKER_TAGS: 'default'
+      WORKER_DATASOURCES: '*'
+      WORKER_USEPLAINTEXT: "true"
+      WORKER_CONNECTIONS_POOL_SIZE: '20'
+  # Extra volume mounts for the worker container
+  # extraVolumeMounts:
+  #   - name: my-secret
+  #     mountPath: /mnt/secrets
+  #     readOnly: true
+  # Extra pod-level volumes
+  # extraVolumes:
+  #   - name: my-secret
+  #     secret:
+  #       secretName: my-secret-name
+  #       defaultMode: 420
+  persistence:
+    enabled: false
+    name: worker-pv
+    mountPath: /app/rocksdb
+    claimName: worker-pvc
+    size: 10Gi
+    storageClassName: ""
+  tlsInternal:
+    certificate:
+      # commonName: governor-worker
+      # dnsNames:
+      #   - governor-worker.governor.svc.cluster.local
+      # usages:
+      #   - server auth
+
+# DEPRECATED: legacy `agent:` overrides are merged on top of `worker:` for
+# backward compatibility. Legacy values take precedence for any field they
+# specify. To keep your existing K8s deployment name on upgrade, set
+# `agent.name: governor-agent` (or your custom name).
+# agent: {}
 
 director:
   name: governor-director

@@ -17,48 +17,30 @@ app.kubernetes.io/managed-by: Helm
 {{/*
 Resolve worker values with backward-compatible fallback from legacy "agent" key.
 
-The actual default values live in `_workerDefaults` and `_legacyAgentDefaults`
-inside values.yaml — they cannot live under the customer-facing `worker:` /
-`agent:` keys because that would prevent us from detecting which fields the
-customer has overridden.
+Merge order: `worker:` (with chart defaults) < legacy `agent:` overrides.
+Customer's `agent:` overrides take precedence for any field they specify.
+This means a customer with only legacy overrides keeps the values they set
+explicitly, while picking up new defaults for everything else.
 
-If the user has any `agent:` values in their overrides, the chart starts
-from `_legacyAgentDefaults` (governor-agent, synthesized-agent, AGENT_*,
-agent-pvc) so unspecified fields keep their previous values. Otherwise it
-starts from `_workerDefaults`.
-
-Merge order: defaults < user's agent overrides < user's worker overrides
+For the case of a customer setting BOTH `worker.X` and `agent.X` for
+the same field, `agent.X` wins.
 
 Usage: {{- $w := include "governor.workerValues" . | fromYaml }}
 */}}
 {{- define "governor.workerValues" -}}
-{{- $agent := .Values.agent | default dict -}}
-{{- $worker := .Values.worker | default dict -}}
-{{- $useLegacy := gt (len $agent) 0 -}}
-{{- $defaults := dict -}}
-{{- if $useLegacy -}}
-{{- $defaults = .Values._legacyAgentDefaults | default dict -}}
-{{- else -}}
-{{- $defaults = .Values._workerDefaults | default dict -}}
-{{- end -}}
-{{- $merged := mergeOverwrite (deepCopy $defaults) (deepCopy $agent) -}}
-{{- $merged = mergeOverwrite $merged (deepCopy $worker) -}}
-{{- $merged | toYaml -}}
+{{- $w := .Values.worker | default dict -}}
+{{- $a := .Values.agent | default dict -}}
+{{- mergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
 {{- end -}}
 
 {{/*
 Resolve tdkWorkers feature flag with backward-compatible fallback from
-legacy "tdkAgents" key. Defaults live in `_tdkWorkersDefaults` in values.yaml.
-
-Merge order: defaults < user's tdkAgents overrides < user's tdkWorkers overrides
+legacy "tdkAgents" key. Same merge semantics as governor.workerValues.
 */}}
 {{- define "governor.tdkWorkersValues" -}}
-{{- $defaults := .Values._tdkWorkersDefaults | default dict -}}
-{{- $tdkAgents := .Values.tdkAgents | default dict -}}
-{{- $tdkWorkers := .Values.tdkWorkers | default dict -}}
-{{- $merged := mergeOverwrite (deepCopy $defaults) (deepCopy $tdkAgents) -}}
-{{- $merged = mergeOverwrite $merged (deepCopy $tdkWorkers) -}}
-{{- $merged | toYaml -}}
+{{- $w := .Values.tdkWorkers | default dict -}}
+{{- $a := .Values.tdkAgents | default dict -}}
+{{- mergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
 {{- end -}}
 
 {{/*
