@@ -3,6 +3,17 @@ sandbox: false
 # Enables OpenShift-friendly mounts for nginx; auto-detected in templates via route.openshift.io.
 openShiftEnabled: false
 
+# Image used by the pre-upgrade migration cleanup hook (delete-only kubectl).
+# Override `repository` / `tag` for airgapped environments where the default
+# Docker Hub image is unavailable.
+migrationCleanup:
+  image:
+    repository: bitnami/kubectl
+    tag: latest
+    pullPolicy: IfNotPresent
+  # imagePullSecrets:  # falls back to top-level imagePullSecrets if unset
+  #   - name: my-pull-secret
+
 # Feature flags shared across components.
 tdkWorkers:
   enabled: true

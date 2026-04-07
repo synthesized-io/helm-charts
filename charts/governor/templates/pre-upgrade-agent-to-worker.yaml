@@ -63,9 +63,14 @@ spec:
     spec:
       serviceAccountName: {{ .Release.Name }}-agent-cleanup
       restartPolicy: Never
+      {{- with .Values.migrationCleanup.imagePullSecrets | default .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: cleanup
-          image: bitnami/kubectl:latest
+          image: "{{ .Values.migrationCleanup.image.repository }}:{{ .Values.migrationCleanup.image.tag }}"
+          imagePullPolicy: {{ .Values.migrationCleanup.image.pullPolicy }}
           command:
             - /bin/sh
             - -c
