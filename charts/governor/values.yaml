@@ -196,7 +196,10 @@ front:
       #   - server auth
 
 worker:
-  name: governor-worker
+  # name: when omitted, falls back to legacy `agent.name` (preserves K8s
+  # resource names for upgrades from charts that used the old `agent:` key);
+  # if neither is set, defaults to "governor-worker"
+  # name: governor-worker
   image:
     repository: synthesizedio/synthesized-worker
     pullPolicy: Always

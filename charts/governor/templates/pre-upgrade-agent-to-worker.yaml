@@ -72,10 +72,22 @@ spec:
             - |
               set +e
               NS={{ .Release.Namespace }}
+              {{- $w := include "governor.workerValues" . | fromYaml }}
+              {{- /* Legacy resource name (what we may need to delete) */}}
+              LEGACY_NAME={{ default "governor-agent" ((.Values.agent).name) | quote }}
+              {{- /* Resolved worker name (what the new resources are named) */}}
+              WORKER_NAME={{ $w.name | quote }}
               FAILED=""
-              echo "Cleaning up legacy governor-agent resources (best-effort)..."
 
-              for resource in deployment/governor-agent configmap/governor-agent-configmap secret/governor-agent-secret; do
+              if [ "$LEGACY_NAME" = "$WORKER_NAME" ]; then
+                echo "Worker uses the same name as the legacy agent (${WORKER_NAME})."
+                echo "No cleanup needed — existing resources are reused in place."
+                exit 0
+              fi
+
+              echo "Cleaning up legacy ${LEGACY_NAME} resources..."
+
+              for resource in deployment/${LEGACY_NAME} configmap/${LEGACY_NAME}-configmap secret/${LEGACY_NAME}-secret; do
                 if ! kubectl get "$resource" -n "$NS" >/dev/null 2>&1; then
                   echo "  $resource: not found, skipping"
                   continue

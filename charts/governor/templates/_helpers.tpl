@@ -17,13 +17,24 @@ app.kubernetes.io/managed-by: Helm
 {{/*
 Resolve worker values with backward-compatible fallback from legacy "agent" key.
 .Values.worker takes precedence; .Values.agent is merged underneath.
+
+Special handling for `name`: if `worker.name` is not explicitly set, prefer
+`agent.name` so that upgrades from charts using the old `agent:` key do not
+rename existing K8s resources (which would orphan the old Deployment and
+break NetworkPolicies, ServiceMonitors, dashboards, etc.). If neither is
+set, falls back to "governor-worker".
+
 Usage: {{ include "governor.workerValues" . }}
 Returns: the merged dict as YAML
 */}}
 {{- define "governor.workerValues" -}}
 {{- $worker := .Values.worker | default dict -}}
 {{- $agent := .Values.agent | default dict -}}
-{{- mergeOverwrite (deepCopy $agent) $worker | toYaml -}}
+{{- $merged := mergeOverwrite (deepCopy $agent) $worker -}}
+{{- if not $worker.name -}}
+{{- $_ := set $merged "name" ($agent.name | default "governor-worker") -}}
+{{- end -}}
+{{- $merged | toYaml -}}
 {{- end -}}
 
 {{/*

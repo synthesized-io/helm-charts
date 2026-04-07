@@ -22,7 +22,7 @@ front:
     seccompProfile:
       type: RuntimeDefault
 
-agent:
+worker:
   securityContext:
     runAsNonRoot: true
     runAsUser: 1002270000
