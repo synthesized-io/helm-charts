@@ -95,10 +95,8 @@ spec:
                      If the customer previously set a custom claimName under
                      agent.persistence.claimName, honor that. */}}
               {{- $legacyAgent := .Values.agent | default dict }}
-              {{- $legacyPvcName := "agent-pvc" }}
-              {{- if and $legacyAgent.persistence $legacyAgent.persistence.claimName }}
-              {{-   $legacyPvcName = $legacyAgent.persistence.claimName }}
-              {{- end }}
+              {{- $legacyPersistence := $legacyAgent.persistence | default dict }}
+              {{- $legacyPvcName := $legacyPersistence.claimName | default "agent-pvc" }}
               LEGACY_PVC={{ $legacyPvcName | quote }}
               DELETE_LEGACY_PVC={{ .Values.migrationCleanup.deleteLegacyPvc | default false | quote }}
 
