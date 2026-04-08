@@ -1,11 +1,28 @@
 {{/*
-Pre-upgrade hook: clean up old "governor-agent" resources left from before the
-agent-to-worker rename.  Helm does not delete resources whose names change
-between revisions, so without this hook the old Deployment (and its pods)
-would keep running alongside the new "governor-worker" Deployment.
+Pre-upgrade hook: protect the legacy worker PVC during the agent-to-worker
+rename.
 
-This hook is idempotent — it uses --ignore-not-found so it is safe to run
-even after the old resources have already been removed.
+Context: when upgrading from a chart version that rendered `pvc-agent.yaml`
+(PVC named `agent-pvc`) to a version that renders `pvc-worker.yaml` (PVC named
+`worker-pvc`), Helm's three-way merge sees the old PVC missing from the new
+manifest and deletes it — destroying the worker's rocksdb state.
+
+Legacy Deployments/ConfigMaps/Secrets do NOT need custom cleanup: Helm prunes
+them automatically during the upgrade. Only the PVC needs special handling
+because (a) data loss is irreversible and (b) the rename breaks Helm's ability
+to carry the resource forward.
+
+Behavior:
+  - Default: annotate the legacy PVC with `helm.sh/resource-policy: keep`
+    before Helm's deletion diff runs. The PVC survives the upgrade as an
+    orphaned (unmanaged-by-Helm) resource. To remount it into the renamed
+    worker, set `worker.persistence.enabled=true` and
+    `worker.persistence.claimName: agent-pvc` in your values.
+  - If annotation fails (RBAC, admission webhook, etc.) the upgrade is
+    ABORTED. Failing open would cause silent data loss.
+  - Escape hatch: set `migrationCleanup.deleteLegacyPvc: true` to skip the
+    annotation entirely. Helm will then prune the legacy PVC during the
+    upgrade. Use this only when you don't need the worker's existing state.
 */}}
 apiVersion: v1
 kind: ServiceAccount
@@ -25,12 +42,9 @@ metadata:
     "helm.sh/hook-weight": "-5"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 rules:
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["delete"]
   - apiGroups: [""]
-    resources: ["configmaps", "secrets"]
-    verbs: ["delete"]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -75,53 +89,55 @@ spec:
             - /bin/sh
             - -c
             - |
-              set +e
+              set -u
               NS={{ .Release.Namespace }}
-              {{- $w := include "governor.workerValues" . | fromYaml }}
-              {{- /* Legacy resource name (what we may need to delete).
-                     Safe access: handle the case where `agent:` is not set
-                     in the values file at all (fresh installs from new chart). */}}
+              {{- /* Legacy PVC name rendered by the old chart (pvc-agent.yaml).
+                     If the customer previously set a custom claimName under
+                     agent.persistence.claimName, honor that. */}}
               {{- $legacyAgent := .Values.agent | default dict }}
-              LEGACY_NAME={{ $legacyAgent.name | default "governor-agent" | quote }}
-              {{- /* Resolved worker name (what the new resources are named) */}}
-              WORKER_NAME={{ $w.name | quote }}
-              FAILED=""
+              {{- $legacyPvcName := "agent-pvc" }}
+              {{- if and $legacyAgent.persistence $legacyAgent.persistence.claimName }}
+              {{-   $legacyPvcName = $legacyAgent.persistence.claimName }}
+              {{- end }}
+              LEGACY_PVC={{ $legacyPvcName | quote }}
+              DELETE_LEGACY_PVC={{ .Values.migrationCleanup.deleteLegacyPvc | default false | quote }}
 
-              if [ "$LEGACY_NAME" = "$WORKER_NAME" ]; then
-                echo "Worker uses the same name as the legacy agent (${WORKER_NAME})."
-                echo "No cleanup needed — existing resources are reused in place."
+              if [ "$DELETE_LEGACY_PVC" = "true" ]; then
+                echo "migrationCleanup.deleteLegacyPvc=true — skipping PVC protection."
+                echo "Helm will delete PVC ${LEGACY_PVC} (if present) as part of this upgrade."
                 exit 0
               fi
 
-              echo "Cleaning up legacy ${LEGACY_NAME} resources..."
-
-              for resource in deployment/${LEGACY_NAME} configmap/${LEGACY_NAME}-configmap secret/${LEGACY_NAME}-secret; do
-                if ! kubectl get "$resource" -n "$NS" >/dev/null 2>&1; then
-                  echo "  $resource: not found, skipping"
-                  continue
-                fi
-                if kubectl delete "$resource" -n "$NS" 2>/tmp/err; then
-                  echo "  $resource: deleted"
-                else
-                  echo "  $resource: FAILED to delete"
-                  cat /tmp/err
-                  FAILED="$FAILED $resource"
-                fi
-              done
-
-              if [ -n "$FAILED" ]; then
-                echo ""
-                echo "============================================================"
-                echo "WARNING: Some legacy resources could not be removed."
-                echo "The upgrade will continue, but you must clean them up manually"
-                echo "to avoid orphaned pods running alongside governor-worker."
-                echo ""
-                echo "Run these commands once you have sufficient permissions:"
-                for r in $FAILED; do
-                  echo "  kubectl delete $r -n $NS"
-                done
-                echo "============================================================"
-              else
-                echo "Cleanup complete."
+              if ! kubectl get pvc "$LEGACY_PVC" -n "$NS" >/dev/null 2>&1; then
+                echo "PVC ${LEGACY_PVC}: not found, nothing to protect."
+                exit 0
               fi
-              exit 0
+
+              if kubectl annotate pvc "$LEGACY_PVC" -n "$NS" \
+                   helm.sh/resource-policy=keep --overwrite 2>/tmp/pvc-err; then
+                echo "PVC ${LEGACY_PVC}: annotated with helm.sh/resource-policy=keep (data preserved)."
+                exit 0
+              fi
+
+              echo ""
+              echo "============================================================"
+              echo "FATAL: could not annotate PVC ${LEGACY_PVC} with"
+              echo "helm.sh/resource-policy=keep. Aborting the upgrade to"
+              echo "prevent Helm from deleting the PVC and destroying its data."
+              echo ""
+              echo "kubectl error:"
+              sed 's/^/  /' /tmp/pvc-err
+              echo ""
+              echo "To proceed, either:"
+              echo "  1. Annotate the PVC manually with sufficient permissions:"
+              echo "       kubectl annotate pvc ${LEGACY_PVC} -n ${NS} \\"
+              echo "         helm.sh/resource-policy=keep --overwrite"
+              echo "     then retry 'helm upgrade'."
+              echo "  2. Keep the legacy name by setting 'agent.name: <name>'"
+              echo "     in your values — the PVC then stays in the new release"
+              echo "     manifest and no annotation is needed."
+              echo "  3. If you do NOT need the existing worker data, set"
+              echo "     'migrationCleanup.deleteLegacyPvc: true' and retry."
+              echo "     Helm will then delete the PVC along with its data."
+              echo "============================================================"
+              exit 1

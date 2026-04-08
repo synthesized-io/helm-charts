@@ -13,6 +13,17 @@ migrationCleanup:
     pullPolicy: IfNotPresent
   # imagePullSecrets:  # falls back to top-level imagePullSecrets if unset
   #   - name: my-pull-secret
+  #
+  # When upgrading from a chart version that rendered the legacy `agent-pvc`
+  # PVC, a pre-upgrade hook annotates it with `helm.sh/resource-policy: keep`
+  # so Helm does not delete it during the rename (which would destroy the
+  # worker's rocksdb state). The hook aborts the upgrade if the annotation
+  # fails (e.g. RBAC denied, admission webhook), to prevent silent data loss.
+  #
+  # Set `deleteLegacyPvc: true` to opt out of this protection. The hook will
+  # then skip the annotation and Helm will prune the legacy PVC during the
+  # upgrade. Use this only when you do NOT need the existing worker data.
+  deleteLegacyPvc: false
 
 # Feature flags shared across components.
 tdkWorkers:
