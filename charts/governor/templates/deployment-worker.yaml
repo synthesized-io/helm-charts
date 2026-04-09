@@ -1,0 +1,93 @@
+{{- $w := include "governor.workerValues" . | fromYaml -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $w.name }}
+  labels:
+    app: {{ $w.name }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
+spec:
+  replicas: {{ $w.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $w.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $w.name }}
+        {{- include "governor.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with $w.imagePullSecrets | default .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $w.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tlsInternal.enabled }}
+      initContainers:
+        {{- include "governor.tlsInternal.initContainer" . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $w.name }}
+          image: "{{ $w.image.repository }}:{{ $w.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ $w.image.pullPolicy }}
+          {{- if $w.container.command }}
+          command:
+            {{- toYaml $w.container.command | indent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml ($w.resources | default dict) | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ $w.name }}-configmap
+            - secretRef:
+                name: {{ $w.name }}-secret
+          env:
+            {{- range $w.container.secretEnv }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .valueFrom.secretKeyRef.name }}
+                  key: {{ .valueFrom.secretKeyRef.key }}
+            {{- end}}
+          {{- if or $w.persistence.enabled $w.container.extraVolumeMounts }}
+          volumeMounts:
+            {{- if $w.persistence.enabled }}
+            - name: {{ $w.persistence.name }}
+              mountPath: {{ $w.persistence.mountPath }}
+            {{- end }}
+            {{- with $w.container.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+        {{- if .Values.tlsInternal.enabled }}
+        {{- include "governor.tlsInternal.sidecar" (dict "componentName" "worker" "config" $w "tlsInternal" .Values.tlsInternal "hasHttpPort" false "hasGrpcPort" false) | nindent 8 }}
+        {{- end }}
+      {{- if or $w.persistence.enabled .Values.tlsInternal.enabled $w.extraVolumes }}
+      volumes:
+        {{- if $w.persistence.enabled }}
+        - name: {{ $w.persistence.name }}
+          persistentVolumeClaim:
+            claimName: {{ $w.persistence.claimName }}
+        {{- end }}
+        {{- if .Values.tlsInternal.enabled }}
+        {{- include "governor.tlsInternal.volumes" (dict "componentName" "worker" "config" $w "tlsInternal" .Values.tlsInternal) | nindent 8 }}
+        {{- end }}
+        {{- with $w.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

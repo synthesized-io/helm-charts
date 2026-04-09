@@ -1,0 +1,67 @@
+{{- if .Values.agent }}
+
+============================================================
+DEPRECATION WARNING — legacy `agent:` block detected
+============================================================
+The `agent:` values block is DEPRECATED. It has been renamed
+to `worker:` and will be removed in a future release.
+
+Your `agent:` values are still applied — they are merged on
+top of the `worker:` defaults, so your existing overrides
+continue to work.
+
+IMPORTANT: if you set BOTH `agent.X` and `worker.X` for the
+same field, the LEGACY `agent.X` value wins. To avoid
+surprises, DO NOT mix the two blocks — pick one.
+
+To migrate, rename `agent:` to `worker:` in your values file
+(structure is identical) and remove the `agent:` block:
+
+  agent:                    ->   worker:
+    image:                         image:
+      repository: my/image           repository: my/image
+    container:                     container:
+      config:                        config:
+        AGENT_TAGS: prod               WORKER_TAGS: prod
+
+At runtime, the worker container still accepts `AGENT_*`
+environment variables and remaps them to `WORKER_*`
+automatically — but using `WORKER_*` in your values file is
+recommended for clarity.
+
+NOTE: if you previously relied on the default K8s resource
+name `governor-agent` (e.g. for monitoring, NetworkPolicies,
+ServiceMonitors, or external scripts), set the following to
+keep the old name:
+
+  agent:
+    name: governor-agent
+
+Without this override, your deployment will be renamed to
+`governor-worker` on upgrade (a pre-upgrade hook handles the
+cleanup of the old resources automatically).
+============================================================
+
+{{- end }}
+
+{{- if .Values.tdkAgents }}
+
+============================================================
+DEPRECATION WARNING — legacy `tdkAgents:` flag detected
+============================================================
+The `tdkAgents:` feature flag is DEPRECATED. It has been
+renamed to `tdkWorkers:` and will be removed in a future
+release.
+
+Your `tdkAgents:` values still take effect — they are merged
+on top of `tdkWorkers:` defaults (legacy values win on
+conflict). Do not mix the two blocks.
+
+To migrate:
+
+  tdkAgents:           ->   tdkWorkers:
+    enabled: true             enabled: true
+    useByDefault: true        useByDefault: true
+============================================================
+
+{{- end }}

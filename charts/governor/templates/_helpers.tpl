@@ -15,6 +15,35 @@ app.kubernetes.io/managed-by: Helm
 {{- end }}
 
 {{/*
+Resolve worker values with backward-compatible fallback from legacy "agent" key.
+
+Merge order: `worker:` (with chart defaults) < legacy `agent:` overrides.
+Customer's `agent:` overrides take precedence for any field they specify.
+This means a customer with only legacy overrides keeps the values they set
+explicitly, while picking up new defaults for everything else.
+
+For the case of a customer setting BOTH `worker.X` and `agent.X` for
+the same field, `agent.X` wins.
+
+Usage: {{- $w := include "governor.workerValues" . | fromYaml }}
+*/}}
+{{- define "governor.workerValues" -}}
+{{- $w := .Values.worker | default dict -}}
+{{- $a := .Values.agent | default dict -}}
+{{- mustMergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
+{{- end -}}
+
+{{/*
+Resolve tdkWorkers feature flag with backward-compatible fallback from
+legacy "tdkAgents" key. Same merge semantics as governor.workerValues.
+*/}}
+{{- define "governor.tdkWorkersValues" -}}
+{{- $w := .Values.tdkWorkers | default dict -}}
+{{- $a := .Values.tdkAgents | default dict -}}
+{{- mustMergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
+{{- end -}}
+
+{{/*
 Envoy sidecar container template
 Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal "hasHttpPort" true "hasGrpcPort" true) }}
 */}}

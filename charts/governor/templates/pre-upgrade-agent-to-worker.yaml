@@ -1,0 +1,141 @@
+{{/*
+Pre-upgrade hook: protect the legacy worker PVC during the agent-to-worker
+rename.
+
+Context: when upgrading from a chart version that rendered `pvc-agent.yaml`
+(PVC named `agent-pvc`) to a version that renders `pvc-worker.yaml` (PVC named
+`worker-pvc`), Helm's three-way merge sees the old PVC missing from the new
+manifest and deletes it — destroying the worker's rocksdb state.
+
+Legacy Deployments/ConfigMaps/Secrets do NOT need custom cleanup: Helm prunes
+them automatically during the upgrade. Only the PVC needs special handling
+because (a) data loss is irreversible and (b) the rename breaks Helm's ability
+to carry the resource forward.
+
+Behavior:
+  - Default: annotate the legacy PVC with `helm.sh/resource-policy: keep`
+    before Helm's deletion diff runs. The PVC survives the upgrade as an
+    orphaned (unmanaged-by-Helm) resource. To remount it into the renamed
+    worker, set `worker.persistence.enabled=true` and
+    `worker.persistence.claimName: agent-pvc` in your values.
+  - If annotation fails (RBAC, admission webhook, etc.) the upgrade is
+    ABORTED. Failing open would cause silent data loss.
+  - Escape hatch: set `migrationCleanup.deleteLegacyPvc: true` to skip the
+    annotation entirely. Helm will then prune the legacy PVC during the
+    upgrade. Use this only when you don't need the worker's existing state.
+*/}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-agent-cleanup
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-agent-cleanup
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-agent-cleanup
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-agent-cleanup
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-agent-cleanup
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-agent-cleanup
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}-agent-cleanup
+      restartPolicy: Never
+      {{- with .Values.migrationCleanup.imagePullSecrets | default .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: cleanup
+          image: "{{ .Values.migrationCleanup.image.repository }}:{{ .Values.migrationCleanup.image.tag }}"
+          imagePullPolicy: {{ .Values.migrationCleanup.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -u
+              NS={{ .Release.Namespace }}
+              {{- /* Legacy PVC name rendered by the old chart (pvc-agent.yaml).
+                     If the customer previously set a custom claimName under
+                     agent.persistence.claimName, honor that. */}}
+              {{- $legacyAgent := .Values.agent | default dict }}
+              {{- $legacyPersistence := $legacyAgent.persistence | default dict }}
+              {{- $legacyPvcName := $legacyPersistence.claimName | default "agent-pvc" }}
+              LEGACY_PVC={{ $legacyPvcName | quote }}
+              DELETE_LEGACY_PVC={{ .Values.migrationCleanup.deleteLegacyPvc | default false | quote }}
+
+              if [ "$DELETE_LEGACY_PVC" = "true" ]; then
+                echo "migrationCleanup.deleteLegacyPvc=true — skipping PVC protection."
+                echo "Helm will delete PVC ${LEGACY_PVC} (if present) as part of this upgrade."
+                exit 0
+              fi
+
+              if ! kubectl get pvc "$LEGACY_PVC" -n "$NS" >/dev/null 2>&1; then
+                echo "PVC ${LEGACY_PVC}: not found, nothing to protect."
+                exit 0
+              fi
+
+              if kubectl annotate pvc "$LEGACY_PVC" -n "$NS" \
+                   helm.sh/resource-policy=keep --overwrite 2>/tmp/pvc-err; then
+                echo "PVC ${LEGACY_PVC}: annotated with helm.sh/resource-policy=keep (data preserved)."
+                exit 0
+              fi
+
+              echo ""
+              echo "============================================================"
+              echo "FATAL: could not annotate PVC ${LEGACY_PVC} with"
+              echo "helm.sh/resource-policy=keep. Aborting the upgrade to"
+              echo "prevent Helm from deleting the PVC and destroying its data."
+              echo ""
+              echo "kubectl error:"
+              sed 's/^/  /' /tmp/pvc-err
+              echo ""
+              echo "To proceed, either:"
+              echo "  1. Annotate the PVC manually with sufficient permissions:"
+              echo "       kubectl annotate pvc ${LEGACY_PVC} -n ${NS} \\"
+              echo "         helm.sh/resource-policy=keep --overwrite"
+              echo "     then retry 'helm upgrade'."
+              echo "  2. Keep the legacy name by setting 'agent.name: <name>'"
+              echo "     in your values — the PVC then stays in the new release"
+              echo "     manifest and no annotation is needed."
+              echo "  3. If you do NOT need the existing worker data, set"
+              echo "     'migrationCleanup.deleteLegacyPvc: true' and retry."
+              echo "     Helm will then delete the PVC along with its data."
+              echo "============================================================"
+              exit 1

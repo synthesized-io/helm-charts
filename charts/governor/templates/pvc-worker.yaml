@@ -1,0 +1,19 @@
+{{- $w := include "governor.workerValues" . | fromYaml -}}
+{{- if $w.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $w.persistence.claimName }}
+  labels:
+    app: {{ $w.name }}
+    {{- include "governor.selectorLabels" . | nindent 4 }}
+spec:
+  {{- if $w.persistence.storageClassName }}
+  storageClassName: {{ $w.persistence.storageClassName }}
+  {{- end }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $w.persistence.size }}
+{{- end }}

@@ -3,10 +3,36 @@ sandbox: false
 # Enables OpenShift-friendly mounts for nginx; auto-detected in templates via route.openshift.io.
 openShiftEnabled: false
 
-# Feature flags shared across components
-tdkAgents:
+# Image used by the pre-upgrade migration cleanup hook (delete-only kubectl).
+# Override `repository` / `tag` for airgapped environments where the default
+# Docker Hub image is unavailable.
+migrationCleanup:
+  image:
+    repository: bitnami/kubectl
+    tag: latest
+    pullPolicy: IfNotPresent
+  # imagePullSecrets:  # falls back to top-level imagePullSecrets if unset
+  #   - name: my-pull-secret
+  #
+  # When upgrading from a chart version that rendered the legacy `agent-pvc`
+  # PVC, a pre-upgrade hook annotates it with `helm.sh/resource-policy: keep`
+  # so Helm does not delete it during the rename (which would destroy the
+  # worker's rocksdb state). The hook aborts the upgrade if the annotation
+  # fails (e.g. RBAC denied, admission webhook), to prevent silent data loss.
+  #
+  # Set `deleteLegacyPvc: true` to opt out of this protection. The hook will
+  # then skip the annotation and Helm will prune the legacy PVC during the
+  # upgrade. Use this only when you do NOT need the existing worker data.
+  deleteLegacyPvc: false
+
+# Feature flags shared across components.
+tdkWorkers:
   enabled: true
   useByDefault: true
+
+# DEPRECATED: legacy `tdkAgents:` overrides are merged on top of `tdkWorkers:`
+# (legacy values take precedence for any field they specify).
+# tdkAgents: {}
 s3Client:
   # forcePathStyle: true
   # protocol: "http"
@@ -192,10 +218,10 @@ front:
       # usages:
       #   - server auth
 
-agent:
-  name: governor-agent
+worker:
+  name: governor-worker
   image:
-    repository: synthesizedio/synthesized-agent
+    repository: synthesizedio/synthesized-worker
     pullPolicy: Always
   # securityContext:
   #   runAsNonRoot: true
@@ -205,13 +231,13 @@ agent:
   securityContext: null
   container:
     config:
-      AGENT_SERVERHOST: 'governor-api'
-      AGENT_SERVERPORT: '50055'
-      AGENT_TAGS: 'default'
-      AGENT_DATASOURCES: '*'
-      AGENT_USEPLAINTEXT: "true"
-      AGENT_CONNECTIONS_POOL_SIZE: '20'
-  # Extra volume mounts for the agent container
+      WORKER_SERVERHOST: 'governor-api'
+      WORKER_SERVERPORT: '50055'
+      WORKER_TAGS: 'default'
+      WORKER_DATASOURCES: '*'
+      WORKER_USEPLAINTEXT: "true"
+      WORKER_CONNECTIONS_POOL_SIZE: '20'
+  # Extra volume mounts for the worker container
   # extraVolumeMounts:
   #   - name: my-secret
   #     mountPath: /mnt/secrets
@@ -224,18 +250,24 @@ agent:
   #       defaultMode: 420
   persistence:
     enabled: false
-    name: agent-pv
+    name: worker-pv
     mountPath: /app/rocksdb
-    claimName: agent-pvc
+    claimName: worker-pvc
     size: 10Gi
     storageClassName: ""
   tlsInternal:
     certificate:
-      # commonName: governor-agent
+      # commonName: governor-worker
       # dnsNames:
-      #   - governor-agent.governor.svc.cluster.local
+      #   - governor-worker.governor.svc.cluster.local
       # usages:
       #   - server auth
+
+# DEPRECATED: legacy `agent:` overrides are merged on top of `worker:` for
+# backward compatibility. Legacy values take precedence for any field they
+# specify. To keep your existing K8s deployment name on upgrade, set
+# `agent.name: governor-agent` (or your custom name).
+# agent: {}
 
 director:
   name: governor-director
