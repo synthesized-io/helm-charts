@@ -30,7 +30,7 @@ Usage: {{- $w := include "governor.workerValues" . | fromYaml }}
 {{- define "governor.workerValues" -}}
 {{- $w := .Values.worker | default dict -}}
 {{- $a := .Values.agent | default dict -}}
-{{- mergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
+{{- mustMergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
 {{- end -}}
 
 {{/*
@@ -40,7 +40,7 @@ legacy "tdkAgents" key. Same merge semantics as governor.workerValues.
 {{- define "governor.tdkWorkersValues" -}}
 {{- $w := .Values.tdkWorkers | default dict -}}
 {{- $a := .Values.tdkAgents | default dict -}}
-{{- mergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
+{{- mustMergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
 {{- end -}}
 
 {{/*
