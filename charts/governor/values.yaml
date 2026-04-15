@@ -157,7 +157,7 @@ api:
     # governor:
     #   jwtRedirectUri: "https://my-governor.example.com"
     #   sloEnabled: false
-    
+
     # Example using a cert-manager-managed signing secret:
     # enabled: true
     # entityId: "governor-saml"
