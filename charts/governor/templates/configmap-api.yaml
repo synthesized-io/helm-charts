@@ -8,6 +8,45 @@ data:
 {{- if .Values.api.container.config }}
 {{ toYaml .Values.api.container.config | indent 2 }}
 {{- end }}
+  {{- with .Values.api.saml }}
+  {{- if .enabled }}
+  {{- $registrationId := .registrationId | default "saml" }}
+  {{- $registrationUpper := $registrationId | upper }}
+  {{- $metadataMountPath := .metadataMountPath | default "/etc/governor/saml/idp-metadata" }}
+  {{- $metadataKey := .metadataKey | default "metadata.xml" }}
+  {{- $metadataUri := .idpMetadataUrl }}
+  {{- if or .idpMetadataConfigMap .idpMetadataSecret }}
+  {{- $metadataUri = printf "file:%s/%s" $metadataMountPath $metadataKey }}
+  {{- end }}
+  {{- $signingMountPath := .signing.mountPath | default "/etc/governor/saml/signing" }}
+  {{- $privateKeyKey := .signing.privateKeyKey | default "tls.key" }}
+  {{- $certificateKey := .signing.certificateKey | default "tls.crt" }}
+  SPRING_SECURITY_SAML2_RELYINGPARTY_REGISTRATION_{{ $registrationUpper }}_ENTITY_ID: {{ required "saml.entityId is required when saml.enabled=true" .entityId | quote }}
+  SPRING_SECURITY_SAML2_RELYINGPARTY_REGISTRATION_{{ $registrationUpper }}_ACS_LOCATION: {{ required "saml.acsUrl is required when saml.enabled=true" .acsUrl | quote }}
+  SPRING_SECURITY_SAML2_RELYINGPARTY_REGISTRATION_{{ $registrationUpper }}_ASSERTINGPARTY_METADATA_URI: {{ required "One of saml.idpMetadataUrl or saml.idpMetadataConfigMap/idpMetadataSecret is required when saml.enabled=true" $metadataUri | quote }}
+  {{- if or .signing.keyPairSecret .signing.certManagerSecretName }}
+  SPRING_SECURITY_SAML2_RELYINGPARTY_REGISTRATION_{{ $registrationUpper }}_SIGNING_CREDENTIALS_0_PRIVATE_KEY_LOCATION: {{ printf "file:%s/%s" $signingMountPath $privateKeyKey | quote }}
+  SPRING_SECURITY_SAML2_RELYINGPARTY_REGISTRATION_{{ $registrationUpper }}_SIGNING_CREDENTIALS_0_CERTIFICATE_LOCATION: {{ printf "file:%s/%s" $signingMountPath $certificateKey | quote }}
+  {{- end }}
+  {{- if .governor.defaultRegistrationId }}
+  GOVERNOR_SECURITY_SAML_DEFAULT_REGISTRATION_ID: {{ .governor.defaultRegistrationId | quote }}
+  {{- end }}
+  {{- if .governor.jwtRedirectUri }}
+  SPRING_SECURITY_SAML2_JWT_REDIRECT_URL: {{ .governor.jwtRedirectUri | quote }}
+  {{- end }}
+  GOVERNOR_SECURITY_SAML_SLO_ENABLED: {{ .governor.sloEnabled | quote }}
+  GOVERNOR_SECURITY_SAML_AUTHORITIES_ENABLED: {{ .governor.authorities.enabled | quote }}
+  {{- if .governor.authorities.groupAttribute }}
+  GOVERNOR_SECURITY_SAML_AUTHORITIES_GROUP_ATTRIBUTE: {{ .governor.authorities.groupAttribute | quote }}
+  {{- end }}
+  {{- if .governor.authorities.defaultRole }}
+  GOVERNOR_SECURITY_SAML_AUTHORITIES_DEFAULT_ROLE: {{ .governor.authorities.defaultRole | quote }}
+  {{- end }}
+  {{- range $roleKey, $roleValue := .governor.authorities.roleAliases }}
+  GOVERNOR_SECURITY_SAML_AUTHORITIES_ROLE_ALIASES_{{ $roleKey | upper | replace "-" "_" }}: {{ $roleValue | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
   {{- $tdkW := include "governor.tdkWorkersValues" . | fromYaml }}
   UI_TDK_AGENTS: {{ $tdkW.enabled | quote }}
   UI_TDK_AGENTS_BY_DEFAULT: {{ $tdkW.useByDefault | quote }}

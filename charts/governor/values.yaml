@@ -144,6 +144,52 @@ api:
           secretKeyRef:
             name: governor-api-secret
             key: ADMIN_DEFAULT_PASSWORD
+  saml:
+    enabled: false
+    # Example:
+    # enabled: true
+    # entityId: "governor-saml"
+    # acsUrl: "https://my-saml-idp/api/saml/v1"
+    # idpMetadataConfigMap: "idp-metadata-cm"
+    # signing:
+    #   external: true
+    #   keyPairSecret: "existing-key-pair"
+    # governor:
+    #   jwtRedirectUri: "https://my-governor.example.com"
+    #   sloEnabled: false
+    
+    # Example using a cert-manager-managed signing secret:
+    # enabled: true
+    # entityId: "governor-saml"
+    # acsUrl: "https://my-saml-idp/api/saml/v1"
+    # idpMetadataConfigMap: "idp-metadata-cm"
+    # signing:
+    #   external: false
+    #   certManagerSecretName: "governor-saml-signing"
+    registrationId: "saml"
+    acsUrl: ""
+    entityId: ""
+    idpMetadataUrl: ""
+    idpMetadataConfigMap: ""
+    idpMetadataSecret: ""
+    metadataKey: "metadata.xml"
+    metadataMountPath: "/etc/governor/saml/idp-metadata"
+    signing:
+      keyPairSecret: ""
+      external: true
+      certManagerSecretName: ""
+      privateKeyKey: "tls.key"
+      certificateKey: "tls.crt"
+      mountPath: "/etc/governor/saml/signing"
+    governor:
+      defaultRegistrationId: ""
+      jwtRedirectUri: ""
+      sloEnabled: false
+      authorities:
+        enabled: false
+        groupAttribute: "groups"
+        defaultRole: "MEMBER"
+        roleAliases: {}
   # Extra volume mounts for the api container
   # extraVolumeMounts:
   #   - name: my-secret

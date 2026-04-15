@@ -16,6 +16,23 @@ spec:
         app: {{ .Values.api.name }}
         {{- include "governor.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.api.saml }}
+      {{- if and .enabled .idpMetadataConfigMap .idpMetadataSecret }}
+      {{- fail "Only one of api.saml.idpMetadataConfigMap or api.saml.idpMetadataSecret may be set" }}
+      {{- end }}
+      {{- if and .enabled .signing.external (not .signing.keyPairSecret) }}
+      {{- fail "api.saml.signing.keyPairSecret must be set when api.saml.signing.external=true" }}
+      {{- end }}
+      {{- if and .enabled .signing.external .signing.certManagerSecretName }}
+      {{- fail "api.saml.signing.certManagerSecretName cannot be set when api.saml.signing.external=true" }}
+      {{- end }}
+      {{- if and .enabled (not .signing.external) (not .signing.certManagerSecretName) }}
+      {{- fail "api.saml.signing.certManagerSecretName must be set when api.saml.signing.external=false" }}
+      {{- end }}
+      {{- if and .enabled (not .signing.external) .signing.keyPairSecret }}
+      {{- fail "api.saml.signing.keyPairSecret cannot be set when api.saml.signing.external=false" }}
+      {{- end }}
+      {{- end }}
       {{- with .Values.api.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -60,11 +77,23 @@ spec:
               port: {{ .Values.api.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
-          {{- if or .Values.api.persistence.enabled .Values.tlsInternal.enabled .Values.api.container.extraVolumeMounts }}
+          {{- if or .Values.api.persistence.enabled .Values.tlsInternal.enabled .Values.api.container.extraVolumeMounts .Values.api.saml.enabled }}
           volumeMounts:
             {{- if .Values.api.persistence.enabled }}
             - name: {{ .Values.api.persistence.name }}
               mountPath: {{ .Values.api.persistence.mountPath }}
+            {{- end }}
+            {{- with .Values.api.saml }}
+            {{- if and .enabled (or .idpMetadataConfigMap .idpMetadataSecret) }}
+            - name: saml-idp-metadata
+              mountPath: {{ .metadataMountPath | default "/etc/governor/saml/idp-metadata" }}
+              readOnly: true
+            {{- end }}
+            {{- if and .enabled (or .signing.keyPairSecret .signing.certManagerSecretName) }}
+            - name: saml-signing-keypair
+              mountPath: {{ .signing.mountPath | default "/etc/governor/saml/signing" }}
+              readOnly: true
+            {{- end }}
             {{- end }}
             {{- with .Values.api.container.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -73,7 +102,7 @@ spec:
         {{- if .Values.tlsInternal.enabled }}
         {{- include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal "hasHttpPort" true "hasGrpcPort" true) | nindent 8 }}
         {{- end }}
-      {{- if or .Values.api.persistence.enabled .Values.tlsInternal.enabled .Values.api.extraVolumes }}
+      {{- if or .Values.api.persistence.enabled .Values.tlsInternal.enabled .Values.api.extraVolumes .Values.api.saml.enabled }}
       volumes:
         {{- if .Values.api.persistence.enabled }}
         - name: {{ .Values.api.persistence.name }}
@@ -82,6 +111,34 @@ spec:
         {{- end }}
         {{- if .Values.tlsInternal.enabled }}
         {{- include "governor.tlsInternal.volumes" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal) | nindent 8 }}
+        {{- end }}
+        {{- with .Values.api.saml }}
+        {{- if and .enabled (or .idpMetadataConfigMap .idpMetadataSecret) }}
+        - name: saml-idp-metadata
+          {{- if .idpMetadataConfigMap }}
+          configMap:
+            name: {{ .idpMetadataConfigMap }}
+            items:
+              - key: {{ .metadataKey | default "metadata.xml" }}
+                path: {{ .metadataKey | default "metadata.xml" }}
+          {{- else }}
+          secret:
+            secretName: {{ .idpMetadataSecret }}
+            items:
+              - key: {{ .metadataKey | default "metadata.xml" }}
+                path: {{ .metadataKey | default "metadata.xml" }}
+          {{- end }}
+        {{- end }}
+        {{- if and .enabled (or .signing.keyPairSecret .signing.certManagerSecretName) }}
+        - name: saml-signing-keypair
+          secret:
+            secretName: {{ .signing.keyPairSecret | default .signing.certManagerSecretName }}
+            items:
+              - key: {{ .signing.privateKeyKey | default "tls.key" }}
+                path: {{ .signing.privateKeyKey | default "tls.key" }}
+              - key: {{ .signing.certificateKey | default "tls.crt" }}
+                path: {{ .signing.certificateKey | default "tls.crt" }}
+        {{- end }}
         {{- end }}
         {{- with .Values.api.extraVolumes }}
         {{- toYaml . | nindent 8 }}
