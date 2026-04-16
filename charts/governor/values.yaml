@@ -146,13 +146,13 @@ api:
             key: ADMIN_DEFAULT_PASSWORD
   saml:
     enabled: false
-    # Example:
+    # Example using a pre-existing signing secret:
     # enabled: true
     # entityId: "governor-saml"
     # acsUrl: "https://my-saml-idp/api/saml/v1"
     # idpMetadataConfigMap: "idp-metadata-cm"
     # signing:
-    #   external: true
+    #   external: true  # use an already-existing Secret
     #   keyPairSecret: "existing-key-pair"
     # governor:
     #   jwtRedirectUri: "https://my-governor.example.com"
@@ -164,12 +164,19 @@ api:
     # acsUrl: "https://my-saml-idp/api/saml/v1"
     # idpMetadataConfigMap: "idp-metadata-cm"
     # signing:
-    #   external: false
-    #   certManagerSecretName: "governor-saml-signing"
+    #   external: false  # have cert-manager create the Secret below
+    #   keyPairSecret: "governor-saml-signing"
+    #   certManager:
+    #     issuerRef:
+    #       name: "my-cluster-issuer"
+    #       kind: "ClusterIssuer"
     registrationId: "saml"
     acsUrl: ""
     entityId: ""
+    # Use this when the app should fetch metadata from a URI instead of a
+    # mounted ConfigMap or Secret.
     idpMetadataUrl: ""
+    # Set one of these to mount an IdP metadata file into the API pod.
     idpMetadataConfigMap: ""
     idpMetadataSecret: ""
     metadataKey: "metadata.xml"
@@ -177,7 +184,16 @@ api:
     signing:
       keyPairSecret: ""
       external: true
-      certManagerSecretName: ""
+      certManager:
+        issuerRef:
+          name: ""
+          kind: "ClusterIssuer"
+        duration: 8760h
+        renewBefore: 720h
+        privateKey:
+          algorithm: RSA
+          size: 2048
+          encoding: PKCS8
       privateKeyKey: "tls.key"
       certificateKey: "tls.crt"
       mountPath: "/etc/governor/saml/signing"
@@ -188,6 +204,7 @@ api:
       authorities:
         enabled: false
         groupAttribute: "groups"
+        convertToUpperCase: true
         defaultRole: "MEMBER"
         roleAliases: {}
   # Extra volume mounts for the api container

@@ -23,14 +23,11 @@ spec:
       {{- if and .enabled .signing.external (not .signing.keyPairSecret) }}
       {{- fail "api.saml.signing.keyPairSecret must be set when api.saml.signing.external=true" }}
       {{- end }}
-      {{- if and .enabled .signing.external .signing.certManagerSecretName }}
-      {{- fail "api.saml.signing.certManagerSecretName cannot be set when api.saml.signing.external=true" }}
+      {{- if and .enabled (not .signing.external) (not .signing.keyPairSecret) }}
+      {{- fail "api.saml.signing.keyPairSecret must be set when api.saml.signing.external=false" }}
       {{- end }}
-      {{- if and .enabled (not .signing.external) (not .signing.certManagerSecretName) }}
-      {{- fail "api.saml.signing.certManagerSecretName must be set when api.saml.signing.external=false" }}
-      {{- end }}
-      {{- if and .enabled (not .signing.external) .signing.keyPairSecret }}
-      {{- fail "api.saml.signing.keyPairSecret cannot be set when api.saml.signing.external=false" }}
+      {{- if and .enabled (not .signing.external) (not .signing.certManager.issuerRef.name) }}
+      {{- fail "api.saml.signing.certManager.issuerRef.name must be set when api.saml.signing.external=false" }}
       {{- end }}
       {{- end }}
       {{- with .Values.api.imagePullSecrets | default .Values.imagePullSecrets }}
@@ -89,7 +86,7 @@ spec:
               mountPath: {{ .metadataMountPath | default "/etc/governor/saml/idp-metadata" }}
               readOnly: true
             {{- end }}
-            {{- if and .enabled (or .signing.keyPairSecret .signing.certManagerSecretName) }}
+            {{- if and .enabled .signing.keyPairSecret }}
             - name: saml-signing-keypair
               mountPath: {{ .signing.mountPath | default "/etc/governor/saml/signing" }}
               readOnly: true
@@ -129,10 +126,10 @@ spec:
                 path: {{ .metadataKey | default "metadata.xml" }}
           {{- end }}
         {{- end }}
-        {{- if and .enabled (or .signing.keyPairSecret .signing.certManagerSecretName) }}
+        {{- if and .enabled .signing.keyPairSecret }}
         - name: saml-signing-keypair
           secret:
-            secretName: {{ .signing.keyPairSecret | default .signing.certManagerSecretName }}
+            secretName: {{ .signing.keyPairSecret }}
             items:
               - key: {{ .signing.privateKeyKey | default "tls.key" }}
                 path: {{ .signing.privateKeyKey | default "tls.key" }}
