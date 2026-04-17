@@ -150,7 +150,7 @@ api:
   # When enabled, set:
   # - `entityId` to the SP entity ID presented to the IdP
   # - `acsUrl` to the assertion consumer service URL exposed by Governor
-  # - one metadata source: `idpMetadataUrl` or `idpMetadataConfigMap` or
+  # - exactly one metadata source: `idpMetadataUrl` or `idpMetadataConfigMap` or
   #   `idpMetadataSecret`
   # - signing credentials, either from an existing Secret
   #   (`signing.external=true`) or from a cert-manager-managed Certificate
@@ -162,7 +162,7 @@ api:
     # Example using a pre-existing signing secret:
     # enabled: true
     # entityId: "governor-saml"
-    # acsUrl: "https://my-saml-idp/api/saml/v1"
+    # acsUrl: "https://my-governor.example.com/api/saml/v1"
     # idpMetadataConfigMap: "idp-metadata-cm"
     # signing:
     #   external: true  # use an already-existing Secret
@@ -175,7 +175,7 @@ api:
     # Example using a cert-manager-managed signing secret:
     # enabled: true
     # entityId: "governor-saml"
-    # acsUrl: "https://my-saml-idp/api/saml/v1"
+    # acsUrl: "https://my-governor.example.com/api/saml/v1"
     # idpMetadataConfigMap: "idp-metadata-cm"
     # signing:
     #   external: false  # have cert-manager create the Secret below

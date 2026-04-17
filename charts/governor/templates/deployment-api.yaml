@@ -17,11 +17,18 @@ spec:
         {{- include "governor.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.api.saml }}
-      {{- if and .enabled .idpMetadataConfigMap .idpMetadataSecret }}
-      {{- fail "Only one of api.saml.idpMetadataConfigMap or api.saml.idpMetadataSecret may be set" }}
+      {{- $metadataSources := add (ternary 1 0 (ne .idpMetadataUrl "")) (ternary 1 0 (ne .idpMetadataConfigMap "")) (ternary 1 0 (ne .idpMetadataSecret "")) }}
+      {{- if and .enabled (ne $metadataSources 1) }}
+      {{- fail "Exactly one of api.saml.idpMetadataUrl, api.saml.idpMetadataConfigMap, or api.saml.idpMetadataSecret must be set when api.saml.enabled=true" }}
       {{- end }}
       {{- if and .enabled .signing.external (not .signing.keyPairSecret.name) }}
       {{- fail "api.saml.signing.keyPairSecret.name must be set when api.saml.signing.external=true" }}
+      {{- end }}
+      {{- if and .enabled (not .registrationId) }}
+      {{- fail "api.saml.registrationId must be set when api.saml.enabled=true" }}
+      {{- end }}
+      {{- if and .enabled (not (regexMatch "^[A-Za-z0-9_]+$" .registrationId)) }}
+      {{- fail "api.saml.registrationId may contain only letters, numbers, and underscores when api.saml.enabled=true" }}
       {{- end }}
       {{- if and .enabled (not .signing.external) (not .signing.keyPairSecret.name) }}
       {{- fail "api.saml.signing.keyPairSecret.name must be set when api.saml.signing.external=false" }}
@@ -130,6 +137,7 @@ spec:
         - name: saml-signing-keypair
           secret:
             secretName: {{ .signing.keyPairSecret.name }}
+            defaultMode: 0400
             items:
               - key: {{ .signing.keyPairSecret.privateKey }}
                 path: {{ .signing.keyPairSecret.privateKey }}
