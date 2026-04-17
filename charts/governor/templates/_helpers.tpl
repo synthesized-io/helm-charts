@@ -44,6 +44,15 @@ legacy "tdkAgents" key. Same merge semantics as governor.workerValues.
 {{- end -}}
 
 {{/*
+Envoy node identity required for SDS initialization.
+*/}}
+{{- define "governor.envoy.node" -}}
+node:
+  cluster: {{ printf "%s-envoy" .componentName | quote }}
+  id: {{ printf "%s.%s" .componentName .Release.Namespace | quote }}
+{{- end }}
+
+{{/*
 Envoy sidecar container template
 Usage: {{ include "governor.tlsInternal.sidecar" (dict "componentName" "api" "config" .Values.api "tlsInternal" .Values.tlsInternal "hasHttpPort" true "hasGrpcPort" true) }}
 */}}
@@ -153,6 +162,34 @@ Usage: {{ include "governor.tlsInternal.volumes" (dict "componentName" "api" "co
 {{- end }}
 
 {{/*
+Envoy file-based SDS secret documents for hot-reloading mounted cert-manager
+Secrets. These are consumed via path_config_source.
+*/}}
+{{- define "governor.envoy.downstreamTlsSdsSecret" -}}
+resources:
+  - "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+    name: downstream_tls_certificate
+    tls_certificate:
+      certificate_chain:
+        filename: /etc/envoy/certs/tls.crt
+      private_key:
+        filename: /etc/envoy/certs/tls.key
+      watched_directory:
+        path: /etc/envoy/certs
+{{- end }}
+
+{{- define "governor.envoy.upstreamValidationContextSdsSecret" -}}
+resources:
+  - "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+    name: upstream_validation_context
+    validation_context:
+      trusted_ca:
+        filename: /etc/envoy/ca/ca.crt
+      watched_directory:
+        path: /etc/envoy/ca
+{{- end }}
+
+{{/*
 Envoy HTTP router filter (used in all listeners)
 */}}
 {{- define "governor.envoy.httpRouter" -}}
@@ -170,11 +207,11 @@ transport_socket:
   typed_config:
     "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
     common_tls_context:
-      tls_certificates:
-        - certificate_chain:
-            filename: /etc/envoy/certs/tls.crt
-          private_key:
-            filename: /etc/envoy/certs/tls.key
+      tls_certificate_sds_secret_configs:
+        - name: downstream_tls_certificate
+          sds_config:
+            path_config_source:
+              path: /etc/envoy/downstream_tls_certificate.yaml
 {{- end }}
 
 {{/*
@@ -186,9 +223,11 @@ transport_socket:
   typed_config:
     "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
     common_tls_context:
-      validation_context:
-        trusted_ca:
-          filename: /etc/envoy/ca/ca.crt
+      validation_context_sds_secret_config:
+        name: upstream_validation_context
+        sds_config:
+          path_config_source:
+            path: /etc/envoy/upstream_validation_context.yaml
 {{- end }}
 
 {{/*

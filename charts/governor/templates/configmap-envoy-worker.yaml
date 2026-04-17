@@ -9,6 +9,7 @@ metadata:
     {{- include "governor.selectorLabels" . | nindent 4 }}
 data:
   envoy.yaml: |
+    {{- include "governor.envoy.node" (dict "componentName" $w.name "Release" .Release) | nindent 4 }}
     admin:
       address:
         socket_address:
@@ -21,4 +22,6 @@ data:
 
       clusters:
         {{- include "governor.envoy.apiGrpcsCluster" (dict "apiName" .Values.api.name "apiGrpcPort" .Values.api.service.grpcPort) | nindent 8 }}
+  upstream_validation_context.yaml: |
+    {{- include "governor.envoy.upstreamValidationContextSdsSecret" . | nindent 4 }}
 {{- end }}

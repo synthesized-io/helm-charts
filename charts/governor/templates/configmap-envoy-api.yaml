@@ -8,6 +8,7 @@ metadata:
     {{- include "governor.selectorLabels" . | nindent 4 }}
 data:
   envoy.yaml: |
+    {{- include "governor.envoy.node" (dict "componentName" .Values.api.name "Release" .Release) | nindent 4 }}
     admin:
       address:
         socket_address:
@@ -99,4 +100,6 @@ data:
                         socket_address:
                           address: 127.0.0.1
                           port_value: {{ .Values.api.container.grpcPort }}
+  downstream_tls_certificate.yaml: |
+    {{- include "governor.envoy.downstreamTlsSdsSecret" . | nindent 4 }}
 {{- end }}
