@@ -44,6 +44,59 @@ legacy "tdkAgents" key. Same merge semantics as governor.workerValues.
 {{- end -}}
 
 {{/*
+Shared cert-manager Certificate manifest.
+
+Usage:
+{{ include "governor.certificate" (dict
+  "root" .
+  "name" "component-cert"
+  "app" "component"
+  "secretName" "component-tls"
+  "cert" .Values.tlsInternal.certificates
+  "certificate" .Values.component.tlsInternal.certificate
+  "defaultDnsName" "component.namespace.svc.cluster.local"
+) }}
+*/}}
+{{- define "governor.certificate" -}}
+{{- $root := .root -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .app }}
+    {{- include "governor.selectorLabels" $root | nindent 4 }}
+spec:
+  secretName: {{ .secretName }}
+  duration: {{ .cert.duration }}
+  renewBefore: {{ .cert.renewBefore }}
+  privateKey:
+    algorithm: {{ .cert.privateKey.algorithm }}
+    size: {{ .cert.privateKey.size }}
+    encoding: {{ .cert.privateKey.encoding }}
+  {{- with .certificate }}
+  {{- with .usages }}
+  usages:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .commonName }}
+  commonName: {{ . }}
+  {{- end }}
+  {{- end }}
+  {{- if .defaultDnsName }}
+  dnsNames:
+    {{- if and .certificate .certificate.dnsNames }}
+    {{- toYaml .certificate.dnsNames | nindent 4 }}
+    {{- else }}
+    - {{ .defaultDnsName }}
+    {{- end }}
+  {{- end }}
+  issuerRef:
+    name: {{ .cert.issuerRef.name }}
+    kind: {{ .cert.issuerRef.kind }}
+{{- end }}
+
+{{/*
 Envoy node identity required for SDS initialization.
 */}}
 {{- define "governor.envoy.node" -}}

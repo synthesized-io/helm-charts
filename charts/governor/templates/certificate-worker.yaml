@@ -1,36 +1,12 @@
 {{- $w := include "governor.workerValues" . | fromYaml -}}
 {{- if .Values.tlsInternal.enabled }}
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: {{ $w.name }}-cert
-  labels:
-    app: {{ $w.name }}
-    {{- include "governor.selectorLabels" . | nindent 4 }}
-spec:
-  secretName: {{ $w.name }}-tls
-  duration: {{ .Values.tlsInternal.certificates.duration }}
-  renewBefore: {{ .Values.tlsInternal.certificates.renewBefore }}
-  privateKey:
-    algorithm: {{ .Values.tlsInternal.certificates.privateKey.algorithm }}
-    size: {{ .Values.tlsInternal.certificates.privateKey.size }}
-    encoding: {{ .Values.tlsInternal.certificates.privateKey.encoding }}
-  {{- if and $w.tlsInternal.certificate $w.tlsInternal.certificate.usages }}
-  usages:
-    {{- toYaml $w.tlsInternal.certificate.usages | nindent 4 }}
-  {{- end }}
-  {{- if $w.tlsInternal.certificate }}
-  {{- with $w.tlsInternal.certificate.commonName }}
-  commonName: {{ . }}
-  {{- end }}
-  {{- end }}
-  dnsNames:
-    {{- if and $w.tlsInternal.certificate $w.tlsInternal.certificate.dnsNames }}
-    {{- toYaml $w.tlsInternal.certificate.dnsNames | nindent 4 }}
-    {{- else }}
-    - {{ $w.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    {{- end }}
-  issuerRef:
-    name: {{ .Values.tlsInternal.certificates.issuerRef.name }}
-    kind: {{ .Values.tlsInternal.certificates.issuerRef.kind }}
+{{ include "governor.certificate" (dict
+  "root" .
+  "name" (printf "%s-cert" $w.name)
+  "app" $w.name
+  "secretName" (printf "%s-tls" $w.name)
+  "cert" .Values.tlsInternal.certificates
+  "certificate" $w.tlsInternal.certificate
+  "defaultDnsName" (printf "%s.%s.svc.cluster.local" $w.name .Release.Namespace)
+) }}
 {{- end }}
