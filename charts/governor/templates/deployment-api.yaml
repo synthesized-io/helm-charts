@@ -20,11 +20,11 @@ spec:
       {{- if and .enabled .idpMetadataConfigMap .idpMetadataSecret }}
       {{- fail "Only one of api.saml.idpMetadataConfigMap or api.saml.idpMetadataSecret may be set" }}
       {{- end }}
-      {{- if and .enabled .signing.external (not .signing.keyPairSecret) }}
-      {{- fail "api.saml.signing.keyPairSecret must be set when api.saml.signing.external=true" }}
+      {{- if and .enabled .signing.external (not .signing.keyPairSecret.name) }}
+      {{- fail "api.saml.signing.keyPairSecret.name must be set when api.saml.signing.external=true" }}
       {{- end }}
-      {{- if and .enabled (not .signing.external) (not .signing.keyPairSecret) }}
-      {{- fail "api.saml.signing.keyPairSecret must be set when api.saml.signing.external=false" }}
+      {{- if and .enabled (not .signing.external) (not .signing.keyPairSecret.name) }}
+      {{- fail "api.saml.signing.keyPairSecret.name must be set when api.saml.signing.external=false" }}
       {{- end }}
       {{- if and .enabled (not .signing.external) (not .signing.certManager.issuerRef.name) }}
       {{- fail "api.saml.signing.certManager.issuerRef.name must be set when api.saml.signing.external=false" }}
@@ -83,12 +83,12 @@ spec:
             {{- with .Values.api.saml }}
             {{- if and .enabled (or .idpMetadataConfigMap .idpMetadataSecret) }}
             - name: saml-idp-metadata
-              mountPath: {{ .metadataMountPath | default "/etc/governor/saml/idp-metadata" }}
+              mountPath: {{ .metadataMountPath }}
               readOnly: true
             {{- end }}
-            {{- if and .enabled .signing.keyPairSecret }}
+            {{- if and .enabled .signing.keyPairSecret.name }}
             - name: saml-signing-keypair
-              mountPath: {{ .signing.mountPath | default "/etc/governor/saml/signing" }}
+              mountPath: {{ .signing.mountPath }}
               readOnly: true
             {{- end }}
             {{- end }}
@@ -116,25 +116,25 @@ spec:
           configMap:
             name: {{ .idpMetadataConfigMap }}
             items:
-              - key: {{ .metadataKey | default "metadata.xml" }}
-                path: {{ .metadataKey | default "metadata.xml" }}
+              - key: {{ .metadataKey }}
+                path: {{ .metadataKey }}
           {{- else }}
           secret:
             secretName: {{ .idpMetadataSecret }}
             items:
-              - key: {{ .metadataKey | default "metadata.xml" }}
-                path: {{ .metadataKey | default "metadata.xml" }}
+              - key: {{ .metadataKey }}
+                path: {{ .metadataKey }}
           {{- end }}
         {{- end }}
-        {{- if and .enabled .signing.keyPairSecret }}
+        {{- if and .enabled .signing.keyPairSecret.name }}
         - name: saml-signing-keypair
           secret:
-            secretName: {{ .signing.keyPairSecret }}
+            secretName: {{ .signing.keyPairSecret.name }}
             items:
-              - key: {{ .signing.privateKeyKey | default "tls.key" }}
-                path: {{ .signing.privateKeyKey | default "tls.key" }}
-              - key: {{ .signing.certificateKey | default "tls.crt" }}
-                path: {{ .signing.certificateKey | default "tls.crt" }}
+              - key: {{ .signing.keyPairSecret.privateKey }}
+                path: {{ .signing.keyPairSecret.privateKey }}
+              - key: {{ .signing.keyPairSecret.certificate }}
+                path: {{ .signing.keyPairSecret.certificate }}
         {{- end }}
         {{- end }}
         {{- with .Values.api.extraVolumes }}

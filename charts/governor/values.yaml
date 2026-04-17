@@ -144,6 +144,19 @@ api:
           secretKeyRef:
             name: governor-api-secret
             key: ADMIN_DEFAULT_PASSWORD
+  # SAML configuration for the Governor API.
+  #
+  # Enable this section to configure Governor as a SAML relying party.
+  # When enabled, set:
+  # - `entityId` to the SP entity ID presented to the IdP
+  # - `acsUrl` to the assertion consumer service URL exposed by Governor
+  # - one metadata source: `idpMetadataUrl` or `idpMetadataConfigMap` or
+  #   `idpMetadataSecret`
+  # - signing credentials, either from an existing Secret
+  #   (`signing.external=true`) or from a cert-manager-managed Certificate
+  #   (`signing.external=false`)
+  #
+  # See `values.saml.local.example.yaml` for end-to-end examples.
   saml:
     enabled: false
     # Example using a pre-existing signing secret:
@@ -153,7 +166,8 @@ api:
     # idpMetadataConfigMap: "idp-metadata-cm"
     # signing:
     #   external: true  # use an already-existing Secret
-    #   keyPairSecret: "existing-key-pair"
+    #   keyPairSecret:
+    #     name: "existing-key-pair"
     # governor:
     #   jwtRedirectUri: "https://my-governor.example.com"
     #   sloEnabled: false
@@ -165,14 +179,15 @@ api:
     # idpMetadataConfigMap: "idp-metadata-cm"
     # signing:
     #   external: false  # have cert-manager create the Secret below
-    #   keyPairSecret: "governor-saml-signing"
+    #   keyPairSecret:
+    #     name: "governor-saml-signing"
     #   certManager:
     #     issuerRef:
     #       name: "my-cluster-issuer"
     #       kind: "ClusterIssuer"
     registrationId: "saml"
     acsUrl: ""
-    entityId: ""
+    entityId: "governor-saml"
     # Use this when the app should fetch metadata from a URI instead of a
     # mounted ConfigMap or Secret.
     idpMetadataUrl: ""
@@ -182,7 +197,10 @@ api:
     metadataKey: "metadata.xml"
     metadataMountPath: "/etc/governor/saml/idp-metadata"
     signing:
-      keyPairSecret: ""
+      keyPairSecret:
+        name: ""
+        privateKey: "tls.key"
+        certificate: "tls.crt"
       external: true
       certManager:
         issuerRef:
@@ -194,8 +212,6 @@ api:
           algorithm: RSA
           size: 2048
           encoding: PKCS8
-      privateKeyKey: "tls.key"
-      certificateKey: "tls.crt"
       mountPath: "/etc/governor/saml/signing"
     governor:
       defaultRegistrationId: ""

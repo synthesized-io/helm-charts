@@ -4,7 +4,7 @@
   "root" $
   "name" (printf "%s-saml-signing" $.Values.api.name)
   "app" $.Values.api.name
-  "secretName" .signing.keyPairSecret
+  "secretName" .signing.keyPairSecret.name
   "cert" .signing.certManager
 ) }}
 {{- end }}
