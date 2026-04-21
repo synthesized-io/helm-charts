@@ -1,6 +1,6 @@
 {{- $w := include "governor.workerValues" . | fromYaml -}}
 {{- if .Values.tlsInternal.enabled }}
-{{ include "governor.certificate" (dict
+{{ include "governor.cert-manager.certificate" (dict
   "root" .
   "name" (printf "%s-cert" $w.name)
   "app" $w.name

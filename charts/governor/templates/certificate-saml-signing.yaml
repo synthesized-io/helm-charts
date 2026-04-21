@@ -1,6 +1,6 @@
 {{- with .Values.api.saml }}
 {{- if and .enabled (not .signing.external) }}
-{{ include "governor.certificate" (dict
+{{ include "governor.cert-manager.certificate" (dict
   "root" $
   "name" (printf "%s-saml-signing" $.Values.api.name)
   "app" $.Values.api.name

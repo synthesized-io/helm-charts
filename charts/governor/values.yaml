@@ -216,7 +216,8 @@ api:
     governor:
       defaultRegistrationId: ""
       jwtRedirectUri: ""
-      sloEnabled: false
+      # Optional. When omitted, the application default is used.
+      # sloEnabled: false
       authorities:
         enabled: false
         groupAttribute: "groups"

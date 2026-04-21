@@ -34,7 +34,9 @@ data:
   {{- if .governor.jwtRedirectUri }}
   SPRING_SECURITY_SAML2_JWT_REDIRECT_URL: {{ .governor.jwtRedirectUri | quote }}
   {{- end }}
+  {{- if hasKey .governor "sloEnabled" }}
   GOVERNOR_SECURITY_SAML_SLO_ENABLED: {{ .governor.sloEnabled | quote }}
+  {{- end }}
   GOVERNOR_SECURITY_SAML_AUTHORITIES_ENABLED: {{ .governor.authorities.enabled | quote }}
   {{- if .governor.authorities.groupAttribute }}
   GOVERNOR_SECURITY_SAML_AUTHORITIES_GROUP_ATTRIBUTE: {{ .governor.authorities.groupAttribute | quote }}

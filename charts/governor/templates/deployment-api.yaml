@@ -27,9 +27,6 @@ spec:
       {{- if and .enabled (not .registrationId) }}
       {{- fail "api.saml.registrationId must be set when api.saml.enabled=true" }}
       {{- end }}
-      {{- if and .enabled (not (regexMatch "^[A-Za-z0-9_]+$" .registrationId)) }}
-      {{- fail "api.saml.registrationId may contain only letters, numbers, and underscores when api.saml.enabled=true" }}
-      {{- end }}
       {{- if and .enabled (not .signing.external) (not .signing.keyPairSecret.name) }}
       {{- fail "api.saml.signing.keyPairSecret.name must be set when api.saml.signing.external=false" }}
       {{- end }}

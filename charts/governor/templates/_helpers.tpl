@@ -47,7 +47,7 @@ legacy "tdkAgents" key. Same merge semantics as governor.workerValues.
 Shared cert-manager Certificate manifest.
 
 Usage:
-{{ include "governor.certificate" (dict
+{{ include "governor.cert-manager.certificate" (dict
   "root" .
   "name" "component-cert"
   "app" "component"
@@ -57,7 +57,7 @@ Usage:
   "defaultDnsName" "component.namespace.svc.cluster.local"
 ) }}
 */}}
-{{- define "governor.certificate" -}}
+{{- define "governor.cert-manager.certificate" -}}
 {{- $root := .root -}}
 apiVersion: cert-manager.io/v1
 kind: Certificate
