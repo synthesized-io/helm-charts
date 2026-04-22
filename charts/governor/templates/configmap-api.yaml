@@ -31,8 +31,8 @@ data:
   {{- if .governor.defaultRegistrationId }}
   GOVERNOR_SECURITY_SAML_DEFAULT_REGISTRATION_ID: {{ .governor.defaultRegistrationId | quote }}
   {{- end }}
-  {{- if .governor.jwtRedirectUri }}
-  SPRING_SECURITY_SAML2_JWT_REDIRECT_URL: {{ .governor.jwtRedirectUri | quote }}
+  {{- if .governor.jwtRedirectUrl }}
+  SPRING_SECURITY_SAML2_JWT_REDIRECT_URL: {{ .governor.jwtRedirectUrl | quote }}
   {{- end }}
   {{- if hasKey .governor "sloEnabled" }}
   GOVERNOR_SECURITY_SAML_SLO_ENABLED: {{ .governor.sloEnabled | quote }}

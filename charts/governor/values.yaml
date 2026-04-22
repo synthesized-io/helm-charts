@@ -169,7 +169,7 @@ api:
     #   keyPairSecret:
     #     name: "existing-key-pair"
     # governor:
-    #   jwtRedirectUri: "https://my-governor.example.com"
+    #   jwtRedirectUrl: "https://my-governor.example.com"
     #   sloEnabled: false
 
     # Example using a cert-manager-managed signing secret:
@@ -215,7 +215,7 @@ api:
       mountPath: "/etc/governor/saml/signing"
     governor:
       defaultRegistrationId: ""
-      jwtRedirectUri: ""
+      jwtRedirectUrl: ""
       # Optional. When omitted, the application default is used.
       # sloEnabled: false
       authorities:
