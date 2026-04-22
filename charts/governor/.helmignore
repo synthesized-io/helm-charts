@@ -16,6 +16,8 @@
 *.tmp
 *.orig
 *~
+# Packaged charts
+*.tgz
 # Various IDEs
 .project
 .idea/
