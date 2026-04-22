@@ -144,6 +144,86 @@ api:
           secretKeyRef:
             name: governor-api-secret
             key: ADMIN_DEFAULT_PASSWORD
+  # SAML configuration for the Governor API.
+  #
+  # Enable this section to configure Governor as a SAML relying party.
+  # When enabled, set:
+  # - `entityId` to the SP entity ID presented to the IdP
+  # - `acsUrl` to the assertion consumer service URL exposed by Governor
+  # - exactly one metadata source: `idpMetadataUrl` or `idpMetadataConfigMap` or
+  #   `idpMetadataSecret`
+  # - signing credentials, either from an existing Secret
+  #   (`signing.external=true`) or from a cert-manager-managed Certificate
+  #   (`signing.external=false`)
+  #
+  # See `values.saml.local.example.yaml` for end-to-end examples.
+  saml:
+    enabled: false
+    # Example using a pre-existing signing secret:
+    # enabled: true
+    # entityId: "governor-saml"
+    # acsUrl: "https://my-governor.example.com/api/saml/v1"
+    # idpMetadataConfigMap: "idp-metadata-cm"
+    # signing:
+    #   external: true  # use an already-existing Secret
+    #   keyPairSecret:
+    #     name: "existing-key-pair"
+    # governor:
+    #   jwtRedirectUrl: "https://my-governor.example.com"
+    #   sloEnabled: false
+
+    # Example using a cert-manager-managed signing secret:
+    # enabled: true
+    # entityId: "governor-saml"
+    # acsUrl: "https://my-governor.example.com/api/saml/v1"
+    # idpMetadataConfigMap: "idp-metadata-cm"
+    # signing:
+    #   external: false  # have cert-manager create the Secret below
+    #   keyPairSecret:
+    #     name: "governor-saml-signing"
+    #   certManager:
+    #     issuerRef:
+    #       name: "my-cluster-issuer"
+    #       kind: "ClusterIssuer"
+    registrationId: "saml"
+    acsUrl: ""
+    entityId: "governor-saml"
+    # Use this when the app should fetch metadata from a URI instead of a
+    # mounted ConfigMap or Secret.
+    idpMetadataUrl: ""
+    # Set one of these to mount an IdP metadata file into the API pod.
+    idpMetadataConfigMap: ""
+    idpMetadataSecret: ""
+    metadataKey: "metadata.xml"
+    metadataMountPath: "/etc/governor/saml/idp-metadata"
+    signing:
+      keyPairSecret:
+        name: ""
+        privateKey: "tls.key"
+        certificate: "tls.crt"
+      external: true
+      certManager:
+        issuerRef:
+          name: ""
+          kind: "ClusterIssuer"
+        duration: 8760h
+        renewBefore: 720h
+        privateKey:
+          algorithm: RSA
+          size: 2048
+          encoding: PKCS8
+      mountPath: "/etc/governor/saml/signing"
+    governor:
+      defaultRegistrationId: ""
+      jwtRedirectUrl: ""
+      # Optional. When omitted, the application default is used.
+      # sloEnabled: false
+      authorities:
+        enabled: false
+        groupAttribute: "groups"
+        convertToUpperCase: true
+        defaultRole: "MEMBER"
+        roleAliases: {}
   # Extra volume mounts for the api container
   # extraVolumeMounts:
   #   - name: my-secret
