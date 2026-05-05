@@ -45,8 +45,26 @@ data:
   {{- if .governor.authorities.defaultRole }}
   GOVERNOR_SECURITY_SAML_AUTHORITIES_DEFAULT_ROLE: {{ .governor.authorities.defaultRole | quote }}
   {{- end }}
-  {{- range $roleKey, $roleValue := .governor.authorities.roleAliases }}
-  GOVERNOR_SECURITY_SAML_AUTHORITIES_ROLE_ALIASES_{{ $roleKey | upper | replace "-" "_" }}: {{ $roleValue | quote }}
+  {{/*
+    Group-to-role mapping. Two input shapes are supported:
+
+    * `aliases` (preferred): list of {group, role} pairs. Rendered as indexed env
+      vars that bind cleanly through Spring's relaxed environment-variable rules.
+
+    * `roleAliases` (legacy): map of group→role. Cannot be expressed as
+      individual env vars because Spring's binder cannot enumerate descendants
+      of a Map property whose prefix contains a hyphen (`role-aliases`). We
+      therefore render this map as a single SPRING_APPLICATION_JSON entry,
+      which Spring loads via its JSON property source — original keys preserved.
+
+    Both shapes are merged on the application side; safe to use either or both.
+  */}}
+  {{- range $idx, $entry := .governor.authorities.aliases }}
+  GOVERNOR_SECURITY_SAML_AUTHORITIES_ALIASES_{{ $idx }}_GROUP: {{ required "saml.governor.authorities.aliases[].group is required" $entry.group | quote }}
+  GOVERNOR_SECURITY_SAML_AUTHORITIES_ALIASES_{{ $idx }}_ROLE:  {{ required "saml.governor.authorities.aliases[].role is required" $entry.role | quote }}
+  {{- end }}
+  {{- if .governor.authorities.roleAliases }}
+  SPRING_APPLICATION_JSON: {{ dict "governor" (dict "security" (dict "saml" (dict "authorities" (dict "role-aliases" .governor.authorities.roleAliases)))) | toJson | quote }}
   {{- end }}
   {{- end }}
   {{- end }}
