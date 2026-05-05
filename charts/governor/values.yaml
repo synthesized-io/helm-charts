@@ -223,6 +223,20 @@ api:
         groupAttribute: "groups"
         convertToUpperCase: true
         defaultRole: "MEMBER"
+        # Preferred form for env-var-driven deployments. List of group→role
+        # pairs; rendered as indexed env vars that Spring binds correctly.
+        # aliases:
+        #   - group: WM_SYNTHESIZED_ADMIN_QA
+        #     role: ADMINISTRATOR
+        #   - group: WM_SYNTHESIZED_OWNER_QA
+        #     role: OWNER
+        aliases: []
+        # Legacy map form. Rendered into SPRING_APPLICATION_JSON because Spring's
+        # relaxed binding cannot bind a Map<String, X> from individual env vars
+        # when the property prefix (`role-aliases`) contains a hyphen. Original
+        # keys are preserved.
+        # roleAliases:
+        #   WM_SYNTHESIZED_ADMIN_QA: ADMINISTRATOR
         roleAliases: {}
   # Extra volume mounts for the api container
   # extraVolumeMounts:
