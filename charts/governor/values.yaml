@@ -30,6 +30,24 @@ tdkWorkers:
   enabled: true
   useByDefault: true
 
+# Public host the deployment is reachable on (e.g. exp-pl8kwnr.dev-hybrid-cloud.synthesized.io).
+# Surfaces to the api pod as UI_SERVER_HOST. Required for:
+#   - PostHog analytics (forms the distinct_id namespace shared by FE/BE)
+#   - The TDK worker installation command rendered in the UI
+#   - Auth flows that build absolute URLs
+# Leave blank only if api.container.config.UI_SERVER_HOST is already set
+# directly (legacy override path).
+serverHost: ""
+
+# PostHog analytics — applied to both api and front pods so a single value
+# powers backend-emitted events and frontend manifest substitution.
+# Leave apiKey blank to disable analytics; both BE and FE no-op when the key
+# is missing, so the default apiHost is harmless when unused.
+analytics:
+  posthog:
+    apiKey: ""
+    apiHost: "https://eu.posthog.com"
+
 # DEPRECATED: legacy `tdkAgents:` overrides are merged on top of `tdkWorkers:`
 # (legacy values take precedence for any field they specify).
 # tdkAgents: {}
@@ -289,6 +307,10 @@ front:
       UI_PII_SCAN: "true"
       UI_WORKFLOW_WIZARD: "true"
     secretConfig:
+      # DEPRECATED: name is missing the UI_ prefix the frontend manifest expects
+      # and is therefore not picked up by the FE. Use `analytics.posthog.apiKey`
+      # at the chart top level instead — it feeds both api and front pods under
+      # the correct env var name.
       POSTHOG_ANALYTICS_API_KEY: ""
   # Extra volume mounts for the front container
   # extraVolumeMounts:
