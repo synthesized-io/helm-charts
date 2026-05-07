@@ -96,3 +96,9 @@ data:
   DIRECTOR_SERVERPORT: "{{ .Values.director.service.port }}"
   GOVERNOR_SECURITY_OWNERACCESSONLY: "yes"
 {{- end }}
+{{- if and .Values.serverHost (not (hasKey (.Values.api.container.config | default dict) "UI_SERVER_HOST")) }}
+  UI_SERVER_HOST: {{ .Values.serverHost | quote }}
+{{- end }}
+{{- if .Values.analytics.posthog.apiHost }}
+  UI_POSTHOG_ANALYTICS_API_HOST: {{ .Values.analytics.posthog.apiHost | quote }}
+{{- end }}

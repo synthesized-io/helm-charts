@@ -24,8 +24,10 @@ data:
   {{- $tdkW := include "governor.tdkWorkersValues" . | fromYaml }}
   UI_TDK_AGENTS: {{ $tdkW.enabled | quote }}
   UI_TDK_AGENTS_BY_DEFAULT: {{ $tdkW.useByDefault | quote }}
+{{- if .Values.analytics.posthog.apiHost }}
+  UI_POSTHOG_ANALYTICS_API_HOST: {{ .Values.analytics.posthog.apiHost | quote }}
+{{- end }}
 {{- if eq .Values.mode "saas" }}
-  UI_POSTHOG_ANALYTICS_API_HOST: 'https://eu.posthog.com'
   UI_ENVIRONMENT: "cloud"
 {{- else}}
   UI_ENVIRONMENT: "on-premise"
