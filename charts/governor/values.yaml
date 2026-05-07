@@ -304,7 +304,6 @@ front:
       API_INTERNAL_HOST: 'governor-api'
       API_GRPC_INTERNAL_PORT: '50055'
       API_HTTP_INTERNAL_PORT: '80'
-      UI_PII_SCAN: "true"
       UI_WORKFLOW_WIZARD: "true"
     secretConfig:
       # DEPRECATED: name is missing the UI_ prefix the frontend manifest expects
