@@ -68,9 +68,6 @@ data:
   {{- end }}
   {{- end }}
   {{- end }}
-  {{- $tdkW := include "governor.tdkWorkersValues" . | fromYaml }}
-  UI_TDK_AGENTS: {{ $tdkW.enabled | quote }}
-  UI_TDK_AGENTS_BY_DEFAULT: {{ $tdkW.useByDefault | quote }}
   {{- with .Values.s3Client }}
   {{- if .forcePathStyle }}
   TDK_S3_FORCE_PATH_STYLE: {{ .forcePathStyle | quote }}

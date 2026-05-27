@@ -21,9 +21,6 @@ data:
 {{ toYaml .Values.front.container.config | indent 2}}
 {{- end }}
 {{- end }}
-  {{- $tdkW := include "governor.tdkWorkersValues" . | fromYaml }}
-  UI_TDK_AGENTS: {{ $tdkW.enabled | quote }}
-  UI_TDK_AGENTS_BY_DEFAULT: {{ $tdkW.useByDefault | quote }}
 {{- if .Values.analytics.posthog.apiHost }}
   UI_POSTHOG_ANALYTICS_API_HOST: {{ .Values.analytics.posthog.apiHost | quote }}
 {{- end }}
