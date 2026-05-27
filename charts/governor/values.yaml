@@ -25,11 +25,6 @@ migrationCleanup:
   # upgrade. Use this only when you do NOT need the existing worker data.
   deleteLegacyPvc: false
 
-# Feature flags shared across components.
-tdkWorkers:
-  enabled: true
-  useByDefault: true
-
 # Public host the deployment is reachable on (e.g. exp-pl8kwnr.dev-hybrid-cloud.synthesized.io).
 # Surfaces to the api pod as UI_SERVER_HOST. Required for:
 #   - PostHog analytics (forms the distinct_id namespace shared by FE/BE)
@@ -46,11 +41,8 @@ serverHost: ""
 analytics:
   posthog:
     apiKey: ""
-    apiHost: "https://eu.posthog.com"
+    apiHost: "https://eu.i.posthog.com"
 
-# DEPRECATED: legacy `tdkAgents:` overrides are merged on top of `tdkWorkers:`
-# (legacy values take precedence for any field they specify).
-# tdkAgents: {}
 s3Client:
   # forcePathStyle: true
   # protocol: "http"
@@ -304,7 +296,6 @@ front:
       API_INTERNAL_HOST: 'governor-api'
       API_GRPC_INTERNAL_PORT: '50055'
       API_HTTP_INTERNAL_PORT: '80'
-      UI_WORKFLOW_WIZARD: "true"
     secretConfig:
       # DEPRECATED: name is missing the UI_ prefix the frontend manifest expects
       # and is therefore not picked up by the FE. Use `analytics.posthog.apiKey`

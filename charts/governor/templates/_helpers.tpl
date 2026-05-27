@@ -34,16 +34,6 @@ Usage: {{- $w := include "governor.workerValues" . | fromYaml }}
 {{- end -}}
 
 {{/*
-Resolve tdkWorkers feature flag with backward-compatible fallback from
-legacy "tdkAgents" key. Same merge semantics as governor.workerValues.
-*/}}
-{{- define "governor.tdkWorkersValues" -}}
-{{- $w := .Values.tdkWorkers | default dict -}}
-{{- $a := .Values.tdkAgents | default dict -}}
-{{- mustMergeOverwrite (deepCopy $w) (deepCopy $a) | toYaml -}}
-{{- end -}}
-
-{{/*
 Shared cert-manager Certificate manifest.
 
 Usage:

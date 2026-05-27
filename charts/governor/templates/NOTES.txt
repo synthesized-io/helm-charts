@@ -44,24 +44,3 @@ cleanup of the old resources automatically).
 
 {{- end }}
 
-{{- if .Values.tdkAgents }}
-
-============================================================
-DEPRECATION WARNING — legacy `tdkAgents:` flag detected
-============================================================
-The `tdkAgents:` feature flag is DEPRECATED. It has been
-renamed to `tdkWorkers:` and will be removed in a future
-release.
-
-Your `tdkAgents:` values still take effect — they are merged
-on top of `tdkWorkers:` defaults (legacy values win on
-conflict). Do not mix the two blocks.
-
-To migrate:
-
-  tdkAgents:           ->   tdkWorkers:
-    enabled: true             enabled: true
-    useByDefault: true        useByDefault: true
-============================================================
-
-{{- end }}
