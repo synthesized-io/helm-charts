@@ -299,6 +299,9 @@ Envoy gRPC egress listener to api (shared by front and agent)
                         prefix: "/"
                       route:
                         cluster: api_grpcs
+                        # Disable route timeout: gRPC uses long-lived streams
+                        # (task updates, file transfers); Envoy's default is 15s
+                        timeout: 0s
             http_filters:
               {{- include "governor.envoy.httpRouter" . | nindent 14 }}
 {{- end }}
