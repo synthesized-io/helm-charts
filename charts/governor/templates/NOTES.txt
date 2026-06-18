@@ -44,3 +44,21 @@ cleanup of the old resources automatically).
 
 {{- end }}
 
+{{- if .Values.assistant.enabled }}
+
+============================================================
+Assistant (agent-lab) is ENABLED
+============================================================
+Deployed as Deployment/Service "{{ .Values.assistant.name }}"
+(port {{ .Values.assistant.container.port }}).
+
+Make sure ANTHROPIC_API_KEY is supplied — via
+assistant.container.secretEnv (from an external secret) or
+assistant.container.secretConfig.
+
+To deploy Governor WITHOUT the Assistant (e.g. for no-LLM /
+no-AI clients), set assistant.enabled=false — the default.
+This removes all Assistant pods, services, config, and
+secrets.
+============================================================
+{{- end }}

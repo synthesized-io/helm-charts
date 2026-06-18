@@ -397,6 +397,103 @@ director:
     type: ClusterIP
     port: 50051
 
+# Assistant (agent-lab) — optional AI chat assistant for Governor.
+#
+# DISABLED BY DEFAULT. When assistant.enabled=false (the default) NO Assistant
+# pods, services, config maps, or secrets are rendered, and existing Governor
+# deployments are completely unaffected. Clients with no-LLM / no-AI policies
+# deploy Governor with this left off. Set assistant.enabled=true to deploy it.
+assistant:
+  enabled: false
+  name: governor-assistant
+  replicaCount: 1
+  image:
+    repository: synthesizedio/agent-lab
+    # Pin to a published agent-lab release tag (see synthesized-io/agent-lab).
+    # Defaults to "latest"; pin a version for reproducible deployments.
+    tag: "latest"
+    pullPolicy: Always
+  # imagePullSecrets:  # falls back to top-level imagePullSecrets if unset
+  #   - name: my-pull-secret
+  # Container security context. The agent-lab image is distroless and runs as
+  # the nonroot user UID 65532 by default. Override (e.g. drop runAsUser) for
+  # platforms that assign their own UID such as OpenShift.
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+  container:
+    # Command the container serves. The default matches the LangGraph server the
+    # Governor SPA reaches via the /api/v1/agent/** reverse proxy on the API.
+    #
+    # NOTE: `langgraph` is currently a dev-only dependency in the agent-lab
+    # image, so serving via it requires langgraph in the runtime deps (tracked
+    # in agent-lab). To serve the bundled FastAPI server instead, set:
+    #   command: ["tdk-api-server", "--host", "0.0.0.0", "--port", "8100"]
+    #   port: 8100
+    command:
+      - langgraph
+      - dev
+      - --host
+      - 0.0.0.0
+      - --port
+      - "2024"
+      - --no-browser
+    port: 2024
+    # Non-secret runtime config, rendered into a ConfigMap. GOVERNOR_BASE_URL
+    # targets the in-cluster Governor API service by default.
+    config:
+      GOVERNOR_BASE_URL: "http://governor-api"
+      # Tracing defaults OFF so PII/schema/data-sample rows are not uploaded to
+      # LangSmith unless an operator explicitly opts in.
+      LANGCHAIN_TRACING_V2: "false"
+    # Sensitive values. Prefer secretEnv, sourced from an external secret (e.g.
+    # Vault, External Secrets Operator). ANTHROPIC_API_KEY is required for any
+    # LLM operation.
+    secretEnv: []
+    #   - name: ANTHROPIC_API_KEY
+    #     valueFrom:
+    #       secretKeyRef:
+    #         name: governor-assistant-secret
+    #         key: ANTHROPIC_API_KEY
+    # Legacy inline secret fallback, rendered into a chart-managed Secret.
+    secretConfig: {}
+    #   ANTHROPIC_API_KEY: ""
+  # extraVolumeMounts:
+  #   - name: my-secret
+  #     mountPath: /mnt/secrets
+  #     readOnly: true
+  # extraVolumes:
+  #   - name: my-secret
+  #     secret:
+  #       secretName: my-secret-name
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  # Probes. Left empty, a TCP check on container.port is used (works regardless
+  # of the served command's HTTP health path). Provide a full probe map here to
+  # override, e.g. an httpGet readiness check.
+  readinessProbe: {}
+  #   httpGet:
+  #     path: /ok
+  #     port: 2024
+  #   initialDelaySeconds: 10
+  #   periodSeconds: 10
+  livenessProbe: {}
+  service:
+    type: ClusterIP
+    port: 80
+
 nodeSelector: {}
 
 tolerations: []
