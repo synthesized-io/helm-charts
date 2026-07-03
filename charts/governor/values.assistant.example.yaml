@@ -1,0 +1,82 @@
+# Example: deploy Governor WITH the Assistant (agent-lab) enabled.
+#
+#   helm upgrade --install governor charts/governor \
+#     -f charts/governor/values.assistant.example.yaml
+#
+# The Assistant is OFF by default; this file turns it on and wires up the
+# required secret. Omit this file (or set assistant.enabled=false) to deploy
+# Governor with no Assistant components — the default for no-LLM / no-AI clients.
+#
+# Prerequisite — create the secret the Assistant reads its key + DB URL from
+# (do NOT put these in this file / git). DATABASE_URL should point at a
+# dedicated logical database on the shared TDK/Governor Postgres instance:
+#
+#   kubectl create secret generic governor-assistant-secret \
+#     --from-literal=ANTHROPIC_API_KEY=sk-ant-... \
+#     --from-literal=DATABASE_URL=postgresql://USER:PASS@governor-postgres:5432/agent \
+#     -n <namespace>
+#
+# Or manage it via Vault / External Secrets Operator under the same name/keys.
+
+assistant:
+  enabled: true
+
+  image:
+    repository: synthesizedio/agent-lab
+    # Pin to a published agent-lab release tag (avoid "latest" in production).
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+
+  # Pulling from a private registry? Add the pull secret here (or rely on the
+  # chart-wide top-level imagePullSecrets):
+  # imagePullSecrets:
+  #   - name: my-registry-pull-secret
+
+  container:
+    # Default command is tdk-chat-server on :2024 (the production chat/SPA
+    # backend, already in the image) — no override needed here.
+
+    config:
+      # In-cluster Governor API service (default). Override if your release name
+      # changes the service name.
+      GOVERNOR_BASE_URL: "http://governor-api"
+      LANGCHAIN_TRACING_V2: "false"
+
+    # Required secrets, sourced from the external secret created above.
+    secretEnv:
+      - name: ANTHROPIC_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: governor-assistant-secret
+            key: ANTHROPIC_API_KEY
+      - name: DATABASE_URL
+        valueFrom:
+          secretKeyRef:
+            name: governor-assistant-secret
+            key: DATABASE_URL
+      # Optional — Cloudflare AI Gateway:
+      # - name: CLOUDFLARE_AI_GATEWAY_BASE_URL
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: governor-assistant-secret
+      #       key: CLOUDFLARE_AI_GATEWAY_BASE_URL
+      # - name: CLOUDFLARE_AI_GATEWAY_TOKEN
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: governor-assistant-secret
+      #       key: CLOUDFLARE_AI_GATEWAY_TOKEN
+      # Optional — LangSmith tracing (also set LANGCHAIN_TRACING_V2=true above):
+      # - name: LANGCHAIN_API_KEY
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: governor-assistant-secret
+      #       key: LANGCHAIN_API_KEY
+
+  # Tune to your cluster. The agent is memory-heavy under load.
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi

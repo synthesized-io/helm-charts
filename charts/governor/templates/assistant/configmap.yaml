@@ -1,0 +1,12 @@
+{{- if .Values.assistant.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.assistant.name }}-configmap
+  labels:
+    {{- include "governor.selectorLabels" . | nindent 4 }}
+data:
+{{- if .Values.assistant.container.config }}
+{{ toYaml .Values.assistant.container.config | indent 2 }}
+{{- end }}
+{{- end }}

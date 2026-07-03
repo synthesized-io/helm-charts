@@ -1,0 +1,81 @@
+{{- if .Values.assistant.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.assistant.name }}
+  labels:
+    {{- include "governor.component.labels" (list .Values.assistant .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.assistant.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.assistant.name }}
+  template:
+    metadata:
+      labels:
+        {{- include "governor.component.labels" (list .Values.assistant .) | nindent 8 }}
+    spec:
+      {{- with .Values.assistant.imagePullSecrets | default .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.assistant.name }}
+          image: "{{ .Values.assistant.image.repository }}:{{ required "assistant.image.tag must be set — pin a published agent-lab release tag" .Values.assistant.image.tag }}"
+          imagePullPolicy: {{ .Values.assistant.image.pullPolicy }}
+          {{- with .Values.assistant.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.assistant.container.command }}
+          command:
+            {{- toYaml .Values.assistant.container.command | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.assistant.container.port }}
+          resources:
+            {{- toYaml (.Values.assistant.resources | default dict) | nindent 12 }}
+          {{- include "governor.component.envSources" .Values.assistant | nindent 10 }}
+          readinessProbe:
+            {{- if .Values.assistant.readinessProbe }}
+            {{- toYaml .Values.assistant.readinessProbe | nindent 12 }}
+            {{- else }}
+            httpGet:
+              path: /ready
+              port: {{ .Values.assistant.container.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            {{- end }}
+          livenessProbe:
+            {{- if .Values.assistant.livenessProbe }}
+            {{- toYaml .Values.assistant.livenessProbe | nindent 12 }}
+            {{- else }}
+            httpGet:
+              path: /health
+              port: {{ .Values.assistant.container.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            {{- end }}
+          # startupProbe gates liveness until the chat graph + Postgres
+          # checkpointer warm up (/ready); failureThreshold*periodSeconds buys
+          # ~5min on slow clusters before liveness can restart the pod.
+          startupProbe:
+            {{- if .Values.assistant.startupProbe }}
+            {{- toYaml .Values.assistant.startupProbe | nindent 12 }}
+            {{- else }}
+            httpGet:
+              path: /ready
+              port: {{ .Values.assistant.container.port }}
+            failureThreshold: 30
+            periodSeconds: 10
+            {{- end }}
+          {{- with .Values.assistant.container.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.assistant.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- include "governor.component.schedulingConstraints" . | nindent 6 }}
+{{- end }}

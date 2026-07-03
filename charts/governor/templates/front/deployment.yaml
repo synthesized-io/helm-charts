@@ -4,8 +4,7 @@ kind: Deployment
 metadata:
   name: {{ .Values.front.name }}
   labels:
-    app: {{ .Values.front.name }}
-    {{- include "governor.selectorLabels" . | nindent 4 }}
+    {{- include "governor.component.labels" (list .Values.front .) | nindent 4 }}
 spec:
   replicas: {{ .Values.front.replicaCount }}
   selector:
@@ -14,8 +13,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Values.front.name }}
-        {{- include "governor.selectorLabels" . | nindent 8 }}
+        {{- include "governor.component.labels" (list .Values.front .) | nindent 8 }}
     spec:
       {{- if or $openShift .Values.tlsInternal.enabled }}
       initContainers:
@@ -50,27 +48,13 @@ spec:
           imagePullPolicy: {{ .Values.front.image.pullPolicy }}
           {{- if .Values.front.container.command }}
           command:
-{{ toYaml .Values.front.container.command | indent 12 }}
+            {{- toYaml .Values.front.container.command | nindent 12 }}
           {{- end }}
           ports:
             - containerPort: {{ .Values.front.container.port }}
           resources:
-            {{- toYaml .Values.front.resources | default "{}" | nindent 12 }}
-          {{- if .Values.front.container.config }}
-          envFrom:
-            - configMapRef:
-                name: {{ .Values.front.name }}-configmap
-            - secretRef:
-                name: {{ .Values.front.name }}-secret
-          {{- end }}
-          env:
-            {{- range .Values.front.container.secretEnv }}
-            - name: {{ .name }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .valueFrom.secretKeyRef.name }}
-                  key: {{ .valueFrom.secretKeyRef.key }}
-            {{- end }}
+            {{- toYaml (.Values.front.resources | default dict) | nindent 12 }}
+          {{- include "governor.component.envSources" .Values.front | nindent 10 }}
           readinessProbe:
             httpGet:
               path: /
@@ -113,15 +97,4 @@ spec:
         {{- with .Values.front.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "governor.component.schedulingConstraints" . | nindent 6 }}

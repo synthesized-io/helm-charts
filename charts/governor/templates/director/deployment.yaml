@@ -1,0 +1,45 @@
+{{- if eq .Values.mode "saas" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.director.name }}
+  labels:
+    {{- include "governor.component.labels" (list .Values.director .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.director.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.director.name }}
+  template:
+    metadata:
+      labels:
+        {{- include "governor.component.labels" (list .Values.director .) | nindent 8 }}
+    spec:
+      {{- with .Values.director.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.director.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.director.name }}
+          image: "{{ .Values.director.image.repository }}:{{ .Values.director.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.director.image.pullPolicy }}
+          {{- if .Values.director.container.command }}
+          command:
+            {{- toYaml .Values.director.container.command | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.director.container.port }}
+          resources:
+            {{- toYaml (.Values.director.resources | default dict) | nindent 12 }}
+          {{- include "governor.component.envSources" .Values.director | nindent 10 }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.director.container.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      {{- include "governor.component.schedulingConstraints" . | nindent 6 }}
+{{- end }}

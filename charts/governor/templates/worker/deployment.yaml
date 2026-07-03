@@ -4,8 +4,7 @@ kind: Deployment
 metadata:
   name: {{ $w.name }}
   labels:
-    app: {{ $w.name }}
-    {{- include "governor.selectorLabels" . | nindent 4 }}
+    {{- include "governor.component.labels" (list $w .) | nindent 4 }}
 spec:
   replicas: {{ $w.replicaCount }}
   selector:
@@ -14,8 +13,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ $w.name }}
-        {{- include "governor.selectorLabels" . | nindent 8 }}
+        {{- include "governor.component.labels" (list $w .) | nindent 8 }}
     spec:
       {{- with $w.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -35,23 +33,11 @@ spec:
           imagePullPolicy: {{ $w.image.pullPolicy }}
           {{- if $w.container.command }}
           command:
-            {{- toYaml $w.container.command | indent 12 }}
+            {{- toYaml $w.container.command | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml ($w.resources | default dict) | nindent 12 }}
-          envFrom:
-            - configMapRef:
-                name: {{ $w.name }}-configmap
-            - secretRef:
-                name: {{ $w.name }}-secret
-          env:
-            {{- range $w.container.secretEnv }}
-            - name: {{ .name }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .valueFrom.secretKeyRef.name }}
-                  key: {{ .valueFrom.secretKeyRef.key }}
-            {{- end}}
+          {{- include "governor.component.envSources" $w | nindent 10 }}
           {{- if or $w.persistence.enabled $w.container.extraVolumeMounts }}
           volumeMounts:
             {{- if $w.persistence.enabled }}
@@ -79,15 +65,4 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "governor.component.schedulingConstraints" . | nindent 6 }}

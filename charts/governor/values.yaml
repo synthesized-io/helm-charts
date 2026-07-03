@@ -8,8 +8,8 @@ openShiftEnabled: false
 # Docker Hub image is unavailable.
 migrationCleanup:
   image:
-    repository: bitnami/kubectl
-    tag: latest
+    repository: alpine/k8s
+    tag: "1.32.13"
     pullPolicy: IfNotPresent
   # imagePullSecrets:  # falls back to top-level imagePullSecrets if unset
   #   - name: my-pull-secret
@@ -102,6 +102,7 @@ imagePullSecrets: []
 
 api:
   name: governor-api
+  replicaCount: 1
   image:
     repository: synthesizedio/synthesized-api
     pullPolicy: Always
@@ -280,6 +281,7 @@ api:
 
 front:
   name: governor-front
+  replicaCount: 1
   image:
     repository: synthesizedio/synthesized-front
     pullPolicy: Always
@@ -296,6 +298,7 @@ front:
       API_INTERNAL_HOST: 'governor-api'
       API_GRPC_INTERNAL_PORT: '50055'
       API_HTTP_INTERNAL_PORT: '80'
+      UI_WORKFLOW_WIZARD: "true"
     secretConfig:
       # DEPRECATED: name is missing the UI_ prefix the frontend manifest expects
       # and is therefore not picked up by the FE. Use `analytics.posthog.apiKey`
@@ -326,6 +329,7 @@ front:
 
 worker:
   name: governor-worker
+  replicaCount: 1
   image:
     repository: synthesizedio/synthesized-worker
     pullPolicy: Always
@@ -377,6 +381,7 @@ worker:
 
 director:
   name: governor-director
+  replicaCount: 1
   image:
     repository: synthesized.azurecr.io/synthesized-director
     pullPolicy: Always
@@ -396,6 +401,116 @@ director:
   service:
     type: ClusterIP
     port: 50051
+
+# Assistant (agent-lab) — optional AI chat assistant for Governor.
+#
+# DISABLED BY DEFAULT. When assistant.enabled=false (the default) NO Assistant
+# pods, services, config maps, or secrets are rendered, and existing Governor
+# deployments are completely unaffected. Clients with no-LLM / no-AI policies
+# deploy Governor with this left off. Set assistant.enabled=true to deploy it.
+assistant:
+  enabled: false
+  name: governor-assistant
+  replicaCount: 1
+  image:
+    repository: synthesizedio/agent-lab
+    # REQUIRED — pin a published agent-lab release tag (see the releases page in
+    # synthesized-io/agent-lab). Left empty on purpose: rendering fails fast when
+    # unset, so a mutable "latest" can't be pulled silently on pod restarts.
+    tag: ""
+    # IfNotPresent so a pinned tag isn't re-pulled on every pod restart.
+    pullPolicy: IfNotPresent
+  # imagePullSecrets:  # falls back to top-level imagePullSecrets if unset
+  #   - name: my-pull-secret
+  # Container security context. The agent-lab image is distroless and runs as
+  # the nonroot user UID 65532 by default. Override (e.g. drop runAsUser) for
+  # platforms that assign their own UID such as OpenShift.
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+  container:
+    # Command the container serves. tdk-chat-server runs the chat/SPA backend
+    # (uvicorn on data_agent.app:app) that the Governor SPA reaches via the
+    # /api/v1/agent/** reverse proxy. It is the production server and ships in
+    # the image. (`langgraph dev` is local-dev only and not in the image.)
+    command:
+      - tdk-chat-server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "2024"
+    port: 2024
+    # Non-secret runtime config, rendered into a ConfigMap. GOVERNOR_BASE_URL
+    # targets the in-cluster Governor API service by default.
+    config:
+      GOVERNOR_BASE_URL: "http://governor-api"
+      # Tracing defaults OFF so PII/schema/data-sample rows are not uploaded to
+      # LangSmith unless an operator explicitly opts in.
+      LANGCHAIN_TRACING_V2: "false"
+    # Sensitive values. Prefer secretEnv, sourced from an external secret (e.g.
+    # Vault, External Secrets Operator).
+    #
+    # Both of these are REQUIRED for a working Assistant:
+    #   ANTHROPIC_API_KEY — any LLM operation.
+    #   DATABASE_URL      — Postgres for chat threads + checkpointer. A dedicated
+    #                       LOGICAL DB on the shared TDK/Governor Postgres instance
+    #                       is supported; the agent creates its own tables there
+    #                       (e.g. postgresql://USER:PASS@<pg-host>:5432/agent).
+    #                       Without it /ready stays 503 and chat requests 500.
+    secretEnv: []
+    #   - name: ANTHROPIC_API_KEY
+    #     valueFrom:
+    #       secretKeyRef:
+    #         name: governor-assistant-secret
+    #         key: ANTHROPIC_API_KEY
+    #   - name: DATABASE_URL
+    #     valueFrom:
+    #       secretKeyRef:
+    #         name: governor-assistant-secret
+    #         key: DATABASE_URL
+    # Legacy inline secret fallback, rendered into a chart-managed Secret.
+    secretConfig: {}
+    #   ANTHROPIC_API_KEY: ""
+  # extraVolumeMounts:
+  #   - name: my-secret
+  #     mountPath: /mnt/secrets
+  #     readOnly: true
+  # extraVolumes:
+  #   - name: my-secret
+  #     secret:
+  #       secretName: my-secret-name
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  # Probes. Left empty, the chart uses the tdk-chat-server HTTP endpoints on
+  # container.port: readiness GET /ready (503 until the chat graph + Postgres
+  # checkpointer are warm), liveness GET /health. Provide a full probe map here
+  # to override.
+  readinessProbe: {}
+  #   httpGet:
+  #     path: /ready
+  #     port: 2024
+  #   initialDelaySeconds: 10
+  #   periodSeconds: 10
+  livenessProbe: {}
+  # startupProbe defaults to GET /ready with failureThreshold 30 × 10s (~5 min)
+  # so a slow Postgres/checkpointer warmup doesn't get the pod restarted by the
+  # liveness probe. Provide a full probe map here to override.
+  startupProbe: {}
+  service:
+    type: ClusterIP
+    port: 80
 
 nodeSelector: {}
 

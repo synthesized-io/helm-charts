@@ -40,7 +40,43 @@ keep the old name:
 Without this override, your deployment will be renamed to
 `governor-worker` on upgrade (a pre-upgrade hook handles the
 cleanup of the old resources automatically).
+
+PVC MIGRATION — if you had `agent.persistence.enabled: true`,
+the pre-upgrade hook has protected the old `agent-pvc` from
+deletion, but the renamed worker now mounts a NEW EMPTY
+`worker-pvc` by default.
+
+To reconnect the worker to your existing data, add:
+
+  worker:
+    persistence:
+      claimName: agent-pvc
+
+(or whatever `agent.persistence.claimName` was set to).
+The old `agent-pvc` remains as an unmanaged resource until
+you explicitly delete it once migration is complete.
 ============================================================
 
 {{- end }}
 
+{{- if .Values.assistant.enabled }}
+
+============================================================
+Assistant (agent-lab) is ENABLED
+============================================================
+Deployed as Deployment/Service "{{ .Values.assistant.name }}"
+(port {{ .Values.assistant.container.port }}).
+
+Make sure BOTH are supplied via assistant.container.secretEnv
+(from an external secret) or assistant.container.secretConfig:
+  - ANTHROPIC_API_KEY  (required for any LLM operation)
+  - DATABASE_URL       (Postgres for chat threads; a logical DB
+                        on the shared TDK/Governor Postgres is fine)
+Without DATABASE_URL the pod stays NotReady (/ready = 503).
+
+To deploy Governor WITHOUT the Assistant (e.g. for no-LLM /
+no-AI clients), set assistant.enabled=false — the default.
+This removes all Assistant pods, services, config, and
+secrets.
+============================================================
+{{- end }}
