@@ -1,0 +1,130 @@
+{{/*
+Envoy node identity required for SDS initialization.
+*/}}
+{{- define "governor.envoy.node" -}}
+node:
+  cluster: {{ printf "%s-envoy" .componentName | quote }}
+  id: {{ printf "%s.%s" .componentName .Release.Namespace | quote }}
+{{- end }}
+
+{{/*
+Envoy file-based SDS secret documents for hot-reloading mounted cert-manager
+Secrets. These are consumed via path_config_source.
+*/}}
+{{- define "governor.envoy.downstreamTlsSdsSecret" -}}
+resources:
+  - "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+    name: downstream_tls_certificate
+    tls_certificate:
+      certificate_chain:
+        filename: /etc/envoy/certs/tls.crt
+      private_key:
+        filename: /etc/envoy/certs/tls.key
+      watched_directory:
+        path: /etc/envoy/certs
+{{- end }}
+
+{{- define "governor.envoy.upstreamValidationContextSdsSecret" -}}
+resources:
+  - "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+    name: upstream_validation_context
+    validation_context:
+      trusted_ca:
+        filename: /etc/envoy/ca/ca.crt
+      watched_directory:
+        path: /etc/envoy/ca
+{{- end }}
+
+{{/*
+Envoy HTTP router filter (used in all listeners)
+*/}}
+{{- define "governor.envoy.httpRouter" -}}
+- name: envoy.filters.http.router
+  typed_config:
+    "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+{{- end }}
+
+{{/*
+Envoy downstream TLS context (for inbound TLS termination)
+*/}}
+{{- define "governor.envoy.downstreamTls" -}}
+transport_socket:
+  name: envoy.transport_sockets.tls
+  typed_config:
+    "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+    common_tls_context:
+      tls_certificate_sds_secret_configs:
+        - name: downstream_tls_certificate
+          sds_config:
+            path_config_source:
+              path: /etc/envoy/downstream_tls_certificate.yaml
+{{- end }}
+
+{{/*
+Envoy upstream TLS context (for egress with CA validation)
+*/}}
+{{- define "governor.envoy.upstreamTls" -}}
+transport_socket:
+  name: envoy.transport_sockets.tls
+  typed_config:
+    "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+    common_tls_context:
+      validation_context_sds_secret_config:
+        name: upstream_validation_context
+        sds_config:
+          path_config_source:
+            path: /etc/envoy/upstream_validation_context.yaml
+{{- end }}
+
+{{/*
+Envoy gRPC egress listener to api (shared by front and agent)
+*/}}
+{{- define "governor.envoy.apiGrpcEgressListener" -}}
+- name: api_grpc_egress
+  address:
+    socket_address:
+      address: 127.0.0.1
+      port_value: {{ .egressGrpcPort }}
+  filter_chains:
+    - filters:
+        - name: envoy.filters.network.http_connection_manager
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+            stat_prefix: api_grpc_egress
+            codec_type: HTTP2
+            route_config:
+              name: api_grpc_route
+              virtual_hosts:
+                - name: api_grpc_service
+                  domains: ["*"]
+                  routes:
+                    - match:
+                        prefix: "/"
+                      route:
+                        cluster: api_grpcs
+                        # Disable route timeout: gRPC uses long-lived streams
+                        # (task updates, file transfers); Envoy's default is 15s
+                        timeout: 0s
+            http_filters:
+              {{- include "governor.envoy.httpRouter" . | nindent 14 }}
+{{- end }}
+
+{{/*
+Envoy api gRPCS upstream cluster (shared by front and agent)
+*/}}
+{{- define "governor.envoy.apiGrpcsCluster" -}}
+- name: api_grpcs
+  type: STRICT_DNS
+  connect_timeout: 5s
+  http2_protocol_options: {}
+  load_assignment:
+    cluster_name: api_grpcs
+    endpoints:
+      - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: {{ .apiName }}
+                  port_value: {{ .apiGrpcPort }}
+  {{- include "governor.envoy.upstreamTls" . | nindent 2 }}
+{{- end }}

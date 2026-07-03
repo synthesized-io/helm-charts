@@ -1,0 +1,16 @@
+{{- if .Values.assistant.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.assistant.name }}
+  labels:
+    {{- include "governor.selectorLabels" . | nindent 4 }}
+spec:
+  type: {{ .Values.assistant.service.type }}
+  selector:
+    app: {{ .Values.assistant.name }}
+  ports:
+    - port: {{ .Values.assistant.service.port }}
+      targetPort: {{ .Values.assistant.container.port }}
+      name: defaultport
+{{- end }}
